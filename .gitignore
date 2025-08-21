@@ -1,0 +1,7 @@
+node_modules/
+certs/
+*.log
+.DS_Store
+.env
+public/media/*
+!public/media/.gitkeep

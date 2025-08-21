@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#controls {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 10px;
+  border-radius: 5px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#controls button {
+  padding: 8px 15px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+#controls button:hover {
+  background: #388e3c;
+}
+
+#status {
+  color: white;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+#mapping-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: none;
+}
+
+/* Maptastic overrides */
+.maptastic-active {
+  cursor: crosshair !important;
+}
+
+.maptastic-control-point {
+  width: 16px !important;
+  height: 16px !important;
+  border: 2px solid #4caf50 !important;
+  background: rgba(76, 175, 80, 0.5) !important;
+}
+
+.maptastic-control-point:hover {
+  background: rgba(76, 175, 80, 0.8) !important;
+}
+
+.maptastic-outline {
+  stroke: #4caf50 !important;
+  stroke-width: 2 !important;
+}

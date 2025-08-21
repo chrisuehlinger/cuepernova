@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const init = require('../app');
+
+init().catch(err => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});

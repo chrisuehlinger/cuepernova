@@ -1,0 +1,9 @@
+{
+  "verbose": false,
+  "ignore": ["*.test.js", "node_modules/*"],
+  "watch": ["app.js", "sockets.js", "routes/", "util/", "views/"],
+  "ext": "js,pug",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Example Cuepernova App</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    #content {
+      text-align: center;
+      animation: fadeIn 2s ease-in;
+    }
+    
+    h1 {
+      font-size: 5em;
+      margin: 0;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient 3s ease infinite;
+    }
+    
+    #particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: float 10s infinite;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes gradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(100vh) scale(0); }
+      10% { transform: translateY(90vh) scale(1); }
+      90% { transform: translateY(10vh) scale(1); }
+      100% { transform: translateY(0vh) scale(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="particles"></div>
+  <div id="content">
+    <h1>CUEPERNOVA</h1>
+    <p>Example App</p>
+  </div>
+  
+  <script>
+    // Get URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const arg1 = urlParams.get('arg1');
+    
+    // Update content based on arguments
+    if (arg1) {
+      document.querySelector('#content p').textContent = arg1;
+    }
+    
+    // Create particle effect
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.left = Math.random() * 100 + '%';
+      particle.style.animationDelay = Math.random() * 10 + 's';
+      particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+      document.getElementById('particles').appendChild(particle);
+      
+      // Remove particle after animation
+      setTimeout(() => particle.remove(), 20000);
+    }
+    
+    // Create initial particles
+    for (let i = 0; i < 50; i++) {
+      setTimeout(createParticle, i * 200);
+    }
+    
+    // Continue creating particles
+    setInterval(createParticle, 500);
+  </script>
+</body>
+</html>

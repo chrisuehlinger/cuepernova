@@ -1,0 +1,33 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  
+  h2 Quick Links
+  ul
+    li
+      a(href='/orbital.html') Orbital Display
+    li
+      a(href='/control.html') Control Panel
+    li
+      a(href='/mapping.html') Projection Mapping Setup
+      
+  h2 Documentation
+  p Configure your orbitals by adding a name parameter to the URL:
+  code /orbital.html?name=mainprojector
+  
+  p Send OSC messages to port 57121 with the following format:
+  ul
+    li
+      code /orbital/showScreen/[screenname]
+      |  - Show a specific screen
+    li
+      code /orbital/clearScreen
+      |  - Clear all screens (bail)
+    li
+      code /orbital/fadeScreen [duration]
+      |  - Fade out current screen
+    li
+      code /orbital/refreshScreen
+      |  - Refresh all orbital pages

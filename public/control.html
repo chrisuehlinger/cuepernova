@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Cuepernova Control Panel</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="css/control.css" />
+</head>
+<body>
+  <header>
+    <h1>Cuepernova Control Panel</h1>
+  </header>
+  
+  <main>
+    <section class="emergency-controls">
+      <h2>Emergency Controls</h2>
+      <div class="button-row">
+        <button id="bail" class="btn-emergency">
+          <i class="material-icons">cancel</i>
+          <span>BAIL!</span>
+        </button>
+        <button id="refresh" class="btn-warning">
+          <i class="material-icons">refresh</i>
+          <span>REFRESH ALL</span>
+        </button>
+        <button id="debug" class="btn-info">
+          <i class="material-icons">bug_report</i>
+          <span>DEBUG</span>
+        </button>
+      </div>
+    </section>
+    
+    <section class="basic-controls">
+      <h2>Basic Screens</h2>
+      <div class="button-grid">
+        <button class="btn-cue" data-cue="/orbital/showScreen/black">
+          <span>BLACK</span>
+        </button>
+        <button class="btn-cue" data-cue="/orbital/showScreen/white">
+          <span>WHITE</span>
+        </button>
+        <button class="btn-cue" data-cue="/orbital/showScreen/freeze">
+          <span>FREEZE</span>
+        </button>
+        <button class="btn-cue" data-cue="/orbital/fadeScreen" data-args="1000">
+          <span>FADE OUT (1s)</span>
+        </button>
+      </div>
+    </section>
+    
+    <section class="custom-cues">
+      <h2>Custom Cues</h2>
+      <div class="manual-cue">
+        <input id="manualcue" type="text" placeholder="e.g., /orbital/showScreen/myapp arg1 arg2" />
+        <button id="callmanual" class="btn-primary">
+          <i class="material-icons">send</i>
+          <span>SEND</span>
+        </button>
+      </div>
+      
+      <div id="cue-list" class="cue-list">
+        <!-- Dynamic cue list will be populated here -->
+      </div>
+    </section>
+    
+    <section class="status">
+      <h2>Status</h2>
+      <div id="connection-status" class="status-indicator">
+        <i class="material-icons">wifi_off</i>
+        <span>Disconnected</span>
+      </div>
+    </section>
+  </main>
+  
+  <script src="js/jquery.js"></script>
+  <script src="js/control.js"></script>
+</body>
+</html>
