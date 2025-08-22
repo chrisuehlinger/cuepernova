@@ -90,6 +90,35 @@ async function handleSystemMessage(message) {
       console.log('Cleared RTC signals');
       break;
       
+    case 'clearMappings':
+      // Broadcast clearMappings message to all orbitals
+      orbitalWS.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            address: '/orbital/clearMappings',
+            args: []
+          }));
+        }
+      });
+      console.log('Sent clearMappings to all orbitals');
+      break;
+      
+    case 'resetMapping':
+      // Reset mapping for specific orbital
+      const targetOrbital = message.args && message.args[0];
+      if (targetOrbital) {
+        orbitalWS.clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN && client.orbitalName === targetOrbital) {
+            client.send(JSON.stringify({
+              address: '/orbital/clearMappings',
+              args: []
+            }));
+          }
+        });
+        console.log(`Sent clearMappings to orbital: ${targetOrbital}`);
+      }
+      break;
+      
     default:
       console.log(`No handler for system command: ${command}`);
   }

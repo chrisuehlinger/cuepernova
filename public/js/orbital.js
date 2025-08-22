@@ -163,6 +163,13 @@ $(async () => {
         location.reload();
         break;
         
+      case 'clearMappings':
+        // Post message to parent frame if we're in an iframe (mapping.html)
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'clearMappings' }, '*');
+        }
+        break;
+        
       default:
         console.log(`No handler for message type: ${messageType}`);
     }
