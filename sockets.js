@@ -1,13 +1,13 @@
-const WebSocket = require('ws');
-const osc = require("osc");
-const url = require('url');
+import { WebSocketServer, WebSocket } from 'ws';
+import osc from 'osc';
+import url from 'node:url';
+import os from 'node:os';
 
-const rtcSignals = require('./util/rtc-signals');
+import rtcSignals from './util/rtc-signals.js';
 
 // Get local IP addresses for OSC logging
 const getIPAddresses = function () {
-  const os = require("os"),
-      interfaces = os.networkInterfaces(),
+  const interfaces = os.networkInterfaces(),
       ipAddresses = [];
 
   for (const deviceName in interfaces) {
@@ -24,8 +24,8 @@ const getIPAddresses = function () {
 };
 
 // Create WebSocket servers
-const orbitalWS = new WebSocket.Server({ noServer: true });
-const controlWS = new WebSocket.Server({ noServer: true });
+const orbitalWS = new WebSocketServer({ noServer: true });
+const controlWS = new WebSocketServer({ noServer: true });
 
 // Orbital connections handle display/projection devices
 orbitalWS.on('connection', function connection(ws, request) {
@@ -140,8 +140,7 @@ udpPort.on("error", function (err) {
 udpPort.open();
 
 // Export WebSocket upgrade handler
-module.exports = {
-  wsUpgrade: function(request, socket, head) {
+export const wsUpgrade = function(request, socket, head) {
     const pathname = url.parse(request.url).pathname;
 
     if (pathname === '/orbital') {
@@ -155,14 +154,12 @@ module.exports = {
     } else {
       socket.destroy();
     }
-  },
-  
-  // Utility function to send messages to all control panels
-  sendControlMessage: function(message) {
+};
+
+export const sendControlMessage = function(message) {
     controlWS.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(message));
       }
     });
-  }
 };

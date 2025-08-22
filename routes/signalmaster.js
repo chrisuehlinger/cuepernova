@@ -1,6 +1,7 @@
-const express = require('express');
+import express from 'express';
+import rtcSignals from '../util/rtc-signals.js';
+
 const router = express.Router();
-const rtcSignals = require('../util/rtc-signals');
 
 // WebRTC signaling endpoints
 router.post('/offer/:id', (req, res) => {
@@ -48,4 +49,4 @@ router.get('/answer/:id', (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

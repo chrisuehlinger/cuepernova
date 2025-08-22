@@ -2,10 +2,13 @@
   "name": "cuepernova",
   "version": "1.0.0",
   "description": "Open source theater projection control system",
-  "main": "bin/www",
+  "type": "module",
+  "main": "bin/www.js",
   "scripts": {
-    "start": "node bin/www",
-    "dev": "nodemon bin/www",
+    "start": "node bin/www.js",
+    "dev": "node --watch bin/www.js",
+    "start:env": "node --env-file=.env bin/www.js",
+    "dev:env": "node --watch --env-file=.env bin/www.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -18,15 +21,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.20.2",
-    "cookie-parser": "^1.4.6",
     "express": "^4.18.2",
     "morgan": "^1.10.0",
     "osc": "^2.4.4",
     "pug": "^3.0.2",
     "ws": "^8.14.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.2"
   }
 }

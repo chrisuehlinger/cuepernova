@@ -26,7 +26,7 @@ cd cuepernova
 # Production mode
 ./startup.sh
 
-# Development mode (auto-restart on file changes)
+# Development mode with Node.js --watch (auto-restart on file changes)
 ./startup.sh dev
 ```
 
@@ -34,6 +34,35 @@ cd cuepernova
    - Control Panel: http://localhost:8080/control.html
    - Orbital Display: http://localhost:8080/orbital.html?name=main
    - Projection Mapping: http://localhost:8080/mapping.html?name=main
+
+## Modern Development Features
+
+### ES Modules (ESM)
+The project now uses modern ES modules throughout the codebase with `node:` prefix for built-in modules.
+
+### Native Node.js --watch Mode
+Use the built-in `--watch` flag for automatic restarts during development:
+```bash
+npm run dev
+# or with environment file
+npm run dev:env
+```
+
+### Environment Configuration
+Use Node.js native `--env-file` support for configuration:
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Run with environment variables
+npm run start:env     # Production with .env
+npm run dev:env       # Development with .env and --watch
+```
+
+### No External Dependencies for Common Tasks
+- **Body parsing**: Uses Express built-in `express.json()` and `express.urlencoded()`
+- **Development**: Uses Node.js native `--watch` for auto-restart (no nodemon needed)
+- **Configuration**: Uses Node.js native `--env-file` (no dotenv needed)
 
 ## Basic Usage
 

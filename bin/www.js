@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const init = require('../app');
+import init from '../app.js';
 
 init().catch(err => {
   console.error('Failed to start server:', err);

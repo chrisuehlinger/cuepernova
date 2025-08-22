@@ -22,11 +22,28 @@ if [ ! -f "certs/cert.pem" ] || [ ! -f "certs/key.pem" ]; then
   echo "Starting HTTP-only server..."
 fi
 
+# Check for environment file
+if [ -f ".env" ]; then
+  echo "Environment file detected (.env)"
+  ENV_MODE="_ENV"
+else
+  ENV_MODE=""
+fi
+
 # Check if we're in development mode
 if [ "$1" = "dev" ]; then
-  echo "Starting in development mode with auto-restart..."
-  npm run dev
+  echo "Starting in development mode with --watch (auto-restart on file changes)..."
+  if [ "$ENV_MODE" = "_ENV" ]; then
+    npm run dev:env
+  else
+    npm run dev
+  fi
 else
   # Start the server in production mode
-  npm start
+  echo "Starting in production mode..."
+  if [ "$ENV_MODE" = "_ENV" ]; then
+    npm run start:env
+  else
+    npm start
+  fi
 fi

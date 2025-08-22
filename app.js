@@ -1,14 +1,16 @@
-const fs = require('fs').promises;
-const express = require('express');
-const http = require('http');
-const https = require('https');
-const path = require('path');
-const logger = require('morgan');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
+import { promises as fs } from 'node:fs';
+import express from 'express';
+import http from 'node:http';
+import https from 'node:https';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import logger from 'morgan';
 
-const routes = require('./routes/index');
-const signalmaster = require('./routes/signalmaster');
+import routes from './routes/index.js';
+import signalmaster from './routes/signalmaster.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -21,11 +23,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
+app.use(express.json());
+app.use(express.urlencoded({
   extended: true
 }));
-app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
 
@@ -65,7 +66,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-module.exports = async function init() {
+export default async function init() {
   let httpServer, httpsServer;
   
   // Try to load SSL certificates
@@ -82,7 +83,7 @@ module.exports = async function init() {
 
   httpServer = http.createServer(app);
 
-  const { wsUpgrade } = require('./sockets');
+  const { wsUpgrade } = await import('./sockets.js');
 
   httpServer.on('upgrade', wsUpgrade);
   if (httpsServer) {

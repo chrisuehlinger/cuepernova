@@ -12,12 +12,14 @@ Cuepernova is an open source theater projection control system for managing mult
 ```bash
 # Start with automatic dependency installation
 ./startup.sh         # Production mode (ports 8080/8443)
-./startup.sh dev     # Development mode with auto-restart
+./startup.sh dev     # Development mode with Node.js --watch (auto-restart)
 
 # Manual start
 npm install          # Install dependencies (if needed)
 npm start           # Production mode
-npm run dev         # Development mode with nodemon
+npm run dev         # Development with --watch
+npm run start:env   # Production with --env-file=.env
+npm run dev:env     # Development with --env-file=.env and --watch
 ```
 
 ### Create a new app/effect
@@ -38,7 +40,8 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 ## Architecture Overview
 
 ### Server Architecture
-- **Entry Point**: `bin/www` → `app.js`
+- **Module System**: ES Modules (ESM) with `node:` prefix for built-ins
+- **Entry Point**: `bin/www.js` → `app.js`
 - **Express Server**: Serves on ports 8080 (HTTP) and 8443 (HTTPS) in development
 - **WebSocket Endpoints**:
   - `/orbital` - Display/projection devices
