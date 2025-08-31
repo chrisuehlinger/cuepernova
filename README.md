@@ -80,10 +80,13 @@ http://yourserver:8080/orbital.html?name=monitor1
 
 Send OSC messages to port 57121:
 
-- `/orbital/showScreen/[screenType]` - Show a specific screen type
-- `/orbital/clearScreen` - Clear all screens (emergency bail)
-- `/orbital/fadeScreen [duration]` - Fade out over duration (ms)
-- `/orbital/refreshScreen` - Refresh all orbital pages
+- `/cuepernova/orbital/showScreen/[screenType]` - Show a specific screen type
+- `/cuepernova/orbital/clearScreen` - Clear all screens (emergency bail)
+- `/cuepernova/orbital/fadeScreen [duration]` - Fade out over duration (ms)
+- `/cuepernova/orbital/refreshScreen` - Refresh all orbital pages
+- `/cuepernova/system/clear-rtc` - Clear RTC signals
+- `/cuepernova/system/clearMappings` - Clear all projection mappings
+- `/cuepernova/system/resetMapping [orbitalName]` - Reset mapping for specific orbital
 
 ### Built-in Screen Types
 
@@ -115,7 +118,7 @@ This creates:
 
 1. Create an HTML file in `public/apps/`
 2. Access URL parameters for dynamic content
-3. Call from OSC: `/orbital/showScreen/app yourappname arg1 arg2`
+3. Call from OSC: `/cuepernova/orbital/showScreen/app yourappname arg1 arg2`
 
 #### Common Utilities
 

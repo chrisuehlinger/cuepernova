@@ -129,11 +129,13 @@ $(async () => {
   
   function handleMessage(message) {
     const parts = message.address.split('/');
-    const messageType = parts[2]; // Assuming format: /orbital/messageType/...
+    // Handle both /cuepernova/orbital/messageType and legacy /orbital/messageType
+    const isNamespaced = parts[1] === 'cuepernova';
+    const messageType = isNamespaced ? parts[3] : parts[2];
     
     switch (messageType) {
       case 'showScreen':
-        const screenType = parts[3];
+        const screenType = isNamespaced ? parts[4] : parts[3];
         $showtime.addClass('its-showtime');
         
         if (cueHandlers[screenType]) {

@@ -4,11 +4,11 @@ $(async () => {
   
   // Example cues - in a real production, these would be show-specific
   const customCues = [
-    { name: "Show Video", address: "/orbital/showScreen/video", args: ["/media/example.mp4"] },
-    { name: "Loop Background", address: "/orbital/showScreen/video", args: ["/media/background.mp4", "loop"] },
-    { name: "Show Image", address: "/orbital/showScreen/image", args: ["/media/poster.jpg"] },
-    { name: "Message: Places", address: "/orbital/showScreen/message", args: ["PLACES", "5 minutes to curtain"] },
-    { name: "Load App", address: "/orbital/showScreen/app", args: ["example-app"] }
+    { name: "Show Video", address: "/cuepernova/orbital/showScreen/video", args: ["/media/example.mp4"] },
+    { name: "Loop Background", address: "/cuepernova/orbital/showScreen/video", args: ["/media/background.mp4", "loop"] },
+    { name: "Show Image", address: "/cuepernova/orbital/showScreen/image", args: ["/media/poster.jpg"] },
+    { name: "Message: Places", address: "/cuepernova/orbital/showScreen/message", args: ["PLACES", "5 minutes to curtain"] },
+    { name: "Load App", address: "/cuepernova/orbital/showScreen/app", args: ["example-app"] }
   ];
   
   // Initialize UI
@@ -69,18 +69,18 @@ $(async () => {
     // Emergency controls
     $('#bail').on('click', () => {
       if (confirm('Clear all screens?')) {
-        sendMessage('/orbital/clearScreen');
+        sendMessage('/cuepernova/orbital/clearScreen');
       }
     });
     
     $('#refresh').on('click', () => {
       if (confirm('Refresh all orbital pages?')) {
-        sendMessage('/orbital/refreshScreen');
+        sendMessage('/cuepernova/orbital/refreshScreen');
       }
     });
     
     $('#debug').on('click', () => {
-      sendMessage('/orbital/showScreen/debug');
+      sendMessage('/cuepernova/orbital/showScreen/debug');
     });
     
     // Basic screen controls

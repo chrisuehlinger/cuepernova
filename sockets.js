@@ -54,24 +54,30 @@ controlWS.on('connection', function connection(ws) {
       console.log('Control panel message:', JSON.stringify(oscMessage, null, 2));
       
       // Route messages based on address namespace
-      const namespace = oscMessage.address.split('/')[1];
+      const pathParts = oscMessage.address.split('/');
+      const namespace = pathParts[1];
+      const subNamespace = pathParts[2];
       
-      switch(namespace) {
-        case 'orbital':
-          // Broadcast to all orbital clients
-          orbitalWS.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify(oscMessage));
-            }
-          });
-          break;
-          
-        case 'cuepernova':
-          handleSystemMessage(oscMessage);
-          break;
-          
-        default:
-          console.log(`No handler for namespace: ${namespace}`);
+      if (namespace === 'cuepernova') {
+        switch(subNamespace) {
+          case 'orbital':
+            // Broadcast to all orbital clients
+            orbitalWS.clients.forEach(client => {
+              if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(oscMessage));
+              }
+            });
+            break;
+            
+          case 'system':
+            handleSystemMessage(oscMessage);
+            break;
+            
+          default:
+            console.log(`No handler for sub-namespace: ${subNamespace}`);
+        }
+      } else {
+        console.log(`No handler for namespace: ${namespace}`);
       }
     } catch(e) {
       console.error('Error processing control message:', e);
@@ -81,7 +87,7 @@ controlWS.on('connection', function connection(ws) {
 
 // Handle system-level messages
 async function handleSystemMessage(message) {
-  const command = message.address.split('/')[2];
+  const command = message.address.split('/')[3];
   
   switch(command) {
     case 'clear-rtc':
@@ -95,7 +101,7 @@ async function handleSystemMessage(message) {
       orbitalWS.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({
-            address: '/orbital/clearMappings',
+            address: '/cuepernova/orbital/clearMappings',
             args: []
           }));
         }
@@ -110,7 +116,7 @@ async function handleSystemMessage(message) {
         orbitalWS.clients.forEach(client => {
           if (client.readyState === WebSocket.OPEN && client.orbitalName === targetOrbital) {
             client.send(JSON.stringify({
-              address: '/orbital/clearMappings',
+              address: '/cuepernova/orbital/clearMappings',
               args: []
             }));
           }
@@ -141,24 +147,30 @@ udpPort.on("ready", function () {
 udpPort.on("message", function (oscMessage) {
   console.log('OSC message received:', JSON.stringify(oscMessage, null, 2));
   
-  const namespace = oscMessage.address.split('/')[1];
+  const pathParts = oscMessage.address.split('/');
+  const namespace = pathParts[1];
+  const subNamespace = pathParts[2];
   
-  switch(namespace) {
-    case 'orbital':
-      // Broadcast to all orbital clients
-      orbitalWS.clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(oscMessage));
-        }
-      });
-      break;
-      
-    case 'cuepernova':
-      handleSystemMessage(oscMessage);
-      break;
-      
-    default:
-      console.log(`No OSC handler for namespace: ${namespace}`);
+  if (namespace === 'cuepernova') {
+    switch(subNamespace) {
+      case 'orbital':
+        // Broadcast to all orbital clients
+        orbitalWS.clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(oscMessage));
+          }
+        });
+        break;
+        
+      case 'system':
+        handleSystemMessage(oscMessage);
+        break;
+        
+      default:
+        console.log(`No OSC handler for sub-namespace: ${subNamespace}`);
+    }
+  } else {
+    console.log(`No OSC handler for namespace: ${namespace}`);
   }
 });
 

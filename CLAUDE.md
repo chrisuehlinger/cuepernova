@@ -64,10 +64,13 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 3. **WebRTC Signaling** → `signalmaster.js` → Peer connections
 
 ### OSC Command Structure
-- `/orbital/showScreen/[screenType]` - Display content on orbitals
-- `/orbital/clearScreen` - Clear all displays
-- `/orbital/fadeScreen [duration]` - Fade out displays
-- `/orbital/refreshScreen` - Refresh orbital pages
+- `/cuepernova/orbital/showScreen/[screenType]` - Display content on orbitals
+- `/cuepernova/orbital/clearScreen` - Clear all displays
+- `/cuepernova/orbital/fadeScreen [duration]` - Fade out displays
+- `/cuepernova/orbital/refreshScreen` - Refresh orbital pages
+- `/cuepernova/system/clear-rtc` - Clear RTC signals
+- `/cuepernova/system/clearMappings` - Clear all projection mappings
+- `/cuepernova/system/resetMapping [orbitalName]` - Reset mapping for specific orbital
 
 ### Screen Types
 Built-in screen types handled by `orbital.js`:
@@ -116,14 +119,14 @@ cueHandlers['mytype'] = function(args) {
 Edit `sockets.js` `handleSystemMessage()` function:
 ```javascript
 case 'mycommand':
-  // Handle /cuepernova/mycommand
+  // Handle /cuepernova/system/mycommand
   break;
 ```
 
 ### WebSocket Message Format
 ```javascript
 {
-  "address": "/orbital/showScreen/video",
+  "address": "/cuepernova/orbital/showScreen/video",
   "args": ["path/to/video.mp4", "true"]
 }
 ```
