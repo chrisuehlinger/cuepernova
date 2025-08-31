@@ -72,9 +72,9 @@ $(async () => {
       }
     },
     
-    app: (message) => {
-      const appName = message.args[0];
-      if (appName) {
+    cueball: (message) => {
+      const cueballName = message.args[0];
+      if (cueballName) {
         // Pass any additional args as query parameters
         const params = new URLSearchParams();
         if (message.args.length > 1) {
@@ -83,7 +83,7 @@ $(async () => {
           }
         }
         const queryString = params.toString() ? `?${params.toString()}` : '';
-        $showtime.html(`<iframe class="fullscreen-frame" src="/apps/${appName}.html${queryString}"></iframe>`);
+        $showtime.html(`<iframe class="fullscreen-frame" src="/cueballs/${cueballName}.html${queryString}"></iframe>`);
       }
     }
   };
@@ -142,8 +142,8 @@ $(async () => {
           cueHandlers[screenType](message);
         } else {
           console.warn(`No handler for screen type: ${screenType}`);
-          // Try to load it as an app
-          cueHandlers.app({ ...message, args: [screenType, ...(message.args || [])] });
+          // Try to load it as a cueball
+          cueHandlers.cueball({ ...message, args: [screenType, ...(message.args || [])] });
         }
         break;
         

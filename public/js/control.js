@@ -8,7 +8,7 @@ $(async () => {
     { name: "Loop Background", address: "/cuepernova/orbital/showScreen/video", args: ["/media/background.mp4", "loop"] },
     { name: "Show Image", address: "/cuepernova/orbital/showScreen/image", args: ["/media/poster.jpg"] },
     { name: "Message: Places", address: "/cuepernova/orbital/showScreen/message", args: ["PLACES", "5 minutes to curtain"] },
-    { name: "Load App", address: "/cuepernova/orbital/showScreen/app", args: ["example-app"] }
+    { name: "Load Cueball", address: "/cuepernova/orbital/showScreen/cueball", args: ["example-cueball"] }
   ];
   
   // Initialize UI

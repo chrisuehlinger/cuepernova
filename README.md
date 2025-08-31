@@ -97,28 +97,28 @@ Send OSC messages to port 57121:
 - `message [text] [subtitle]` - Display text message
 - `video [path] [loop]` - Play video file
 - `image [path]` - Display image
-- `app [appname] [args...]` - Load app from /apps directory
+- `cueball [cueballname] [args...]` - Load cueball from /cueballs directory
 
-### Creating Custom Apps
+### Creating Custom Cueballs
 
 #### Quick Scaffold
 
-Use the scaffold script to quickly create a new app with all the boilerplate:
+Use the scaffold script to quickly create a new cueball with all the boilerplate:
 
 ```bash
-./scaffold-app.sh "My Cool Effect"
+./scaffold-cueball.sh "My Cool Effect"
 ```
 
 This creates:
-- `public/apps/my-cool-effect.html` - HTML structure
+- `public/cueballs/my-cool-effect.html` - HTML structure
 - `public/css/my-cool-effect.css` - CSS with common theater styles and animations
 - `public/js/my-cool-effect.js` - JavaScript with utility functions
 
 #### Manual Creation
 
-1. Create an HTML file in `public/apps/`
+1. Create an HTML file in `public/cueballs/`
 2. Access URL parameters for dynamic content
-3. Call from OSC: `/cuepernova/orbital/showScreen/app yourappname arg1 arg2`
+3. Call from OSC: `/cuepernova/orbital/showScreen/cueball yourcueballname arg1 arg2`
 
 #### Common Utilities
 
@@ -197,7 +197,7 @@ cuepernova/
 │   ├── orbital.html    # Display page
 │   ├── control.html    # Control panel
 │   ├── mapping.html    # Projection mapping
-│   ├── apps/           # Custom app pages
+│   ├── cueballs/       # Custom cueball pages
 │   ├── css/            # Stylesheets
 │   ├── js/             # Frontend scripts
 │   └── media/          # Media files
@@ -210,7 +210,7 @@ cuepernova/
 
 1. **New Screen Types**: Add handlers to `cueHandlers` in `orbital.js`
 2. **New OSC Commands**: Add cases to `handleSystemMessage()` in `sockets.js`
-3. **New Apps**: Create HTML files in `public/apps/`
+3. **New Cueballs**: Create HTML files in `public/cueballs/`
 
 ## Tips
 

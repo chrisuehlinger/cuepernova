@@ -1,59 +1,59 @@
 #!/bin/bash
 
-# Cuepernova App Scaffolding Script
-# Usage: ./scaffold-app.sh <app-name>
+# Cuepernova Cueball Scaffolding Script
+# Usage: ./scaffold-cueball.sh <cueball-name>
 
-# Check if app name is provided
+# Check if cueball name is provided
 if [ -z "$1" ]; then
-  echo "Error: Please provide an app name"
-  echo "Usage: ./scaffold-app.sh <app-name>"
+  echo "Error: Please provide a cueball name"
+  echo "Usage: ./scaffold-cueball.sh <cueball-name>"
   exit 1
 fi
 
-APP_NAME="$1"
-APP_DIR="public/apps"
+CUEBALL_NAME="$1"
+CUEBALL_DIR="public/cueballs"
 CSS_DIR="public/css"
 JS_DIR="public/js"
 
-# Convert app name to lowercase for file names
-APP_NAME_LOWER=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+# Convert cueball name to lowercase for file names
+CUEBALL_NAME_LOWER=$(echo "$CUEBALL_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
 
-# Check if app already exists
-if [ -f "$APP_DIR/$APP_NAME_LOWER.html" ]; then
-  echo "Error: App '$APP_NAME_LOWER' already exists!"
+# Check if cueball already exists
+if [ -f "$CUEBALL_DIR/$CUEBALL_NAME_LOWER.html" ]; then
+  echo "Error: Cueball '$CUEBALL_NAME_LOWER' already exists!"
   exit 1
 fi
 
-echo "Creating new Cuepernova app: $APP_NAME"
+echo "Creating new Cuepernova cueball: $CUEBALL_NAME"
 
 # Create HTML file
-cat > "$APP_DIR/$APP_NAME_LOWER.html" << EOF
+cat > "$CUEBALL_DIR/$CUEBALL_NAME_LOWER.html" << EOF
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>$APP_NAME</title>
-  <link rel="stylesheet" href="../css/$APP_NAME_LOWER.css" />
+  <title>$CUEBALL_NAME</title>
+  <link rel="stylesheet" href="../css/$CUEBALL_NAME_LOWER.css" />
 </head>
 <body>
   <div id="container">
     <div id="content">
       <!-- Your content here -->
-      <h1>$APP_NAME</h1>
+      <h1>$CUEBALL_NAME</h1>
     </div>
   </div>
   
   <script src="../js/jquery.js"></script>
-  <script type="module" src="../js/$APP_NAME_LOWER.js"></script>
+  <script type="module" src="../js/$CUEBALL_NAME_LOWER.js"></script>
 </body>
 </html>
 EOF
 
-# Create CSS file with common theater app styles
-cat > "$CSS_DIR/$APP_NAME_LOWER.css" << 'EOF'
-/* Common styles for Cuepernova apps */
+# Create CSS file with common theater cueball styles
+cat > "$CSS_DIR/$CUEBALL_NAME_LOWER.css" << 'EOF'
+/* Common styles for Cuepernova cueballs */
 * {
   margin: 0;
   padding: 0;
@@ -184,18 +184,18 @@ video.cover, img.cover {
   height: 100%;
 }
 
-/* Custom styles for this app */
+/* Custom styles for this cueball */
 EOF
 
 # Create JavaScript file with common utilities
-cat > "$JS_DIR/$APP_NAME_LOWER.js" << 'EOF'
+cat > "$JS_DIR/$CUEBALL_NAME_LOWER.js" << 'EOF'
 // Get URL parameters passed from the cue
 const urlParams = new URLSearchParams(window.location.search);
 const arg1 = urlParams.get('arg1');
 const arg2 = urlParams.get('arg2');
 const arg3 = urlParams.get('arg3');
 
-// Common utilities for Cuepernova apps
+// Common utilities for Cuepernova cueballs
 const utils = {
   // Parse numeric arguments
   getNumber: (param, defaultValue = 0) => {
@@ -268,11 +268,11 @@ const utils = {
   }
 };
 
-// Initialize your app
+// Initialize your cueball
 $(document).ready(() => {
-  console.log('App initialized with args:', { arg1, arg2, arg3 });
+  console.log('Cueball initialized with args:', { arg1, arg2, arg3 });
   
-  // Your app code here
+  // Your cueball code here
   
   // Example: Update content based on arguments
   if (arg1) {
@@ -291,14 +291,14 @@ $(document).ready(() => {
 });
 EOF
 
-echo "✅ Created $APP_DIR/$APP_NAME_LOWER.html"
-echo "✅ Created $CSS_DIR/$APP_NAME_LOWER.css"
-echo "✅ Created $JS_DIR/$APP_NAME_LOWER.js"
+echo "✅ Created $CUEBALL_DIR/$CUEBALL_NAME_LOWER.html"
+echo "✅ Created $CSS_DIR/$CUEBALL_NAME_LOWER.css"
+echo "✅ Created $JS_DIR/$CUEBALL_NAME_LOWER.js"
 echo ""
-echo "App scaffolding complete! To use your new app:"
+echo "Cueball scaffolding complete! To use your new cueball:"
 echo ""
 echo "1. Edit the files to add your custom functionality"
-echo "2. Call from OSC: /cuepernova/orbital/showScreen/app $APP_NAME_LOWER arg1 arg2 arg3"
-echo "3. Or test directly: http://localhost:8080/apps/$APP_NAME_LOWER.html?arg1=test"
+echo "2. Call from OSC: /cuepernova/orbital/showScreen/cueball $CUEBALL_NAME_LOWER arg1 arg2 arg3"
+echo "3. Or test directly: http://localhost:8080/cueballs/$CUEBALL_NAME_LOWER.html?arg1=test"
 echo ""
-echo "The app receives arguments as URL parameters (arg1, arg2, arg3, etc.)"
+echo "The cueball receives arguments as URL parameters (arg1, arg2, arg3, etc.)"

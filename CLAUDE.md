@@ -22,10 +22,10 @@ npm run start:env   # Production with --env-file=.env
 npm run dev:env     # Development with --env-file=.env and --watch
 ```
 
-### Create a new app/effect
+### Create a new cueball/effect
 ```bash
-./scaffold-app.sh "My Effect Name"
-# Creates: public/apps/my-effect-name.html
+./scaffold-cueball.sh "My Effect Name"
+# Creates: public/cueballs/my-effect-name.html
 #          public/css/my-effect-name.css
 #          public/js/my-effect-name.js
 ```
@@ -55,7 +55,7 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
   - `orbital.html` - Display device interface (projectors/monitors)
   - `control.html` - Central control panel
   - `mapping.html` - Projection mapping interface
-- **Custom Apps**: Located in `public/apps/` directory
+- **Custom Cueballs**: Located in `public/cueballs/` directory
 - **Communication**: WebSocket connections for real-time updates
 
 ### Message Flow
@@ -80,7 +80,7 @@ Built-in screen types handled by `orbital.js`:
 - `message [text] [subtitle]` - Text display
 - `video [path] [loop]` - Video playback
 - `image [path]` - Image display
-- `app [appname] [args...]` - Custom app from `/apps`
+- `cueball [cueballname] [args...]` - Custom cueball from `/cueballs`
 
 ## Project Structure
 
@@ -98,7 +98,7 @@ cuepernova/
 │   ├── orbital.html       # Display interface
 │   ├── control.html       # Control panel
 │   ├── mapping.html       # Projection mapping
-│   ├── apps/              # Custom app pages
+│   ├── cueballs/          # Custom cueball pages
 │   ├── css/               # Stylesheets
 │   ├── js/                # Frontend scripts
 │   └── media/             # Media assets
@@ -133,7 +133,7 @@ case 'mycommand':
 
 ### URL Parameters for Orbitals
 - `?name=projector1` - Unique identifier for each orbital
-- Apps receive arguments as `?arg1=value&arg2=value&arg3=value`
+- Cueballs receive arguments as `?arg1=value&arg2=value&arg3=value`
 
 ## Development Tips
 
