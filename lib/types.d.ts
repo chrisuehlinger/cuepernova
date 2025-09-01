@@ -1,3 +1,10 @@
+/**
+ * Type definitions for Cuepernova configuration
+ * 
+ * These types are provided for reference and IDE support.
+ * The actual configuration file should be JSON (cuepernova.config.json).
+ */
+
 export interface CuepernovaConfig {
   server?: {
     httpPort?: number;
@@ -5,7 +12,7 @@ export interface CuepernovaConfig {
     ssl?: {
       cert?: string;
       key?: string;
-    };
+    } | null;
   };
   osc?: {
     port?: number;

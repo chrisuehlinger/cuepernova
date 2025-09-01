@@ -50,7 +50,7 @@ This creates:
 - `cueballs/` - Directory for your custom effects
 - `media/` - Directory for media files
 - `cues.json` - Your show's cue list
-- `cuepernova.config.ts` - Configuration file
+- `cuepernova.config.json` - Configuration file
 
 ### 2. Start the server
 
@@ -112,32 +112,30 @@ This creates:
 
 ## Configuration
 
-Create a `cuepernova.config.ts` file for project configuration:
+Create a `cuepernova.config.json` file for project configuration:
 
-```typescript
-import type { CuepernovaConfig } from 'cuepernova';
-
-const config: CuepernovaConfig = {
-  server: {
-    httpPort: 8080,
-    httpsPort: 8443,
-    ssl: {
-      cert: './certs/cert.pem',
-      key: './certs/key.pem'
+```json
+{
+  "server": {
+    "httpPort": 8080,
+    "httpsPort": 8443,
+    "ssl": {
+      "cert": "./certs/cert.pem",
+      "key": "./certs/key.pem"
     }
   },
-  osc: {
-    port: 57121
+  "osc": {
+    "port": 57121
   },
-  paths: {
-    cueballs: './cueballs',
-    media: './media',
-    nodeModules: './node_modules'
+  "paths": {
+    "cueballs": "./cueballs",
+    "media": "./media",
+    "nodeModules": "./node_modules"
   }
-};
-
-export default config;
+}
 ```
+
+Note: Set `ssl` to `null` to disable HTTPS.
 
 ## OSC Commands
 
@@ -271,7 +269,7 @@ brew install mkcert  # macOS
 mkcert -install
 mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost
 
-# Configure in cuepernova.config.ts
+# Configure in cuepernova.config.json
 # Then start normally - HTTPS will be enabled automatically
 cuepernova start
 ```
@@ -290,7 +288,7 @@ your-project/
 ├── js/                   # Cueball scripts
 ├── node_modules/         # Your project's dependencies
 ├── cues.json             # Your show's cue list
-├── cuepernova.config.ts  # Configuration file
+├── cuepernova.config.json # Configuration file
 └── package.json          # Your project's package.json
 ```
 

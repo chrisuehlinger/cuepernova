@@ -56,7 +56,7 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 - **Module System**: ES Modules (ESM) with `node:` prefix for built-ins
 - **CLI Entry Point**: `bin/cuepernova.js` - Commander-based CLI
 - **Server Entry**: `lib/server/app.js` - Express server
-- **Configuration**: TypeScript config with runtime compilation
+- **Configuration**: JSON config file (cuepernova.config.json)
 - **Static Files**: Package serves built-in pages from `static/`, user content from project directories
 
 ### Server Architecture
@@ -144,7 +144,7 @@ user-project/
 ├── js/                    # Cueball scripts
 ├── node_modules/          # Project dependencies
 ├── cues.json              # Show cue list
-└── cuepernova.config.ts   # Configuration file
+└── cuepernova.config.json # Configuration file
 ```
 
 ### Cues.json

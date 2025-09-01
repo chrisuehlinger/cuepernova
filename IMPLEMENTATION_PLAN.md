@@ -29,7 +29,7 @@ cuepernova/
 │   │   │   └── example.html
 │   │   ├── media/
 │   │   │   └── .gitkeep
-│   │   └── cuepernova.config.ts
+│   │   └── cuepernova.config.json
 │   └── cueball/              # Templates for cueball scaffold
 │       ├── cueball.html
 │       ├── cueball.css
@@ -54,7 +54,7 @@ project/
 ├── cueballs/
 ├── media/
 ├── node_modules/
-└── cuepernova.config.ts
+└── cuepernova.config.json
 ```
 
 ## Implementation Steps
@@ -111,31 +111,27 @@ project/
 - [x] Update CLAUDE.md with new architecture
 - [x] Create example config file
 
-## Config File Format (TypeScript)
+## Config File Format (JSON)
 
-```typescript
-import type { CuepernovaConfig } from 'cuepernova';
-
-const config: CuepernovaConfig = {
-  server: {
-    httpPort: 8080,
-    httpsPort: 8443,
-    ssl: {
-      cert: './certs/cert.pem',
-      key: './certs/key.pem'
+```json
+{
+  "server": {
+    "httpPort": 8080,
+    "httpsPort": 8443,
+    "ssl": {
+      "cert": "./certs/cert.pem",
+      "key": "./certs/key.pem"
     }
   },
-  osc: {
-    port: 57121
+  "osc": {
+    "port": 57121
   },
-  paths: {
-    cueballs: './cueballs',
-    media: './media',
-    nodeModules: './node_modules'
+  "paths": {
+    "cueballs": "./cueballs",
+    "media": "./media",
+    "nodeModules": "./node_modules"
   }
-};
-
-export default config;
+}
 ```
 
 ## CLI Usage Examples
@@ -160,7 +156,7 @@ cuepernova start --port 3000 --osc-port 9999
 cuepernova start --cert ./cert.pem --key ./key.pem
 
 # Start with config file
-cuepernova start --config ./my-config.ts
+cuepernova start --config ./my-config.json
 
 # Create new cueball
 cuepernova cueball my-effect
