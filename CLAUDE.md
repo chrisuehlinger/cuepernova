@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Cuepernova is an open source theater projection control system, now distributed as an npm package. It provides multi-display control, OSC integration for QLab, WebSocket communication for real-time updates, WebRTC support for peer-to-peer streaming, and projection mapping capabilities.
 
+**The codebase is written in TypeScript** with a build process that compiles to JavaScript for distribution. User projects use plain JavaScript without requiring a build step.
+
 ## Package Architecture
 
 Cuepernova is now an npm package that can be installed and used in any project:
@@ -19,10 +21,19 @@ npx cuepernova [command]
 
 ### For Package Development
 ```bash
+# Build TypeScript to JavaScript
+npm run build
+
+# Clean build artifacts
+npm run clean
+
+# Build and run in development
+npm run dev
+
 # Link package locally for testing
 npm link
 
-# Test commands
+# Test commands after building
 cuepernova init          # Initialize a new project
 cuepernova start         # Start the server
 cuepernova cueball "Name" # Create a new cueball
@@ -53,11 +64,13 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 ## Architecture Overview
 
 ### Package Architecture
+- **Language**: TypeScript (compiled to JavaScript for distribution)
 - **Module System**: ES Modules (ESM) with `node:` prefix for built-ins
-- **CLI Entry Point**: `bin/cuepernova.js` - Commander-based CLI
-- **Server Entry**: `lib/server/app.js` - Express server
+- **CLI Entry Point**: `src/cli.ts` → `dist/cli.js` - Commander-based CLI
+- **Server Entry**: `src/server/app.ts` → `dist/server/app.js` - Express server
 - **Configuration**: JSON config file (cuepernova.config.json)
 - **Static Files**: Package serves built-in pages from `static/`, user content from project directories
+- **Type Definitions**: Shared types in `src/types/index.ts` for frontend/backend consistency
 
 ### Server Architecture
 - **Express Server**: Default ports 8080 (HTTP) and 8443 (HTTPS)
@@ -68,7 +81,8 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 - **WebRTC Signaling**: Via `/signalmaster` routes
 
 ### Frontend Architecture
-- **No Build System**: Uses vanilla JavaScript with ES modules
+- **Development**: TypeScript compiled to JavaScript
+- **User Projects**: Plain JavaScript with ES modules (no build required)
 - **Core Pages** (served from package):
   - `orbital.html` - Display device interface (projectors/monitors)
   - `control.html` - Central control panel
@@ -102,37 +116,42 @@ Built-in screen types handled by `orbital.js`:
 
 ## Project Structure
 
-### Package Structure
+### Source Structure (TypeScript)
 ```
 cuepernova/
-├── bin/
-│   └── cuepernova.js      # CLI entry point
-├── lib/
+├── src/                   # TypeScript source files
+│   ├── cli.ts            # CLI entry point
 │   ├── server/
-│   │   ├── app.js         # Express server
-│   │   ├── sockets.js     # WebSocket & OSC handling
-│   │   └── signalmaster.js # WebRTC signaling
+│   │   ├── app.ts        # Express server
+│   │   ├── sockets.ts    # WebSocket & OSC handling
+│   │   └── signalmaster.ts # WebRTC signaling
 │   ├── commands/
-│   │   ├── start.js       # Start server command
-│   │   ├── init.js        # Initialize project
-│   │   └── cueball.js     # Scaffold cueball
+│   │   ├── start.ts      # Start server command
+│   │   ├── init.ts       # Initialize project
+│   │   └── cueball.ts    # Scaffold cueball
 │   ├── config/
-│   │   └── loader.js      # Config file loader
+│   │   └── loader.ts     # Config file loader
+│   ├── routes/
+│   │   └── index.ts      # Main routes
 │   ├── utils/
-│   │   └── rtc-signals.js # RTC signal storage
-│   └── types.d.ts         # TypeScript definitions
-├── static/                # Built-in static files
-│   ├── orbital.html       # Display interface
-│   ├── control.html       # Control panel
-│   ├── mapping.html       # Projection mapping
-│   ├── css/               # Core stylesheets
-│   └── js/                # Core scripts
-├── templates/             # Templates for scaffolding
-│   ├── init/              # Project init templates
-│   └── cueball/           # Cueball templates
-├── routes/
-│   └── index.js           # Main routes
-└── views/                 # Pug templates (error pages)
+│   │   └── rtc-signals.ts # RTC signal storage
+│   └── types/
+│       └── index.ts      # Shared TypeScript definitions
+├── static-src/           # TypeScript source for frontend
+│   └── js/
+│       ├── control.ts    # Control panel script
+│       ├── orbital.ts    # Orbital display script
+│       └── mapping.ts    # Mapping interface script
+├── dist/                 # Compiled JavaScript (generated)
+├── static/               # Static files including compiled JS
+│   ├── orbital.html      # Display interface
+│   ├── control.html      # Control panel
+│   ├── mapping.html      # Projection mapping
+│   ├── css/              # Core stylesheets
+│   └── js/               # Compiled + vendor scripts
+├── templates/            # Templates for scaffolding
+├── views/                # Pug templates (error pages)
+└── build.js              # Build script
 ```
 
 ### User Project Structure (after `cuepernova init`)
@@ -154,7 +173,7 @@ The `cues.json` file stores the show's cue list and is loaded by the control pan
 ## Key Implementation Details
 
 ### Adding New Screen Types
-Edit `public/js/orbital.js` and add handler to `cueHandlers` object:
+Edit `static-src/js/orbital.ts` and add handler to `cueHandlers` object:
 ```javascript
 cueHandlers['mytype'] = function(args) {
   // args[0], args[1], etc. from OSC message
@@ -162,7 +181,7 @@ cueHandlers['mytype'] = function(args) {
 ```
 
 ### Adding New OSC Commands
-Edit `sockets.js` `handleSystemMessage()` function:
+Edit `src/server/sockets.ts` `handleSystemMessage()` function:
 ```javascript
 case 'mycommand':
   // Handle /cuepernova/system/mycommand

@@ -3,20 +3,22 @@
   "version": "0.0.1",
   "description": "Open source theater projection control system",
   "type": "module",
-  "main": "lib/server/app.js",
-  "types": "lib/types.d.ts",
+  "main": "dist/server/app.js",
+  "types": "dist/types/index.d.ts",
   "bin": {
-    "cuepernova": "bin/cuepernova.js"
+    "cuepernova": "dist/cli.js"
   },
   "files": [
-    "bin/",
-    "lib/",
+    "dist/",
     "static/",
     "templates/",
-    "views/",
-    "routes/"
+    "views/"
   ],
   "scripts": {
+    "build": "node build.js",
+    "clean": "rm -rf dist",
+    "dev": "npm run build && node dist/cli.js start",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -47,5 +49,14 @@
     "osc": "^2.4.4",
     "pug": "^3.0.2",
     "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
+    "@types/jquery": "^3.5.33",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^24.3.0",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.9.2"
   }
 }

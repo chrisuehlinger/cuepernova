@@ -11,7 +11,8 @@ Open source theater projection control system for managing multiple displays, re
 - 🗺️ **Projection Mapping** - Built-in projection mapping interface
 - 🎨 **Custom Effects** - Create custom "cueballs" for unique visual effects
 - 📦 **NPM Package** - Easy installation and project setup via npm
-- ⚡ **No Build Step** - Uses ES modules for rapid development
+- 📘 **TypeScript** - Full TypeScript support with shared types between frontend and backend
+- ⚡ **No Build Step for Users** - User projects use plain JavaScript with ES modules
 
 ## Installation
 
@@ -33,7 +34,8 @@ npx cuepernova [command]
 git clone [repository-url]
 cd cuepernova
 npm install
-npm link  # Makes 'cuepernova' command available globally
+npm run build  # Compile TypeScript
+npm link       # Makes 'cuepernova' command available globally
 ```
 
 ## Quick Start
