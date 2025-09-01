@@ -140,6 +140,35 @@ button .material-icons {
 }
 
 /* Custom cues */
+.custom-cues h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-reload {
+  background: transparent;
+  border: 1px solid #667eea;
+  color: #667eea;
+  padding: 0.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.btn-reload:hover {
+  background: #667eea;
+  color: white;
+}
+
+.btn-reload .material-icons {
+  font-size: 18px;
+}
+
 .manual-cue {
   display: flex;
   gap: 20px;

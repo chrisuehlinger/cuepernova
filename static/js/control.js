@@ -1,18 +1,29 @@
 $(async () => {
   let connection = null;
   let isConnected = false;
+  let customCues = [];
   
-  // Example cues - in a real production, these would be show-specific
-  const customCues = [
-    { name: "Show Video", address: "/cuepernova/orbital/showScreen/video", args: ["/media/example.mp4"] },
-    { name: "Loop Background", address: "/cuepernova/orbital/showScreen/video", args: ["/media/background.mp4", "loop"] },
-    { name: "Show Image", address: "/cuepernova/orbital/showScreen/image", args: ["/media/poster.jpg"] },
-    { name: "Message: Places", address: "/cuepernova/orbital/showScreen/message", args: ["PLACES", "5 minutes to curtain"] },
-    { name: "Load Cueball", address: "/cuepernova/orbital/showScreen/cueball", args: ["example-cueball"] }
-  ];
+  // Load cues from JSON file
+  async function loadCues() {
+    try {
+      const response = await fetch('/cues.json');
+      if (response.ok) {
+        const data = await response.json();
+        customCues = data.cues || [];
+        console.log('Loaded cues from cues.json:', customCues);
+      } else {
+        console.warn('Could not load cues.json, using empty cue list');
+        customCues = [];
+      }
+    } catch (error) {
+      console.error('Error loading cues.json:', error);
+      customCues = [];
+    }
+    renderCueList();
+  }
   
   // Initialize UI
-  renderCueList();
+  await loadCues();
   bindEventHandlers();
   
   // WebSocket connection
@@ -81,6 +92,13 @@ $(async () => {
     
     $('#debug').on('click', () => {
       sendMessage('/cuepernova/orbital/showScreen/debug');
+    });
+    
+    // Reload cues button
+    $('#reload-cues').on('click', async () => {
+      console.log('Reloading cues...');
+      await loadCues();
+      alert('Cues reloaded from cues.json');
     });
     
     // Basic screen controls

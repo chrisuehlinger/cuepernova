@@ -1,0 +1,29 @@
+{
+  "cues": [
+    {
+      "name": "Show Video",
+      "address": "/cuepernova/orbital/showScreen/video",
+      "args": ["/media/example.mp4"]
+    },
+    {
+      "name": "Loop Background",
+      "address": "/cuepernova/orbital/showScreen/video",
+      "args": ["/media/background.mp4", "loop"]
+    },
+    {
+      "name": "Show Image",
+      "address": "/cuepernova/orbital/showScreen/image",
+      "args": ["/media/poster.jpg"]
+    },
+    {
+      "name": "Message: Places",
+      "address": "/cuepernova/orbital/showScreen/message",
+      "args": ["PLACES", "5 minutes to curtain"]
+    },
+    {
+      "name": "Load Example Cueball",
+      "address": "/cuepernova/orbital/showScreen/cueball",
+      "args": ["example"]
+    }
+  ]
+}

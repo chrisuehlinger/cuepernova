@@ -49,6 +49,7 @@ cuepernova init
 This creates:
 - `cueballs/` - Directory for your custom effects
 - `media/` - Directory for media files
+- `cues.json` - Your show's cue list
 - `cuepernova.config.ts` - Configuration file
 
 ### 2. Start the server
@@ -172,6 +173,46 @@ Example OSC messages:
 /cuepernova/orbital/showScreen/cueball rainbow-wave fast blue
 ```
 
+## Managing Cues
+
+### Cues.json File
+
+Your show's cues are stored in `cues.json` in your project root. This file is automatically created when you run `cuepernova init` and can be edited to customize your show's cue list.
+
+#### Format
+
+```json
+{
+  "cues": [
+    {
+      "name": "Show Video",
+      "address": "/cuepernova/orbital/showScreen/video",
+      "args": ["/media/intro.mp4", "loop"]
+    },
+    {
+      "name": "Scene 1 Title",
+      "address": "/cuepernova/orbital/showScreen/message",
+      "args": ["ACT 1", "The Garden"]
+    },
+    {
+      "name": "Custom Effect",
+      "address": "/cuepernova/orbital/showScreen/cueball",
+      "args": ["rainbow-wave", "fast", "blue"]
+    }
+  ]
+}
+```
+
+#### Live Reloading
+
+The control panel includes a reload button (↻) next to "Custom Cues" that allows you to reload the cue list without restarting the server. This is useful during tech rehearsals when you need to quickly update cues.
+
+#### Fields
+
+- `name` - Display name shown in the control panel
+- `address` - OSC address for the command
+- `args` - Array of arguments to pass with the command
+
 ## Creating Custom Cueballs
 
 ### Using the CLI
@@ -248,6 +289,7 @@ your-project/
 ├── css/                  # Cueball stylesheets
 ├── js/                   # Cueball scripts
 ├── node_modules/         # Your project's dependencies
+├── cues.json             # Your show's cue list
 ├── cuepernova.config.ts  # Configuration file
 └── package.json          # Your project's package.json
 ```

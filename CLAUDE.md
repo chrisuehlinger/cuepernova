@@ -143,8 +143,13 @@ user-project/
 ├── css/                   # Cueball stylesheets
 ├── js/                    # Cueball scripts
 ├── node_modules/          # Project dependencies
+├── cues.json              # Show cue list
 └── cuepernova.config.ts   # Configuration file
 ```
+
+### Cues.json
+
+The `cues.json` file stores the show's cue list and is loaded by the control panel. It's served statically from the project root at `/cues.json`. The control panel fetches this file on load and includes a reload button for live updates during tech rehearsals.
 
 ## Key Implementation Details
 
