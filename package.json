@@ -1,14 +1,22 @@
 {
   "name": "cuepernova",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Open source theater projection control system",
   "type": "module",
-  "main": "bin/www.js",
+  "main": "lib/server/app.js",
+  "types": "lib/types.d.ts",
+  "bin": {
+    "cuepernova": "bin/cuepernova.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "static/",
+    "templates/",
+    "views/",
+    "routes/"
+  ],
   "scripts": {
-    "start": "node bin/www.js",
-    "dev": "node --watch bin/www.js",
-    "start:env": "node --env-file=.env bin/www.js",
-    "dev:env": "node --watch --env-file=.env bin/www.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -16,15 +24,31 @@
     "projection",
     "osc",
     "webrtc",
-    "websockets"
+    "websockets",
+    "qlab",
+    "projection-mapping",
+    "stage-control"
   ],
   "author": "",
   "license": "MIT",
+  "homepage": "https://github.com/yourusername/cuepernova#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/cuepernova.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/cuepernova/issues"
+  },
   "dependencies": {
+    "@types/node": "^24.3.0",
+    "chalk": "^5.6.0",
+    "commander": "^14.0.0",
     "express": "^4.18.2",
     "morgan": "^1.10.0",
     "osc": "^2.4.4",
     "pug": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
     "ws": "^8.14.2"
   }
 }

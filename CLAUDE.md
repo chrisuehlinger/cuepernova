@@ -4,30 +4,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Cuepernova is an open source theater projection control system for managing multiple displays, real-time effects, and show cues. It provides multi-display control, OSC integration for QLab, WebSocket communication for real-time updates, WebRTC support for peer-to-peer streaming, and projection mapping capabilities.
+Cuepernova is an open source theater projection control system, now distributed as an npm package. It provides multi-display control, OSC integration for QLab, WebSocket communication for real-time updates, WebRTC support for peer-to-peer streaming, and projection mapping capabilities.
+
+## Package Architecture
+
+Cuepernova is now an npm package that can be installed and used in any project:
+
+```bash
+npm install -g cuepernova
+npx cuepernova [command]
+```
 
 ## Common Development Commands
 
-### Start the application
+### For Package Development
 ```bash
-# Start with automatic dependency installation
-./startup.sh         # Production mode (ports 8080/8443)
-./startup.sh dev     # Development mode with Node.js --watch (auto-restart)
+# Link package locally for testing
+npm link
 
-# Manual start
-npm install          # Install dependencies (if needed)
-npm start           # Production mode
-npm run dev         # Development with --watch
-npm run start:env   # Production with --env-file=.env
-npm run dev:env     # Development with --env-file=.env and --watch
+# Test commands
+cuepernova init          # Initialize a new project
+cuepernova start         # Start the server
+cuepernova cueball "Name" # Create a new cueball
 ```
 
-### Create a new cueball/effect
+### For End Users
 ```bash
-./scaffold-cueball.sh "My Effect Name"
-# Creates: public/cueballs/my-effect-name.html
-#          public/css/my-effect-name.css
-#          public/js/my-effect-name.js
+# Initialize a new project
+npx cuepernova init
+
+# Start the server
+npx cuepernova start
+
+# Create a new cueball/effect
+npx cuepernova cueball "My Effect Name"
+# Creates: cueballs/my-effect-name.html
+#          css/my-effect-name.css
+#          js/my-effect-name.js
 ```
 
 ### SSL Certificate Setup (for WebRTC/HTTPS)
@@ -39,23 +52,28 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 
 ## Architecture Overview
 
-### Server Architecture
+### Package Architecture
 - **Module System**: ES Modules (ESM) with `node:` prefix for built-ins
-- **Entry Point**: `bin/www.js` → `app.js`
-- **Express Server**: Serves on ports 8080 (HTTP) and 8443 (HTTPS) in development
+- **CLI Entry Point**: `bin/cuepernova.js` - Commander-based CLI
+- **Server Entry**: `lib/server/app.js` - Express server
+- **Configuration**: TypeScript config with runtime compilation
+- **Static Files**: Package serves built-in pages from `static/`, user content from project directories
+
+### Server Architecture
+- **Express Server**: Default ports 8080 (HTTP) and 8443 (HTTPS)
 - **WebSocket Endpoints**:
   - `/orbital` - Display/projection devices
   - `/control` - Control panel interfaces
-- **OSC Server**: UDP port 57121 for QLab integration
+- **OSC Server**: UDP port 57121 for QLab integration (configurable)
 - **WebRTC Signaling**: Via `/signalmaster` routes
 
 ### Frontend Architecture
 - **No Build System**: Uses vanilla JavaScript with ES modules
-- **Core Pages**:
+- **Core Pages** (served from package):
   - `orbital.html` - Display device interface (projectors/monitors)
   - `control.html` - Central control panel
   - `mapping.html` - Projection mapping interface
-- **Custom Cueballs**: Located in `public/cueballs/` directory
+- **Custom Cueballs**: Located in user's `cueballs/` directory
 - **Communication**: WebSocket connections for real-time updates
 
 ### Message Flow
@@ -84,25 +102,48 @@ Built-in screen types handled by `orbital.js`:
 
 ## Project Structure
 
+### Package Structure
 ```
 cuepernova/
-├── bin/www                 # Node.js entry point
-├── app.js                  # Express server configuration
-├── sockets.js              # WebSocket & OSC handling
-├── routes/
-│   ├── index.js           # Main routes
-│   └── signalmaster.js    # WebRTC signaling
-├── util/
-│   └── rtc-signals.js     # RTC signal storage
-├── public/
+├── bin/
+│   └── cuepernova.js      # CLI entry point
+├── lib/
+│   ├── server/
+│   │   ├── app.js         # Express server
+│   │   ├── sockets.js     # WebSocket & OSC handling
+│   │   └── signalmaster.js # WebRTC signaling
+│   ├── commands/
+│   │   ├── start.js       # Start server command
+│   │   ├── init.js        # Initialize project
+│   │   └── cueball.js     # Scaffold cueball
+│   ├── config/
+│   │   └── loader.js      # Config file loader
+│   ├── utils/
+│   │   └── rtc-signals.js # RTC signal storage
+│   └── types.d.ts         # TypeScript definitions
+├── static/                # Built-in static files
 │   ├── orbital.html       # Display interface
 │   ├── control.html       # Control panel
 │   ├── mapping.html       # Projection mapping
-│   ├── cueballs/          # Custom cueball pages
-│   ├── css/               # Stylesheets
-│   ├── js/                # Frontend scripts
-│   └── media/             # Media assets
+│   ├── css/               # Core stylesheets
+│   └── js/                # Core scripts
+├── templates/             # Templates for scaffolding
+│   ├── init/              # Project init templates
+│   └── cueball/           # Cueball templates
+├── routes/
+│   └── index.js           # Main routes
 └── views/                 # Pug templates (error pages)
+```
+
+### User Project Structure (after `cuepernova init`)
+```
+user-project/
+├── cueballs/              # Custom cueball pages
+├── media/                 # Media assets
+├── css/                   # Cueball stylesheets
+├── js/                    # Cueball scripts
+├── node_modules/          # Project dependencies
+└── cuepernova.config.ts   # Configuration file
 ```
 
 ## Key Implementation Details

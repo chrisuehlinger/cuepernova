@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example Cueball</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .content {
+            text-align: center;
+            animation: fadeIn 1s ease-in;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin: 0 0 1rem 0;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        p {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>Example Cueball</h1>
+        <p>This is a sample cueball effect</p>
+        <p id="args"></p>
+    </div>
+    
+    <script>
+        // Get URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const arg1 = params.get('arg1');
+        const arg2 = params.get('arg2');
+        const arg3 = params.get('arg3');
+        
+        // Display arguments if provided
+        const argsEl = document.getElementById('args');
+        const args = [arg1, arg2, arg3].filter(Boolean);
+        if (args.length > 0) {
+            argsEl.textContent = `Arguments: ${args.join(', ')}`;
+        }
+    </script>
+</body>
+</html>

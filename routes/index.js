@@ -3,7 +3,7 @@ const router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Cuepernova' });
+  res.redirect('/control.html');
 });
 
 export default router;

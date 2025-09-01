@@ -4,168 +4,207 @@ Open source theater projection control system for managing multiple displays, re
 
 ## Features
 
-- **Multi-display Control**: Manage multiple projection surfaces (orbitals) from a central control panel
-- **OSC Integration**: Control via QLab or other OSC-capable software (port 57121)
-- **WebSocket Communication**: Real-time updates across all connected devices
-- **WebRTC Support**: Peer-to-peer video/audio streaming over local networks
-- **Projection Mapping**: Built-in projection mapping interface for display alignment
-- **Flexible Cue System**: Show videos, images, web apps, or custom HTML content
-- **HTTP/HTTPS Support**: Works with or without SSL certificates
-- **No Build Step**: Frontend uses ES modules and import maps for rapid development
+- 🎭 **Multi-Display Control** - Manage multiple projectors and displays from a central control panel
+- 🎛️ **OSC Integration** - Full integration with QLab and other OSC-compatible software
+- 🔌 **WebSocket Communication** - Real-time updates across all connected devices
+- 📹 **WebRTC Support** - Peer-to-peer video streaming between devices
+- 🗺️ **Projection Mapping** - Built-in projection mapping interface
+- 🎨 **Custom Effects** - Create custom "cueballs" for unique visual effects
+- 📦 **NPM Package** - Easy installation and project setup via npm
+- ⚡ **No Build Step** - Uses ES modules for rapid development
 
-## Quick Start
+## Installation
 
-1. Clone the repository:
+### As an NPM Package (Recommended)
+
+```bash
+npm install -g cuepernova
+```
+
+Or use with npx without installing:
+
+```bash
+npx cuepernova [command]
+```
+
+### From Source
+
 ```bash
 git clone [repository-url]
 cd cuepernova
+npm install
+npm link  # Makes 'cuepernova' command available globally
 ```
 
-2. Run the startup script:
-```bash
-# Production mode
-./startup.sh
+## Quick Start
 
-# Development mode with Node.js --watch (auto-restart on file changes)
-./startup.sh dev
-```
-
-3. Open your browser:
-   - Control Panel: http://localhost:8080/control.html
-   - Orbital Display: http://localhost:8080/orbital.html?name=main
-   - Projection Mapping: http://localhost:8080/mapping.html?name=main
-
-## Modern Development Features
-
-### ES Modules (ESM)
-The project now uses modern ES modules throughout the codebase with `node:` prefix for built-in modules.
-
-### Native Node.js --watch Mode
-Use the built-in `--watch` flag for automatic restarts during development:
-```bash
-npm run dev
-# or with environment file
-npm run dev:env
-```
-
-### Environment Configuration
-Use Node.js native `--env-file` support for configuration:
-```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Run with environment variables
-npm run start:env     # Production with .env
-npm run dev:env       # Development with .env and --watch
-```
-
-### No External Dependencies for Common Tasks
-- **Body parsing**: Uses Express built-in `express.json()` and `express.urlencoded()`
-- **Development**: Uses Node.js native `--watch` for auto-restart (no nodemon needed)
-- **Configuration**: Uses Node.js native `--env-file` (no dotenv needed)
-
-## Basic Usage
-
-### Setting Up Orbitals
-
-Each display device (projector, monitor, etc.) runs an "orbital" page. Give each orbital a unique name:
-
-```
-http://yourserver:8080/orbital.html?name=projector1
-http://yourserver:8080/orbital.html?name=projector2
-http://yourserver:8080/orbital.html?name=monitor1
-```
-
-### OSC Commands
-
-Send OSC messages to port 57121:
-
-- `/cuepernova/orbital/showScreen/[screenType]` - Show a specific screen type
-- `/cuepernova/orbital/clearScreen` - Clear all screens (emergency bail)
-- `/cuepernova/orbital/fadeScreen [duration]` - Fade out over duration (ms)
-- `/cuepernova/orbital/refreshScreen` - Refresh all orbital pages
-- `/cuepernova/system/clear-rtc` - Clear RTC signals
-- `/cuepernova/system/clearMappings` - Clear all projection mappings
-- `/cuepernova/system/resetMapping [orbitalName]` - Reset mapping for specific orbital
-
-### Built-in Screen Types
-
-- `black` - Black screen
-- `white` - White screen
-- `freeze` - Flashing "FREEZE!" message
-- `debug` - Shows orbital name and connection status
-- `message [text] [subtitle]` - Display text message
-- `video [path] [loop]` - Play video file
-- `image [path]` - Display image
-- `cueball [cueballname] [args...]` - Load cueball from /cueballs directory
-
-### Creating Custom Cueballs
-
-#### Quick Scaffold
-
-Use the scaffold script to quickly create a new cueball with all the boilerplate:
+### 1. Initialize a new project
 
 ```bash
-./scaffold-cueball.sh "My Cool Effect"
+mkdir my-show
+cd my-show
+cuepernova init
 ```
 
 This creates:
-- `public/cueballs/my-cool-effect.html` - HTML structure
-- `public/css/my-cool-effect.css` - CSS with common theater styles and animations
-- `public/js/my-cool-effect.js` - JavaScript with utility functions
+- `cueballs/` - Directory for your custom effects
+- `media/` - Directory for media files
+- `cuepernova.config.ts` - Configuration file
 
-#### Manual Creation
+### 2. Start the server
 
-1. Create an HTML file in `public/cueballs/`
-2. Access URL parameters for dynamic content
-3. Call from OSC: `/cuepernova/orbital/showScreen/cueball yourcueballname arg1 arg2`
+```bash
+cuepernova start
+```
 
-#### Common Utilities
+The server will run on:
+- HTTP: http://localhost:8080
+- OSC: UDP port 57121
 
-The scaffold includes these helpful utilities:
+### 3. Access the interfaces
+
+- **Control Panel**: http://localhost:8080/control.html
+- **Projection Mapping**: http://localhost:8080/mapping.html
+- **Display/Orbital**: http://localhost:8080/orbital.html?name=display1
+
+Each display device should access the orbital URL with a unique name parameter.
+
+## CLI Commands
+
+### `cuepernova start`
+
+Start the Cuepernova server.
+
+Options:
+- `-p, --port <port>` - HTTP port (default: 8080)
+- `-s, --https-port <port>` - HTTPS port (default: 8443)
+- `-o, --osc-port <port>` - OSC UDP port (default: 57121)
+- `--cert <path>` - SSL certificate path
+- `--key <path>` - SSL key path
+- `-c, --config <path>` - Path to config file
+
+Example:
+```bash
+cuepernova start --port 3000 --osc-port 9999
+```
+
+### `cuepernova init`
+
+Initialize a new Cuepernova project in the current directory.
+
+Options:
+- `-f, --force` - Overwrite existing files
+
+### `cuepernova cueball <name>`
+
+Create a new cueball (custom effect).
+
+Example:
+```bash
+cuepernova cueball "Rainbow Wave"
+```
+
+This creates:
+- `cueballs/rainbow-wave.html`
+- `css/rainbow-wave.css`
+- `js/rainbow-wave.js`
+
+## Configuration
+
+Create a `cuepernova.config.ts` file for project configuration:
+
+```typescript
+import type { CuepernovaConfig } from 'cuepernova';
+
+const config: CuepernovaConfig = {
+  server: {
+    httpPort: 8080,
+    httpsPort: 8443,
+    ssl: {
+      cert: './certs/cert.pem',
+      key: './certs/key.pem'
+    }
+  },
+  osc: {
+    port: 57121
+  },
+  paths: {
+    cueballs: './cueballs',
+    media: './media',
+    nodeModules: './node_modules'
+  }
+};
+
+export default config;
+```
+
+## OSC Commands
+
+All OSC commands are namespaced under `/cuepernova`:
+
+### Display Control
+- `/cuepernova/orbital/showScreen/[screenType] [args...]` - Show content on displays
+- `/cuepernova/orbital/clearScreen` - Clear all displays
+- `/cuepernova/orbital/fadeScreen [duration]` - Fade out displays
+- `/cuepernova/orbital/refreshScreen` - Refresh display pages
+
+### System Commands
+- `/cuepernova/system/clear-rtc` - Clear WebRTC signals
+- `/cuepernova/system/clearMappings` - Clear all projection mappings
+- `/cuepernova/system/resetMapping [orbitalName]` - Reset specific display mapping
+
+### Screen Types
+
+Built-in screen types:
+- `black`, `white` - Solid colors
+- `freeze` - Flashing freeze message
+- `debug` - Connection status
+- `message [text] [subtitle]` - Text display
+- `video [path] [loop]` - Video playback
+- `image [path]` - Image display
+- `cueball [name] [arg1] [arg2] [arg3]` - Custom cueball
+
+Example OSC messages:
+```
+/cuepernova/orbital/showScreen/black
+/cuepernova/orbital/showScreen/message "Scene 1" "The Garden"
+/cuepernova/orbital/showScreen/video /media/intro.mp4 true
+/cuepernova/orbital/showScreen/cueball rainbow-wave fast blue
+```
+
+## Creating Custom Cueballs
+
+### Using the CLI
+
+The easiest way to create a new cueball:
+
+```bash
+cuepernova cueball "My Effect"
+```
+
+### Cueball Structure
+
+Cueballs are HTML pages that can receive arguments via URL parameters:
 
 ```javascript
-// Get URL arguments
-const arg1 = urlParams.get('arg1');
-const duration = utils.getNumber('duration', 1000);
-const shouldLoop = utils.getBoolean('loop', false);
+// In your cueball's JS file
+const params = new URLSearchParams(window.location.search);
+const arg1 = params.get('arg1');
+const arg2 = params.get('arg2');
+const arg3 = params.get('arg3');
 
-// Animation helpers
-utils.fadeIn('#content', 2000);
-utils.fadeOut('#content', 500);
-
-// Media helpers
-const video = utils.playVideo('/media/background.mp4', true);
-const image = utils.showImage('/media/poster.jpg');
-
-// WebSocket for real-time updates
-const ws = utils.connectWebSocket({
-  update: (message) => {
-    // Handle real-time updates
-  }
-});
+// Use the arguments to customize behavior
+if (arg1 === 'fast') {
+  document.body.style.animationDuration = '1s';
+}
 ```
 
-#### CSS Animation Classes
+### Using from QLab
 
-- `.fade-in` / `.fade-out` - Opacity transitions
-- `.slide-in-left` / `.slide-in-right` - Horizontal slides
-- `.slide-in-top` / `.slide-in-bottom` - Vertical slides
-- `.scale-in` - Scale from 0 to 1
-- `.fullscreen` - Full viewport coverage
-- `.hidden` / `.invisible` - Visibility utilities
-
-## SSL Setup (for WebRTC and HTTPS)
-
-1. Install mkcert: https://github.com/FiloSottile/mkcert#installation
-
-2. Create certificates:
-```bash
-mkcert -install
-mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $(hostname).local
-```
-
-3. Restart the server - it will now serve on both HTTP and HTTPS
+Create an OSC cue in QLab:
+- **Message**: `/cuepernova/orbital/showScreen/cueball my-effect value1 value2 value3`
+- **Destination**: Your computer's IP
+- **Port**: 57121
 
 ## Projection Mapping
 
@@ -176,50 +215,80 @@ Use the mapping interface to align projections:
 3. Drag corners to align projection
 4. Click "Toggle Mapping Mode" again to save
 
-## Architecture
+The mapping is saved in the browser's localStorage and persists across sessions.
 
-- **Server**: Express.js with WebSocket support
-- **OSC**: UDP port 57121 for external control
-- **WebSocket Endpoints**:
-  - `/orbital` - Display devices
-  - `/control` - Control panels
-- **No Build System**: Uses ES modules and import maps
-- **Storage**: In-memory for signals, localStorage for mapping
+## SSL/HTTPS Setup
+
+For WebRTC features, you'll need SSL certificates:
+
+```bash
+# Install mkcert
+brew install mkcert  # macOS
+# or see https://github.com/FiloSottile/mkcert#installation
+
+# Generate certificates
+mkcert -install
+mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost
+
+# Configure in cuepernova.config.ts
+# Then start normally - HTTPS will be enabled automatically
+cuepernova start
+```
 
 ## Development
 
-### File Structure
+### Project Structure
+
+After initialization, your project will have:
+
 ```
-cuepernova/
-├── app.js              # Express server setup
-├── sockets.js          # WebSocket and OSC handling
-├── public/
-│   ├── orbital.html    # Display page
-│   ├── control.html    # Control panel
-│   ├── mapping.html    # Projection mapping
-│   ├── cueballs/       # Custom cueball pages
-│   ├── css/            # Stylesheets
-│   ├── js/             # Frontend scripts
-│   └── media/          # Media files
-├── routes/             # Express routes
-├── util/               # Utility modules
-└── views/              # Pug templates
+your-project/
+├── cueballs/             # Custom effect pages
+├── media/                # Media files (videos, images, audio)
+├── css/                  # Cueball stylesheets
+├── js/                   # Cueball scripts
+├── node_modules/         # Your project's dependencies
+├── cuepernova.config.ts  # Configuration file
+└── package.json          # Your project's package.json
 ```
 
-### Adding Features
+### WebSocket Events
 
-1. **New Screen Types**: Add handlers to `cueHandlers` in `orbital.js`
-2. **New OSC Commands**: Add cases to `handleSystemMessage()` in `sockets.js`
-3. **New Cueballs**: Create HTML files in `public/cueballs/`
+The control panel and orbital displays communicate via WebSocket. You can extend functionality by listening to WebSocket messages in your custom cueballs:
+
+```javascript
+const ws = new WebSocket(`ws://${window.location.host}/orbital`);
+
+ws.onmessage = (event) => {
+  const message = JSON.parse(event.data);
+  if (message.address === '/cuepernova/orbital/customCommand') {
+    // Handle custom command
+  }
+};
+```
+
+### Adding New Screen Types
+
+To add a new built-in screen type, contribute to the project by modifying `orbital.js`:
+
+```javascript
+cueHandlers['mytype'] = function(args) {
+  // Implementation
+};
+```
 
 ## Tips
 
 - Keep the control panel on a separate device from projections
 - Use meaningful orbital names for easy identification
 - Test WebRTC features over HTTPS for camera/microphone access
-- Store media files in `public/media/` for easy access
-- Use the mapping interface's "Clear Mapping" carefully - it resets alignment
+- Store media files in your project's `media/` folder
+- Use ES modules and import maps for loading dependencies
 
 ## License
 
 MIT
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
