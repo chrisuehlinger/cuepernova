@@ -7,27 +7,27 @@ block content
   h2 Quick Links
   ul
     li
-      a(href='/mapping.html') Orbital Display (with mapping)
+      a(href='/mapping.html') Cuestation Display (with mapping)
     li
       a(href='/control.html') Control Panel
     li
-      a(href='/orbital.html') Orbital Display (no mapping)
+      a(href='/cuestation.html') Cuestation Display (no mapping)
       
   h2 Documentation
-  p Configure your orbitals by adding a name parameter to the URL:
+  p Configure your cuestations by adding a name parameter to the URL:
   code /mapping.html?name=mainprojector
   
   p Send OSC messages to port 57121 with the following format:
   ul
     li
-      code /cuepernova/orbital/showScreen/[screenname]
+      code /cuepernova/cuestation/showScreen/[screenname]
       |  - Show a specific screen
     li
-      code /cuepernova/orbital/clearScreen
+      code /cuepernova/cuestation/clearScreen
       |  - Clear all screens (bail)
     li
-      code /cuepernova/orbital/fadeScreen [duration]
+      code /cuepernova/cuestation/fadeScreen [duration]
       |  - Fade out current screen
     li
-      code /cuepernova/orbital/refreshScreen
-      |  - Refresh all orbital pages
+      code /cuepernova/cuestation/refreshScreen
+      |  - Refresh all cuestation pages

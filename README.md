@@ -68,9 +68,9 @@ The server will run on:
 
 - **Control Panel**: http://localhost:8080/control.html
 - **Projection Mapping**: http://localhost:8080/mapping.html
-- **Display/Orbital**: http://localhost:8080/orbital.html?name=display1
+- **Display/Cuestation**: http://localhost:8080/cuestation.html?name=display1
 
-Each display device should access the orbital URL with a unique name parameter.
+Each display device should access the cuestation URL with a unique name parameter.
 
 ## CLI Commands
 
@@ -144,15 +144,15 @@ Note: Set `ssl` to `null` to disable HTTPS.
 All OSC commands are namespaced under `/cuepernova`:
 
 ### Display Control
-- `/cuepernova/orbital/showScreen/[screenType] [args...]` - Show content on displays
-- `/cuepernova/orbital/clearScreen` - Clear all displays
-- `/cuepernova/orbital/fadeScreen [duration]` - Fade out displays
-- `/cuepernova/orbital/refreshScreen` - Refresh display pages
+- `/cuepernova/cuestation/showScreen/[screenType] [args...]` - Show content on displays
+- `/cuepernova/cuestation/clearScreen` - Clear all displays
+- `/cuepernova/cuestation/fadeScreen [duration]` - Fade out displays
+- `/cuepernova/cuestation/refreshScreen` - Refresh display pages
 
 ### System Commands
 - `/cuepernova/system/clear-rtc` - Clear WebRTC signals
 - `/cuepernova/system/clearMappings` - Clear all projection mappings
-- `/cuepernova/system/resetMapping [orbitalName]` - Reset specific display mapping
+- `/cuepernova/system/resetMapping [cuestationName]` - Reset specific display mapping
 
 ### Screen Types
 
@@ -167,10 +167,10 @@ Built-in screen types:
 
 Example OSC messages:
 ```
-/cuepernova/orbital/showScreen/black
-/cuepernova/orbital/showScreen/message "Scene 1" "The Garden"
-/cuepernova/orbital/showScreen/video /media/intro.mp4 true
-/cuepernova/orbital/showScreen/cueball rainbow-wave fast blue
+/cuepernova/cuestation/showScreen/black
+/cuepernova/cuestation/showScreen/message "Scene 1" "The Garden"
+/cuepernova/cuestation/showScreen/video /media/intro.mp4 true
+/cuepernova/cuestation/showScreen/cueball rainbow-wave fast blue
 ```
 
 ## Managing Cues
@@ -186,17 +186,17 @@ Your show's cues are stored in `cues.json` in your project root. This file is au
   "cues": [
     {
       "name": "Show Video",
-      "address": "/cuepernova/orbital/showScreen/video",
+      "address": "/cuepernova/cuestation/showScreen/video",
       "args": ["/media/intro.mp4", "loop"]
     },
     {
       "name": "Scene 1 Title",
-      "address": "/cuepernova/orbital/showScreen/message",
+      "address": "/cuepernova/cuestation/showScreen/message",
       "args": ["ACT 1", "The Garden"]
     },
     {
       "name": "Custom Effect",
-      "address": "/cuepernova/orbital/showScreen/cueball",
+      "address": "/cuepernova/cuestation/showScreen/cueball",
       "args": ["rainbow-wave", "fast", "blue"]
     }
   ]
@@ -243,7 +243,7 @@ if (arg1 === 'fast') {
 ### Using from QLab
 
 Create an OSC cue in QLab:
-- **Message**: `/cuepernova/orbital/showScreen/cueball my-effect value1 value2 value3`
+- **Message**: `/cuepernova/cuestation/showScreen/cueball my-effect value1 value2 value3`
 - **Destination**: Your computer's IP
 - **Port**: 57121
 
@@ -296,14 +296,14 @@ your-project/
 
 ### WebSocket Events
 
-The control panel and orbital displays communicate via WebSocket. You can extend functionality by listening to WebSocket messages in your custom cueballs:
+The control panel and cuestation displays communicate via WebSocket. You can extend functionality by listening to WebSocket messages in your custom cueballs:
 
 ```javascript
-const ws = new WebSocket(`ws://${window.location.host}/orbital`);
+const ws = new WebSocket(`ws://${window.location.host}/cuestation`);
 
 ws.onmessage = (event) => {
   const message = JSON.parse(event.data);
-  if (message.address === '/cuepernova/orbital/customCommand') {
+  if (message.address === '/cuepernova/cuestation/customCommand') {
     // Handle custom command
   }
 };
@@ -311,7 +311,7 @@ ws.onmessage = (event) => {
 
 ### Adding New Screen Types
 
-To add a new built-in screen type, contribute to the project by modifying `orbital.js`:
+To add a new built-in screen type, contribute to the project by modifying `cuestation.js`:
 
 ```javascript
 cueHandlers['mytype'] = function(args) {
@@ -322,7 +322,7 @@ cueHandlers['mytype'] = function(args) {
 ## Tips
 
 - Keep the control panel on a separate device from projections
-- Use meaningful orbital names for easy identification
+- Use meaningful cuestation names for easy identification
 - Test WebRTC features over HTTPS for camera/microphone access
 - Store media files in your project's `media/` folder
 - Use ES modules and import maps for loading dependencies

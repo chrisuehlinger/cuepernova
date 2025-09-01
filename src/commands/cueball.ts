@@ -82,7 +82,7 @@ export async function createCueball(name: string): Promise<void> {
     console.log(chalk.green('\n✨ Cueball created successfully!\n'));
     console.log(chalk.cyan('📋 Usage:'));
     console.log(chalk.white('   From QLab OSC:'));
-    console.log(chalk.gray(`   /cuepernova/orbital/showScreen/cueball ${kebabName} [arg1] [arg2] [arg3]`));
+    console.log(chalk.gray(`   /cuepernova/cuestation/showScreen/cueball ${kebabName} [arg1] [arg2] [arg3]`));
     console.log(chalk.white('   Direct URL:'));
     console.log(chalk.gray(`   http://localhost:8080/cueballs/${kebabName}.html?arg1=value&arg2=value\n`));
     

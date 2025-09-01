@@ -21,7 +21,7 @@ export async function startServer(options) {
         console.log(chalk.cyan('📋 Pages:'));
         console.log(`   Control: ${chalk.white(`http://localhost:${config.httpPort}/control.html`)}`);
         console.log(`   Mapping: ${chalk.white(`http://localhost:${config.httpPort}/mapping.html`)}`);
-        console.log(`   Orbital: ${chalk.white(`http://localhost:${config.httpPort}/orbital.html?name=display1`)}`);
+        console.log(`   Cuestation: ${chalk.white(`http://localhost:${config.httpPort}/cuestation.html?name=display1`)}`);
         console.log(chalk.gray('───────────────────────────────'));
         console.log(chalk.yellow('\nPress Ctrl+C to stop the server\n'));
         // Handle graceful shutdown

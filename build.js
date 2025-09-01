@@ -19,7 +19,7 @@ if (existsSync('dist')) {
 
 // Clean compiled frontend files
 if (existsSync('static/js')) {
-  ['control.js', 'orbital.js', 'mapping.js'].forEach(file => {
+  ['control.js', 'cuestation.js', 'mapping.js'].forEach(file => {
     const filePath = join('static/js', file);
     if (existsSync(filePath)) {
       rmSync(filePath);
@@ -46,7 +46,7 @@ try {
   execSync('npx tsc -p tsconfig.frontend.json', { stdio: 'inherit' });
   
   // Move compiled files to correct location
-  ['control.js', 'orbital.js', 'mapping.js'].forEach(file => {
+  ['control.js', 'cuestation.js', 'mapping.js'].forEach(file => {
     const srcPath = join('static/static-src/js', file);
     const destPath = join('static/js', file);
     if (existsSync(srcPath)) {

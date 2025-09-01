@@ -2,27 +2,27 @@
   "cues": [
     {
       "name": "Show Video",
-      "address": "/cuepernova/orbital/showScreen/video",
+      "address": "/cuepernova/cuestation/showScreen/video",
       "args": ["/media/example.mp4"]
     },
     {
       "name": "Loop Background",
-      "address": "/cuepernova/orbital/showScreen/video",
+      "address": "/cuepernova/cuestation/showScreen/video",
       "args": ["/media/background.mp4", "loop"]
     },
     {
       "name": "Show Image",
-      "address": "/cuepernova/orbital/showScreen/image",
+      "address": "/cuepernova/cuestation/showScreen/image",
       "args": ["/media/poster.jpg"]
     },
     {
       "name": "Message: Places",
-      "address": "/cuepernova/orbital/showScreen/message",
+      "address": "/cuepernova/cuestation/showScreen/message",
       "args": ["PLACES", "5 minutes to curtain"]
     },
     {
       "name": "Load Example Cueball",
-      "address": "/cuepernova/orbital/showScreen/cueball",
+      "address": "/cuepernova/cuestation/showScreen/cueball",
       "args": ["example"]
     }
   ]

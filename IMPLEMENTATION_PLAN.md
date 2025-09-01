@@ -35,15 +35,15 @@ cuepernova/
 │       ├── cueball.css
 │       └── cueball.js
 ├── static/                   # Built-in static files
-│   ├── orbital.html
+│   ├── cuestation.html
 │   ├── control.html
 │   ├── mapping.html
 │   ├── css/
-│   │   ├── orbital.css
+│   │   ├── cuestation.css
 │   │   ├── control.css
 │   │   └── mapping.css
 │   └── js/
-│       ├── orbital.js
+│       ├── cuestation.js
 │       ├── control.js
 │       ├── mapping.js
 │       └── shared/

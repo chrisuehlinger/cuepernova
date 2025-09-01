@@ -10,21 +10,21 @@ interface WebSocketMessage {
   args?: (string | number | boolean)[];
 }
 
-interface OrbitalState {
-  orbitalName: string;
+interface CuestationState {
+  cuestationName: string;
   showtime: JQuery<HTMLElement>;
   connection: WebSocket | null;
   mapping?: MappingObject;
 }
 
-// Get orbital name from URL parameter
+// Get cuestation name from URL parameter
 const urlParams = new URLSearchParams(window.location.search);
-const ORBITAL_NAME = urlParams.get('name') || 'unnamed';
+const CUESTATION_NAME = urlParams.get('name') || 'unnamed';
 
-console.log(`Orbital starting with name: ${ORBITAL_NAME}`);
+console.log(`Cuestation starting with name: ${CUESTATION_NAME}`);
 
-const state: OrbitalState = {
-  orbitalName: ORBITAL_NAME,
+const state: CuestationState = {
+  cuestationName: CUESTATION_NAME,
   showtime: $('#showtime-area'),
   connection: null,
   mapping: undefined
@@ -38,7 +38,7 @@ const cueHandlers: Record<string, CueHandler> = {
   // Built-in screens
   debug: (message: WebSocketMessage) => {
     state.showtime.html(`<div class="debug-wrapper">
-      <h1>ORBITAL NAME: <strong>${ORBITAL_NAME}</strong></h1>
+      <h1>CUESTATION NAME: <strong>${CUESTATION_NAME}</strong></h1>
       <h1>TIME: <strong>${new Date().toLocaleTimeString()}</strong></h1>
       <h1>STATUS: <strong>CONNECTED</strong></h1>
     </div>`);
@@ -117,7 +117,7 @@ const cueHandlers: Record<string, CueHandler> = {
 function connectWebSocket(): void {
   console.log('Attempting to connect...');
   const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  const wsUrl = `${protocol}://${location.host}/orbital?name=${encodeURIComponent(ORBITAL_NAME)}`;
+  const wsUrl = `${protocol}://${location.host}/cuestation?name=${encodeURIComponent(CUESTATION_NAME)}`;
   
   state.connection = new WebSocket(wsUrl);
   
@@ -152,7 +152,7 @@ function handleOscMessage(message: WebSocketMessage): void {
   const pathParts = message.address.split('/');
   const action = pathParts[3];
   
-  if (pathParts[1] === 'cuepernova' && pathParts[2] === 'orbital') {
+  if (pathParts[1] === 'cuepernova' && pathParts[2] === 'cuestation') {
     switch(action) {
       case 'showScreen':
         const screenType = pathParts[4];
@@ -200,11 +200,11 @@ function initProjectionMapping(): void {
   const enableMapping = urlParams.get('mapping') === 'true';
   
   if (enableMapping && Maptastic) {
-    state.mapping = Maptastic(ORBITAL_NAME);
+    state.mapping = Maptastic(CUESTATION_NAME);
     console.log('Projection mapping enabled');
     
     // Load saved mappings from localStorage
-    const savedMappings = localStorage.getItem(`maptastic-${ORBITAL_NAME}`);
+    const savedMappings = localStorage.getItem(`maptastic-${CUESTATION_NAME}`);
     if (savedMappings) {
       console.log('Loading saved projection mappings');
     }

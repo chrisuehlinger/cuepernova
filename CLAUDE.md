@@ -75,7 +75,7 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 ### Server Architecture
 - **Express Server**: Default ports 8080 (HTTP) and 8443 (HTTPS)
 - **WebSocket Endpoints**:
-  - `/orbital` - Display/projection devices
+  - `/cuestation` - Display/projection devices
   - `/control` - Control panel interfaces
 - **OSC Server**: UDP port 57121 for QLab integration (configurable)
 - **WebRTC Signaling**: Via `/signalmaster` routes
@@ -84,28 +84,28 @@ mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $
 - **Development**: TypeScript compiled to JavaScript
 - **User Projects**: Plain JavaScript with ES modules (no build required)
 - **Core Pages** (served from package):
-  - `orbital.html` - Display device interface (projectors/monitors)
+  - `cuestation.html` - Display device interface (projectors/monitors)
   - `control.html` - Central control panel
   - `mapping.html` - Projection mapping interface
 - **Custom Cueballs**: Located in user's `cueballs/` directory
 - **Communication**: WebSocket connections for real-time updates
 
 ### Message Flow
-1. **OSC Commands** (port 57121) → `sockets.js` → WebSocket broadcast to orbitals
-2. **Control Panel** → WebSocket → `sockets.js` → Orbital clients
+1. **OSC Commands** (port 57121) → `sockets.js` → WebSocket broadcast to cuestations
+2. **Control Panel** → WebSocket → `sockets.js` → Cuestation clients
 3. **WebRTC Signaling** → `signalmaster.js` → Peer connections
 
 ### OSC Command Structure
-- `/cuepernova/orbital/showScreen/[screenType]` - Display content on orbitals
-- `/cuepernova/orbital/clearScreen` - Clear all displays
-- `/cuepernova/orbital/fadeScreen [duration]` - Fade out displays
-- `/cuepernova/orbital/refreshScreen` - Refresh orbital pages
+- `/cuepernova/cuestation/showScreen/[screenType]` - Display content on cuestations
+- `/cuepernova/cuestation/clearScreen` - Clear all displays
+- `/cuepernova/cuestation/fadeScreen [duration]` - Fade out displays
+- `/cuepernova/cuestation/refreshScreen` - Refresh cuestation pages
 - `/cuepernova/system/clear-rtc` - Clear RTC signals
 - `/cuepernova/system/clearMappings` - Clear all projection mappings
-- `/cuepernova/system/resetMapping [orbitalName]` - Reset mapping for specific orbital
+- `/cuepernova/system/resetMapping [cuestationName]` - Reset mapping for specific cuestation
 
 ### Screen Types
-Built-in screen types handled by `orbital.js`:
+Built-in screen types handled by `cuestation.js`:
 - `black`, `white` - Solid colors
 - `freeze` - Flashing message
 - `debug` - Connection status
@@ -140,11 +140,11 @@ cuepernova/
 ├── static-src/           # TypeScript source for frontend
 │   └── js/
 │       ├── control.ts    # Control panel script
-│       ├── orbital.ts    # Orbital display script
+│       ├── cuestation.ts    # Cuestation display script
 │       └── mapping.ts    # Mapping interface script
 ├── dist/                 # Compiled JavaScript (generated)
 ├── static/               # Static files including compiled JS
-│   ├── orbital.html      # Display interface
+│   ├── cuestation.html      # Display interface
 │   ├── control.html      # Control panel
 │   ├── mapping.html      # Projection mapping
 │   ├── css/              # Core stylesheets
@@ -173,7 +173,7 @@ The `cues.json` file stores the show's cue list and is loaded by the control pan
 ## Key Implementation Details
 
 ### Adding New Screen Types
-Edit `static-src/js/orbital.ts` and add handler to `cueHandlers` object:
+Edit `static-src/js/cuestation.ts` and add handler to `cueHandlers` object:
 ```javascript
 cueHandlers['mytype'] = function(args) {
   // args[0], args[1], etc. from OSC message
@@ -191,20 +191,20 @@ case 'mycommand':
 ### WebSocket Message Format
 ```javascript
 {
-  "address": "/cuepernova/orbital/showScreen/video",
+  "address": "/cuepernova/cuestation/showScreen/video",
   "args": ["path/to/video.mp4", "true"]
 }
 ```
 
-### URL Parameters for Orbitals
-- `?name=projector1` - Unique identifier for each orbital
+### URL Parameters for Cuestations
+- `?name=projector1` - Unique identifier for each cuestation
 - Cueballs receive arguments as `?arg1=value&arg2=value&arg3=value`
 
 ## Development Tips
 
 - Development mode uses ports 8080/8443, production uses 80/443
 - WebRTC features require HTTPS (self-signed certs work locally)
-- Each orbital needs a unique name parameter
+- Each cuestation needs a unique name parameter
 - Media files go in `public/media/`
 - The mapping interface saves to browser localStorage
 - Console logs OSC messages for debugging

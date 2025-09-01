@@ -128,7 +128,7 @@ if (process.argv.length < 3) {
   console.log('Examples:');
   console.log('  ./osc-send.js /field/scroll/start');
   console.log('  ./osc-send.js /field/scroll/speed 100');
-  console.log('  ./osc-send.js /orbital/showScreen/app field');
+  console.log('  ./osc-send.js /cuestation/showScreen/app field');
   console.log('');
   console.log('Environment variables:');
   console.log('  OSC_HOST - Target host (default: localhost)');

@@ -9,8 +9,8 @@ import rtcSignals from '../utils/rtc-signals.js';
 import { WebSocketMessage, OSCMessage, RTCSignals } from '../types/index.js';
 
 // Extended WebSocket with custom properties
-interface OrbitalWebSocket extends WebSocket {
-  orbitalName?: string;
+interface CuestationWebSocket extends WebSocket {
+  cuestationName?: string;
 }
 
 // Get local IP addresses for OSC logging
@@ -34,23 +34,23 @@ const getIPAddresses = function (): string[] {
 };
 
 // Create WebSocket servers
-const orbitalWS = new WebSocketServer({ noServer: true });
+const cuestationWS = new WebSocketServer({ noServer: true });
 const controlWS = new WebSocketServer({ noServer: true });
 
-// Orbital connections handle display/projection devices
-orbitalWS.on('connection', function connection(ws: OrbitalWebSocket, request: IncomingMessage) {
+// Cuestation connections handle display/projection devices
+cuestationWS.on('connection', function connection(ws: CuestationWebSocket, request: IncomingMessage) {
   const params = url.parse(request.url || '', true).query;
-  ws.orbitalName = (params.name as string) || 'unnamed';
+  ws.cuestationName = (params.name as string) || 'unnamed';
   
-  console.log(`ORBITAL CONNECTED: ${ws.orbitalName}`);
-  console.log(`Total orbitals: ${orbitalWS.clients.size}`);
+  console.log(`CUESTATION CONNECTED: ${ws.cuestationName}`);
+  console.log(`Total cuestations: ${cuestationWS.clients.size}`);
   
   ws.on('close', () => {
-    console.log(`ORBITAL DISCONNECTED: ${ws.orbitalName}`);
+    console.log(`CUESTATION DISCONNECTED: ${ws.cuestationName}`);
   });
   
   ws.on('error', (err: Error) => {
-    console.error(`ORBITAL ERROR (${ws.orbitalName}):`, err);
+    console.error(`CUESTATION ERROR (${ws.cuestationName}):`, err);
   });
 });
 
@@ -70,9 +70,9 @@ controlWS.on('connection', function connection(ws: WebSocket) {
       
       if (namespace === 'cuepernova') {
         switch(subNamespace) {
-          case 'orbital':
-            // Broadcast to all orbital clients
-            orbitalWS.clients.forEach((client: WebSocket) => {
+          case 'cuestation':
+            // Broadcast to all cuestation clients
+            cuestationWS.clients.forEach((client: WebSocket) => {
               if (client.readyState === WebSocket.OPEN) {
                 client.send(JSON.stringify(oscMessage));
               }
@@ -107,31 +107,31 @@ async function handleSystemMessage(message: WebSocketMessage): Promise<void> {
       break;
       
     case 'clearMappings':
-      // Broadcast clearMappings message to all orbitals
-      orbitalWS.clients.forEach((client: WebSocket) => {
+      // Broadcast clearMappings message to all cuestations
+      cuestationWS.clients.forEach((client: WebSocket) => {
         if (client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({
-            address: '/cuepernova/orbital/clearMappings',
+            address: '/cuepernova/cuestation/clearMappings',
             args: []
           }));
         }
       });
-      console.log('Sent clearMappings to all orbitals');
+      console.log('Sent clearMappings to all cuestations');
       break;
       
     case 'resetMapping':
-      // Reset mapping for specific orbital
-      const targetOrbital = message.args && message.args[0];
-      if (targetOrbital) {
-        orbitalWS.clients.forEach((client: OrbitalWebSocket) => {
-          if (client.readyState === WebSocket.OPEN && client.orbitalName === targetOrbital) {
+      // Reset mapping for specific cuestation
+      const targetCuestation = message.args && message.args[0];
+      if (targetCuestation) {
+        cuestationWS.clients.forEach((client: CuestationWebSocket) => {
+          if (client.readyState === WebSocket.OPEN && client.cuestationName === targetCuestation) {
             client.send(JSON.stringify({
-              address: '/cuepernova/orbital/clearMappings',
+              address: '/cuepernova/cuestation/clearMappings',
               args: []
             }));
           }
         });
-        console.log(`Sent clearMappings to orbital: ${targetOrbital}`);
+        console.log(`Sent clearMappings to cuestation: ${targetCuestation}`);
       }
       break;
       
@@ -166,9 +166,9 @@ export function initOSCServer(port: number = 57121): void {
     
     if (namespace === 'cuepernova') {
       switch(subNamespace) {
-        case 'orbital':
-          // Broadcast to all orbital clients
-          orbitalWS.clients.forEach((client: WebSocket) => {
+        case 'cuestation':
+          // Broadcast to all cuestation clients
+          cuestationWS.clients.forEach((client: WebSocket) => {
             if (client.readyState === WebSocket.OPEN) {
               client.send(JSON.stringify(oscMessage));
             }
@@ -198,9 +198,9 @@ export function initOSCServer(port: number = 57121): void {
 export const wsUpgrade = function(request: IncomingMessage, socket: Duplex, head: Buffer): void {
     const pathname = url.parse(request.url || '').pathname;
 
-    if (pathname === '/orbital') {
-      orbitalWS.handleUpgrade(request, socket, head, function done(ws) {
-        orbitalWS.emit('connection', ws, request);
+    if (pathname === '/cuestation') {
+      cuestationWS.handleUpgrade(request, socket, head, function done(ws) {
+        cuestationWS.emit('connection', ws, request);
       });
     } else if (pathname === '/control') {
       controlWS.handleUpgrade(request, socket, head, function done(ws) {

@@ -1,9 +1,9 @@
-// Get orbital name from URL parameter
+// Get cuestation name from URL parameter
 const urlParams = new URLSearchParams(window.location.search);
-const ORBITAL_NAME = urlParams.get('name') || 'unnamed';
-console.log(`Orbital starting with name: ${ORBITAL_NAME}`);
+const CUESTATION_NAME = urlParams.get('name') || 'unnamed';
+console.log(`Cuestation starting with name: ${CUESTATION_NAME}`);
 const state = {
-    orbitalName: ORBITAL_NAME,
+    cuestationName: CUESTATION_NAME,
     showtime: $('#showtime-area'),
     connection: null,
     mapping: undefined
@@ -13,7 +13,7 @@ const cueHandlers = {
     // Built-in screens
     debug: (message) => {
         state.showtime.html(`<div class="debug-wrapper">
-      <h1>ORBITAL NAME: <strong>${ORBITAL_NAME}</strong></h1>
+      <h1>CUESTATION NAME: <strong>${CUESTATION_NAME}</strong></h1>
       <h1>TIME: <strong>${new Date().toLocaleTimeString()}</strong></h1>
       <h1>STATUS: <strong>CONNECTED</strong></h1>
     </div>`);
@@ -83,7 +83,7 @@ const cueHandlers = {
 function connectWebSocket() {
     console.log('Attempting to connect...');
     const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${protocol}://${location.host}/orbital?name=${encodeURIComponent(ORBITAL_NAME)}`;
+    const wsUrl = `${protocol}://${location.host}/cuestation?name=${encodeURIComponent(CUESTATION_NAME)}`;
     state.connection = new WebSocket(wsUrl);
     state.connection.onopen = function () {
         console.log('WebSocket connected!');
@@ -112,7 +112,7 @@ function connectWebSocket() {
 function handleOscMessage(message) {
     const pathParts = message.address.split('/');
     const action = pathParts[3];
-    if (pathParts[1] === 'cuepernova' && pathParts[2] === 'orbital') {
+    if (pathParts[1] === 'cuepernova' && pathParts[2] === 'cuestation') {
         switch (action) {
             case 'showScreen':
                 const screenType = pathParts[4];
@@ -154,10 +154,10 @@ function handleOscMessage(message) {
 function initProjectionMapping() {
     const enableMapping = urlParams.get('mapping') === 'true';
     if (enableMapping && Maptastic) {
-        state.mapping = Maptastic(ORBITAL_NAME);
+        state.mapping = Maptastic(CUESTATION_NAME);
         console.log('Projection mapping enabled');
         // Load saved mappings from localStorage
-        const savedMappings = localStorage.getItem(`maptastic-${ORBITAL_NAME}`);
+        const savedMappings = localStorage.getItem(`maptastic-${CUESTATION_NAME}`);
         if (savedMappings) {
             console.log('Loading saved projection mappings');
         }

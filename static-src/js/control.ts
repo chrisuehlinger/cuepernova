@@ -101,18 +101,18 @@ function bindEventHandlers(): void {
   // Emergency controls
   $('#bail').on('click', () => {
     if (confirm('Clear all screens?')) {
-      sendMessage('/cuepernova/orbital/clearScreen');
+      sendMessage('/cuepernova/cuestation/clearScreen');
     }
   });
   
   $('#refresh').on('click', () => {
-    if (confirm('Refresh all orbital pages?')) {
-      sendMessage('/cuepernova/orbital/refreshScreen');
+    if (confirm('Refresh all cuestation pages?')) {
+      sendMessage('/cuepernova/cuestation/refreshScreen');
     }
   });
   
   $('#debug').on('click', () => {
-    sendMessage('/cuepernova/orbital/showScreen/debug');
+    sendMessage('/cuepernova/cuestation/showScreen/debug');
   });
   
   // Reload cues button
@@ -124,25 +124,25 @@ function bindEventHandlers(): void {
   
   // Quick controls
   $('#screen-white').on('click', () => {
-    sendMessage('/cuepernova/orbital/showScreen/white');
+    sendMessage('/cuepernova/cuestation/showScreen/white');
   });
   
   $('#screen-black').on('click', () => {
-    sendMessage('/cuepernova/orbital/showScreen/black');
+    sendMessage('/cuepernova/cuestation/showScreen/black');
   });
   
   $('#screen-freeze').on('click', () => {
-    sendMessage('/cuepernova/orbital/showScreen/freeze');
+    sendMessage('/cuepernova/cuestation/showScreen/freeze');
   });
   
   $('#clear-screen').on('click', () => {
-    sendMessage('/cuepernova/orbital/clearScreen');
+    sendMessage('/cuepernova/cuestation/clearScreen');
   });
   
   $('#fade-screen').on('click', () => {
     const duration = prompt('Fade duration in ms:', '1000');
     if (duration) {
-      sendMessage('/cuepernova/orbital/fadeScreen', [duration]);
+      sendMessage('/cuepernova/cuestation/fadeScreen', [duration]);
     }
   });
   
@@ -151,7 +151,7 @@ function bindEventHandlers(): void {
     const text = $('#message-text').val() as string;
     const subtitle = $('#message-subtitle').val() as string;
     if (text) {
-      sendMessage('/cuepernova/orbital/showScreen/message', [text, subtitle || '']);
+      sendMessage('/cuepernova/cuestation/showScreen/message', [text, subtitle || '']);
     }
   });
   
@@ -160,7 +160,7 @@ function bindEventHandlers(): void {
     const path = $('#video-path').val() as string;
     const loop = $('#video-loop').is(':checked');
     if (path) {
-      sendMessage('/cuepernova/orbital/showScreen/video', [path, loop.toString()]);
+      sendMessage('/cuepernova/cuestation/showScreen/video', [path, loop.toString()]);
     }
   });
   
@@ -168,7 +168,7 @@ function bindEventHandlers(): void {
   $('#send-image').on('click', () => {
     const path = $('#image-path').val() as string;
     if (path) {
-      sendMessage('/cuepernova/orbital/showScreen/image', [path]);
+      sendMessage('/cuepernova/cuestation/showScreen/image', [path]);
     }
   });
   
@@ -178,7 +178,7 @@ function bindEventHandlers(): void {
     const argsStr = $('#cueball-args').val() as string;
     if (name) {
       const args = argsStr ? argsStr.split(',').map(s => s.trim()) : [];
-      sendMessage('/cuepernova/orbital/showScreen/cueball', [name, ...args]);
+      sendMessage('/cuepernova/cuestation/showScreen/cueball', [name, ...args]);
     }
   });
   

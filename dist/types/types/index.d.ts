@@ -45,7 +45,7 @@ export interface RTCSignals {
         [key: string]: any;
     };
 }
-export interface OrbitalState {
+export interface CuestationState {
     name: string;
     connected: boolean;
     currentScreen?: string;
@@ -53,7 +53,7 @@ export interface OrbitalState {
 }
 export interface ProjectionMapping {
     id: string;
-    orbitalName: string;
+    cuestationName: string;
     corners: Array<{
         x: number;
         y: number;
