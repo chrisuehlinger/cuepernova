@@ -1,8 +1,12 @@
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { ServerManager } from '../server-manager.js';
 import { CertificateManager } from '../certificate-manager.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 interface IpcContext {
   serverManager: ServerManager;
@@ -202,5 +206,70 @@ export function setupIpcHandlers(context: IpcContext) {
     if (!projectDir) throw new Error('No project directory set');
     
     return await context.certificateManager.getCACertificate(projectDir);
+  });
+
+  // Cueball creation
+  ipcMain.handle('create-cueball', async (event, cueballName: string) => {
+    const projectDir = context.getProjectDir();
+    if (!projectDir) throw new Error('No project directory set');
+
+    try {
+      // Convert name to kebab-case for file names
+      const kebabName = cueballName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '');
+      
+      // Check if cueball already exists
+      const htmlPath = path.join(projectDir, 'public', 'cueballs', `${kebabName}.html`);
+      const cssPath = path.join(projectDir, 'public', 'css', `${kebabName}.css`);
+      const jsPath = path.join(projectDir, 'public', 'js', `${kebabName}.js`);
+      
+      try {
+        await fs.access(htmlPath);
+        return { success: false, error: `Cueball "${kebabName}" already exists` };
+      } catch {
+        // File doesn't exist, which is what we want
+      }
+
+      // Read template files from the dist/main directory
+      // The templates are copied there during build
+      // __dirname is dist/main/electron/ipc, so go up 2 levels to dist/main
+      const templatesDir = path.join(__dirname, '..', '..', 'templates', 'cueball');
+      
+      // Try to read from templates directory
+      const htmlTemplate = await fs.readFile(path.join(templatesDir, 'cueball.html'), 'utf-8');
+      const cssTemplate = await fs.readFile(path.join(templatesDir, 'cueball.css'), 'utf-8');
+      const jsTemplate = await fs.readFile(path.join(templatesDir, 'cueball.js'), 'utf-8');
+
+      // Replace placeholders
+      const htmlContent = htmlTemplate
+        .replace(/{{NAME}}/g, cueballName)
+        .replace(/{{KEBAB_NAME}}/g, kebabName);
+      
+      const cssContent = cssTemplate
+        .replace(/{{NAME}}/g, cueballName)
+        .replace(/{{KEBAB_NAME}}/g, kebabName);
+      
+      const jsContent = jsTemplate
+        .replace(/{{NAME}}/g, cueballName)
+        .replace(/{{KEBAB_NAME}}/g, kebabName);
+
+      // Write files
+      await fs.writeFile(htmlPath, htmlContent, 'utf-8');
+      await fs.writeFile(cssPath, cssContent, 'utf-8');
+      await fs.writeFile(jsPath, jsContent, 'utf-8');
+
+      return { 
+        success: true, 
+        files: {
+          html: `public/cueballs/${kebabName}.html`,
+          css: `public/css/${kebabName}.css`,
+          js: `public/js/${kebabName}.js`
+        },
+        kebabName
+      };
+    } catch (error) {
+      console.error('Error creating cueball:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create cueball';
+      return { success: false, error: errorMessage };
+    }
   });
 }

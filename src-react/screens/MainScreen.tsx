@@ -7,14 +7,17 @@ import {
   IconButton,
   Paper,
   Container,
+  Button,
 } from '@mui/material';
 import Grid from '@mui/system/Grid';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import AddIcon from '@mui/icons-material/Add';
 import CueList from '../components/CueList';
 import CuestationManager from '../components/CuestationManager';
 import ServerToggle from '../components/ServerToggle';
 import SettingsModal from '../components/SettingsModal';
+import { CueballCreateModal } from '../components/CueballCreateModal';
 import { Cue, Cuestation } from '../types';
 
 interface MainScreenProps {
@@ -26,6 +29,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ projectDir }) => {
   const [cuestations, setCuestations] = useState<Cuestation[]>([]);
   const [serverRunning, setServerRunning] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [cueballModalOpen, setCueballModalOpen] = useState(false);
   const [config, setConfig] = useState<any>({});
 
   useEffect(() => {
@@ -96,6 +100,22 @@ const MainScreen: React.FC<MainScreenProps> = ({ projectDir }) => {
             Cuepernova - {projectDir.split('/').pop()}
           </Typography>
           
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setCueballModalOpen(true)}
+            sx={{ 
+              mr: 2,
+              borderColor: 'rgba(255, 255, 255, 0.3)',
+              '&:hover': {
+                borderColor: 'rgba(255, 255, 255, 0.5)',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              }
+            }}
+          >
+            CUEBALL
+          </Button>
+          
           <ServerToggle
             isRunning={serverRunning}
             onToggle={handleServerToggle}
@@ -164,6 +184,15 @@ const MainScreen: React.FC<MainScreenProps> = ({ projectDir }) => {
         config={config}
         onClose={() => setSettingsOpen(false)}
         onSave={handleSettingsSave}
+      />
+      
+      <CueballCreateModal
+        open={cueballModalOpen}
+        onClose={() => setCueballModalOpen(false)}
+        onCueballCreated={() => {
+          // Optionally refresh or show a success message
+          console.log('Cueball created successfully');
+        }}
       />
     </Box>
   );

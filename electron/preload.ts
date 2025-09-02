@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // CA Certificate operations
   downloadCACert: () => ipcRenderer.invoke('download-ca-cert'),
   
+  // Cueball operations
+  createCueball: (name: string) => ipcRenderer.invoke('create-cueball', name),
+  
   // Event listeners
   onDirectorySelected: (callback: (dir: string) => void) => {
     ipcRenderer.on('directory-selected', (_event, dir) => callback(dir));
@@ -60,6 +63,7 @@ declare global {
       stopServer: () => Promise<void>;
       getServerStatus: () => Promise<boolean>;
       downloadCACert: () => Promise<string>;
+      createCueball: (name: string) => Promise<{ success: boolean; error?: string; files?: any; kebabName?: string }>;
       onDirectorySelected: (callback: (dir: string) => void) => void;
       onServerStatusChanged: (callback: (status: boolean) => void) => void;
     };

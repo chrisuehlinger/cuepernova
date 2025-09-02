@@ -14,6 +14,7 @@ interface ElectronAPI {
   stopServer: () => Promise<void>;
   getServerStatus: () => Promise<boolean>;
   downloadCACert: () => Promise<string>;
+  createCueball: (name: string) => Promise<{ success: boolean; error?: string; files?: any; kebabName?: string }>;
   onDirectorySelected: (callback: (dir: string) => void) => void;
   onServerStatusChanged: (callback: (status: boolean) => void) => void;
 }
