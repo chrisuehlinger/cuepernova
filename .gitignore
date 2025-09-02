@@ -9,10 +9,8 @@ release/
 
 # User project files (when running from source)
 .cuepernova/
-media/*
-!media/.gitkeep
-cueballs/*
-!cueballs/.gitkeep
+public/
+db.json
 
 # Development
 *.tsbuildinfo

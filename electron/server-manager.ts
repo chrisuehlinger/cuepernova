@@ -44,18 +44,22 @@ export class ServerManager {
     // Serve compiled renderer assets
     this.app.use('/static/js', express.static(path.join(__dirname, '../../renderer/static')));
     
-    // Serve project files
-    this.app.use('/cueballs', express.static(path.join(projectDir, 'cueballs')));
-    this.app.use('/media', express.static(path.join(projectDir, 'media')));
-    this.app.use('/css', express.static(path.join(projectDir, 'css')));
-    this.app.use('/js', express.static(path.join(projectDir, 'js')));
+    // Serve project files from public directory
+    this.app.use('/cueballs', express.static(path.join(projectDir, 'public/cueballs')));
+    this.app.use('/media', express.static(path.join(projectDir, 'public/media')));
+    this.app.use('/css', express.static(path.join(projectDir, 'public/css')));
+    this.app.use('/js', express.static(path.join(projectDir, 'public/js')));
     
-    // Serve configuration files
+    // Also serve entire public directory at /public for convenience
+    this.app.use('/public', express.static(path.join(projectDir, 'public')));
+    
+    // Serve data from db.json
     this.app.get('/cues.json', async (req, res) => {
       try {
-        const cuesPath = path.join(projectDir, 'cues.json');
-        const data = await fs.readFile(cuesPath, 'utf-8');
-        res.json(JSON.parse(data));
+        const dbPath = path.join(projectDir, 'db.json');
+        const data = await fs.readFile(dbPath, 'utf-8');
+        const db = JSON.parse(data);
+        res.json(db.cues || []);
       } catch (error) {
         res.json([]);
       }
@@ -63,11 +67,32 @@ export class ServerManager {
 
     this.app.get('/cuestations.json', async (req, res) => {
       try {
-        const cuestationsPath = path.join(projectDir, 'cuestations.json');
-        const data = await fs.readFile(cuestationsPath, 'utf-8');
-        res.json(JSON.parse(data));
+        const dbPath = path.join(projectDir, 'db.json');
+        const data = await fs.readFile(dbPath, 'utf-8');
+        const db = JSON.parse(data);
+        res.json(db.cuestations || []);
       } catch (error) {
         res.json([]);
+      }
+    });
+
+    // Also serve the entire db.json for debugging/development
+    this.app.get('/db.json', async (req, res) => {
+      try {
+        const dbPath = path.join(projectDir, 'db.json');
+        const data = await fs.readFile(dbPath, 'utf-8');
+        res.json(JSON.parse(data));
+      } catch (error) {
+        res.json({
+          cues: [],
+          cuestations: [],
+          config: {
+            oscPort: 57121,
+            httpPort: 8080,
+            httpsPort: 8443,
+            defaultCuestation: 'main'
+          }
+        });
       }
     });
 
@@ -120,18 +145,25 @@ export class ServerManager {
     // Setup WebSocket server on HTTPS
     this.wss = new WebSocketServer({ server: this.httpsServer });
     
-    // Load config and setup sockets
-    const configPath = path.join(projectDir, 'cuepernova.config.json');
+    // Load config from db.json and setup sockets
+    const dbPath = path.join(projectDir, 'db.json');
     let config: any = {};
     try {
-      const configData = await fs.readFile(configPath, 'utf-8');
-      config = JSON.parse(configData);
+      const dbData = await fs.readFile(dbPath, 'utf-8');
+      const db = JSON.parse(dbData);
+      config = db.config || {
+        oscPort: 57121,
+        httpPort: this.httpPort,
+        httpsPort: this.httpsPort,
+        defaultCuestation: 'main',
+      };
     } catch (error) {
       // Use default config
       config = {
         oscPort: 57121,
         httpPort: this.httpPort,
         httpsPort: this.httpsPort,
+        defaultCuestation: 'main',
       };
     }
 

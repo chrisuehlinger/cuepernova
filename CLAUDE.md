@@ -80,7 +80,7 @@ npm run dist
   - `cuestation.html` - Display device interface (projectors/monitors)
   - `control.html` - Central control panel
   - `mapping.html` - Projection mapping interface
-- **Custom Cueballs**: Located in user's `cueballs/` directory
+- **Custom Cueballs**: Located in user's `public/cueballs/` directory
 - **Communication**: WebSocket connections for real-time updates
 
 ### Message Flow
@@ -105,7 +105,7 @@ Built-in screen types handled by `cuestation.js`:
 - `message [text] [subtitle]` - Text display
 - `video [path] [loop]` - Video playback
 - `image [path]` - Image display
-- `cueball [cueballname] [args...]` - Custom cueball from `/cueballs`
+- `cueball [cueballname] [args...]` - Custom cueball from `/public/cueballs`
 
 ## Project Structure
 
@@ -147,53 +147,48 @@ cuepernova/
 ### User Project Structure
 ```
 user-project/
-├── cueballs/              # Custom cueball pages
-├── media/                 # Media assets  
-├── css/                   # Cueball stylesheets
-├── js/                    # Cueball scripts
+├── public/                # All public-facing content
+│   ├── cueballs/         # Custom cueball pages
+│   ├── media/            # Media assets  
+│   ├── css/              # Cueball stylesheets
+│   └── js/               # Cueball scripts
 ├── .cuepernova/           # Certificate storage (gitignored)
 │   ├── ca-cert.pem       # CA certificate (shareable)
 │   └── ca-key.pem        # CA private key (keep secure)
-├── cues.json              # Show cue list
-├── cuestations.json       # Cuestation configurations
-├── cuepernova.config.json # App configuration
+├── db.json                # Consolidated data file (cues, cuestations, config)
 └── .gitignore            # Excludes .cuepernova/
 ```
 
 ### Data Files
 
-#### cues.json
-Stores the show's cue list with structure:
+#### db.json
+Consolidated data file containing all project data:
 ```json
 {
-  "id": "unique-id",
-  "number": "1",
-  "name": "Opening",
-  "type": "video",
-  "args": ["intro.mp4", "false"],
-  "notes": "Play once at show start"
-}
-```
-
-#### cuestations.json
-Stores cuestation configurations:
-```json
-{
-  "id": "unique-id",
-  "name": "projector-1",
-  "description": "Main stage projector",
-  "mappings": {} // Optional projection mapping data
-}
-```
-
-#### cuepernova.config.json
-Application configuration:
-```json
-{
-  "oscPort": 57121,
-  "httpPort": 8080,
-  "httpsPort": 8443,
-  "defaultCuestation": "main"
+  "cues": [
+    {
+      "id": "unique-id",
+      "number": "1",
+      "name": "Opening",
+      "type": "video",
+      "args": ["intro.mp4", "false"],
+      "notes": "Play once at show start"
+    }
+  ],
+  "cuestations": [
+    {
+      "id": "unique-id",
+      "name": "projector-1",
+      "description": "Main stage projector",
+      "mappings": {} // Optional projection mapping data
+    }
+  ],
+  "config": {
+    "oscPort": 57121,
+    "httpPort": 8080,
+    "httpsPort": 8443,
+    "defaultCuestation": "main"
+  }
 }
 ```
 
@@ -233,5 +228,7 @@ case 'mycommand':
 - WebRTC features require HTTPS (self-signed certs work locally)
 - Each cuestation needs a unique name parameter
 - Media files go in `public/media/`
+- Custom cueballs go in `public/cueballs/`
+- All project data is stored in `db.json`
 - The mapping interface saves to browser localStorage
 - Console logs OSC messages for debugging

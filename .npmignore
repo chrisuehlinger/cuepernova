@@ -8,9 +8,8 @@ node_modules/
 
 # Local project files
 public/
-cueballs/
-media/
-certs/
+db.json
+.cuepernova/
 
 # Scripts and config
 startup.sh

@@ -31,7 +31,14 @@ export function setupIpcHandlers(context: IpcContext) {
     context.setProjectDir(directory);
     
     // Create necessary directories
-    const dirs = ['cueballs', 'media', 'css', 'js', '.cuepernova'];
+    const dirs = [
+      'public',
+      'public/cueballs',
+      'public/media',
+      'public/css',
+      'public/js',
+      '.cuepernova'
+    ];
     for (const dir of dirs) {
       await fs.mkdir(path.join(directory, dir), { recursive: true });
     }
@@ -47,34 +54,22 @@ export function setupIpcHandlers(context: IpcContext) {
       await fs.writeFile(gitignorePath, '.cuepernova/\nnode_modules/\n');
     }
 
-    // Create default cues.json if it doesn't exist
-    const cuesPath = path.join(directory, 'cues.json');
+    // Create default db.json if it doesn't exist
+    const dbPath = path.join(directory, 'db.json');
     try {
-      await fs.access(cuesPath);
+      await fs.access(dbPath);
     } catch {
-      await fs.writeFile(cuesPath, JSON.stringify([], null, 2));
-    }
-
-    // Create default cuestations.json if it doesn't exist
-    const cuestationsPath = path.join(directory, 'cuestations.json');
-    try {
-      await fs.access(cuestationsPath);
-    } catch {
-      await fs.writeFile(cuestationsPath, JSON.stringify([], null, 2));
-    }
-
-    // Create default config if it doesn't exist
-    const configPath = path.join(directory, 'cuepernova.config.json');
-    try {
-      await fs.access(configPath);
-    } catch {
-      const defaultConfig = {
-        oscPort: 57121,
-        httpPort: 8080,
-        httpsPort: 8443,
-        defaultCuestation: 'main',
+      const defaultDb = {
+        cues: [],
+        cuestations: [],
+        config: {
+          oscPort: 57121,
+          httpPort: 8080,
+          httpsPort: 8443,
+          defaultCuestation: 'main',
+        }
       };
-      await fs.writeFile(configPath, JSON.stringify(defaultConfig, null, 2));
+      await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
     }
 
     // Initialize CA certificate
@@ -98,48 +93,60 @@ export function setupIpcHandlers(context: IpcContext) {
     await fs.writeFile(fullPath, content);
   });
 
-  // Cues operations
-  ipcMain.handle('get-cues', async () => {
+  // Database operations helper
+  const readDatabase = async (): Promise<any> => {
     const projectDir = context.getProjectDir();
     if (!projectDir) throw new Error('No project directory set');
     
-    const cuesPath = path.join(projectDir, 'cues.json');
+    const dbPath = path.join(projectDir, 'db.json');
     try {
-      const data = await fs.readFile(cuesPath, 'utf-8');
+      const data = await fs.readFile(dbPath, 'utf-8');
       return JSON.parse(data);
     } catch {
-      return [];
+      // Return default structure if file doesn't exist
+      return {
+        cues: [],
+        cuestations: [],
+        config: {
+          oscPort: 57121,
+          httpPort: 8080,
+          httpsPort: 8443,
+          defaultCuestation: 'main',
+        }
+      };
     }
+  };
+
+  const writeDatabase = async (db: any): Promise<void> => {
+    const projectDir = context.getProjectDir();
+    if (!projectDir) throw new Error('No project directory set');
+    
+    const dbPath = path.join(projectDir, 'db.json');
+    await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
+  };
+
+  // Cues operations
+  ipcMain.handle('get-cues', async () => {
+    const db = await readDatabase();
+    return db.cues || [];
   });
 
   ipcMain.handle('save-cues', async (event, cues: any[]) => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-    
-    const cuesPath = path.join(projectDir, 'cues.json');
-    await fs.writeFile(cuesPath, JSON.stringify(cues, null, 2));
+    const db = await readDatabase();
+    db.cues = cues;
+    await writeDatabase(db);
   });
 
   // Cuestations operations
   ipcMain.handle('get-cuestations', async () => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-    
-    const cuestationsPath = path.join(projectDir, 'cuestations.json');
-    try {
-      const data = await fs.readFile(cuestationsPath, 'utf-8');
-      return JSON.parse(data);
-    } catch {
-      return [];
-    }
+    const db = await readDatabase();
+    return db.cuestations || [];
   });
 
   ipcMain.handle('save-cuestations', async (event, cuestations: any[]) => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-    
-    const cuestationsPath = path.join(projectDir, 'cuestations.json');
-    await fs.writeFile(cuestationsPath, JSON.stringify(cuestations, null, 2));
+    const db = await readDatabase();
+    db.cuestations = cuestations;
+    await writeDatabase(db);
   });
 
   ipcMain.handle('open-cuestation', async (event, name: string) => {
@@ -148,29 +155,19 @@ export function setupIpcHandlers(context: IpcContext) {
 
   // Config operations
   ipcMain.handle('get-config', async () => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-    
-    const configPath = path.join(projectDir, 'cuepernova.config.json');
-    try {
-      const data = await fs.readFile(configPath, 'utf-8');
-      return JSON.parse(data);
-    } catch {
-      return {
-        oscPort: 57121,
-        httpPort: 8080,
-        httpsPort: 8443,
-        defaultCuestation: 'main',
-      };
-    }
+    const db = await readDatabase();
+    return db.config || {
+      oscPort: 57121,
+      httpPort: 8080,
+      httpsPort: 8443,
+      defaultCuestation: 'main',
+    };
   });
 
   ipcMain.handle('save-config', async (event, config: any) => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-    
-    const configPath = path.join(projectDir, 'cuepernova.config.json');
-    await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+    const db = await readDatabase();
+    db.config = config;
+    await writeDatabase(db);
   });
 
   // Server operations
