@@ -5,7 +5,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import morgan from 'morgan';
-import { Server as WebSocketServer } from 'ws';
+import { WebSocketServer } from 'ws';
 import { setupSockets } from '../src/server/sockets.js';
 import { setupSignalmaster } from '../src/server/signalmaster.js';
 import { CertificateManager } from './certificate-manager.js';

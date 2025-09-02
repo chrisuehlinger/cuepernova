@@ -4,7 +4,7 @@ FROM node:22
 ARG TZ
 ENV TZ="$TZ"
 
-# Install basic development tools and iptables/ipset
+# Install basic development tools and Electron dependencies
 RUN apt update && apt install -y \
   less \
   ca-certificates \
@@ -29,6 +29,35 @@ RUN apt update && apt install -y \
   libnss3-tools \
   lsof \
   netcat-openbsd \
+  # X11 and Electron dependencies
+  libx11-xcb1 \
+  libxcomposite1 \
+  libxcursor1 \
+  libxdamage1 \
+  libxi6 \
+  libxtst6 \
+  libnss3 \
+  libxss1 \
+  libxrandr2 \
+  libasound2 \
+  libatk1.0-0 \
+  libatk-bridge2.0-0 \
+  libgtk-3-0 \
+  libgbm1 \
+  libdrm2 \
+  libatspi2.0-0 \
+  xvfb \
+  dbus \
+  dbus-x11 \
+  # GPU/DRM support packages
+  libgl1-mesa-glx \
+  libgl1-mesa-dri \
+  libglu1-mesa \
+  libegl1-mesa \
+  libglvnd0 \
+  libglx0 \
+  mesa-utils \
+  mesa-vulkan-drivers \
   && rm -rf /var/lib/apt/lists/*
 
 

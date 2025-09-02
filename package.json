@@ -5,12 +5,13 @@
   "type": "module",
   "main": "dist/main/electron/main.js",
   "scripts": {
-    "start": "npm run build:electron && npm run build:react && electron .",
-    "dev": "npm run build:electron && concurrently \"npm run dev:react\" \"wait-on http://localhost:3000 && electron .\"",
+    "start": "npm run build:electron && npm run build:preload && npm run build:react && electron .",
+    "dev": "npm run build:electron && npm run build:preload && concurrently \"npm run dev:react\" \"wait-on http://localhost:3000 && electron .\"",
     "build:electron": "tsc -p tsconfig.electron.json",
+    "build:preload": "tsc -p tsconfig.preload.json",
     "build:react": "webpack --config webpack.config.js --mode production",
     "dev:react": "webpack serve --config webpack.config.js --mode development",
-    "dist": "npm run build:electron && npm run build:react && electron-builder",
+    "dist": "npm run build:electron && npm run build:preload && npm run build:react && electron-builder",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
