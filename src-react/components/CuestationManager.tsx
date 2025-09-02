@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   List,
@@ -20,7 +20,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import MapIcon from '@mui/icons-material/Map';
-import { Cuestation } from '../types';
+import { Cuestation } from '../../src/shared/types';
 
 interface CuestationManagerProps {
   cuestations: Cuestation[];
@@ -28,7 +28,7 @@ interface CuestationManagerProps {
   serverRunning: boolean;
 }
 
-const CuestationManager: React.FC<CuestationManagerProps> = ({
+const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
   cuestations,
   onChange,
   serverRunning,
@@ -37,7 +37,7 @@ const CuestationManager: React.FC<CuestationManagerProps> = ({
   const [editingCuestation, setEditingCuestation] = useState<Cuestation | null>(null);
   const [formData, setFormData] = useState<Partial<Cuestation>>({});
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     const newCuestation: Cuestation = {
       id: Date.now().toString(),
       name: `Cuestation ${cuestations.length + 1}`,
@@ -46,19 +46,19 @@ const CuestationManager: React.FC<CuestationManagerProps> = ({
     setEditingCuestation(null);
     setFormData(newCuestation);
     setEditDialog(true);
-  };
+  }, [cuestations.length]);
 
-  const handleEdit = (cuestation: Cuestation) => {
+  const handleEdit = useCallback((cuestation: Cuestation) => {
     setEditingCuestation(cuestation);
     setFormData({ ...cuestation });
     setEditDialog(true);
-  };
+  }, []);
 
-  const handleDelete = (cuestationId: string) => {
+  const handleDelete = useCallback((cuestationId: string) => {
     onChange(cuestations.filter(c => c.id !== cuestationId));
-  };
+  }, [cuestations, onChange]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (editingCuestation) {
       // Update existing cuestation
       onChange(cuestations.map(c => 
@@ -70,9 +70,9 @@ const CuestationManager: React.FC<CuestationManagerProps> = ({
     }
     setEditDialog(false);
     setFormData({});
-  };
+  }, [editingCuestation, formData, cuestations, onChange]);
 
-  const handleOpen = async (cuestation: Cuestation) => {
+  const handleOpen = useCallback(async (cuestation: Cuestation) => {
     if (!serverRunning) {
       alert('Server must be running to open cuestations');
       return;
@@ -83,9 +83,9 @@ const CuestationManager: React.FC<CuestationManagerProps> = ({
     } catch (error) {
       console.error('Failed to open cuestation:', error);
     }
-  };
+  }, [serverRunning]);
 
-  const handleOpenMapping = async (cuestation: Cuestation) => {
+  const handleOpenMapping = useCallback(async (cuestation: Cuestation) => {
     if (!serverRunning) {
       alert('Server must be running to access mapping interface');
       return;
@@ -94,7 +94,7 @@ const CuestationManager: React.FC<CuestationManagerProps> = ({
     // Open mapping interface in new window
     const mappingUrl = `https://localhost:8443/mapping.html?name=${encodeURIComponent(cuestation.name)}`;
     window.open(mappingUrl, '_blank');
-  };
+  }, [serverRunning]);
 
   return (
     <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -215,5 +215,7 @@ const CuestationManager: React.FC<CuestationManagerProps> = ({
     </Box>
   );
 };
+
+const CuestationManager = React.memo(CuestationManagerComponent);
 
 export default CuestationManager;

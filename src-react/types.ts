@@ -2,7 +2,7 @@ export interface Cue {
   id: string;
   number: string;
   name: string;
-  type: 'osc' | 'cueball' | 'video' | 'image' | 'message' | 'black' | 'white' | 'freeze' | 'clear';
+  type: 'osc' | 'cueball' | 'video' | 'image' | 'message' | 'clear';
   args: string[];
   notes?: string;
 }

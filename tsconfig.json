@@ -15,9 +15,11 @@
     "allowSyntheticDefaultImports": true,
     "types": ["react", "react-dom", "jquery"],
     "paths": {
-      "@shared/*": ["./src/types/*"]
-    }
+      "@shared/*": ["./src/shared/*"]
+    },
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo/react.tsbuildinfo"
   },
-  "include": ["src-react/**/*", "static-src/**/*", "src/types/**/*"],
+  "include": ["src-react/**/*", "static-src/**/*", "src/shared/**/*"],
   "exclude": ["node_modules"]
 }

@@ -123,18 +123,6 @@ function bindEventHandlers(): void {
   });
   
   // Quick controls
-  $('#screen-white').on('click', () => {
-    sendMessage('/cuepernova/cuestation/showScreen/white');
-  });
-  
-  $('#screen-black').on('click', () => {
-    sendMessage('/cuepernova/cuestation/showScreen/black');
-  });
-  
-  $('#screen-freeze').on('click', () => {
-    sendMessage('/cuepernova/cuestation/showScreen/freeze');
-  });
-  
   $('#clear-screen').on('click', () => {
     sendMessage('/cuepernova/cuestation/clearScreen');
   });

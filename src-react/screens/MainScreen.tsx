@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Box,
   AppBar,
@@ -18,19 +18,19 @@ import CuestationManager from '../components/CuestationManager';
 import ServerToggle from '../components/ServerToggle';
 import SettingsModal from '../components/SettingsModal';
 import { CueballCreateModal } from '../components/CueballCreateModal';
-import { Cue, Cuestation } from '../types';
+import { Cue, Cuestation, Config } from '../../src/shared/types';
 
 interface MainScreenProps {
   projectDir: string;
 }
 
-const MainScreen: React.FC<MainScreenProps> = ({ projectDir }) => {
+const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
   const [cues, setCues] = useState<Cue[]>([]);
   const [cuestations, setCuestations] = useState<Cuestation[]>([]);
   const [serverRunning, setServerRunning] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cueballModalOpen, setCueballModalOpen] = useState(false);
-  const [config, setConfig] = useState<any>({});
+  const [config, setConfig] = useState<Config>({} as Config);
 
   useEffect(() => {
     loadData();
@@ -62,25 +62,25 @@ const MainScreen: React.FC<MainScreenProps> = ({ projectDir }) => {
     setServerRunning(status);
   };
 
-  const handleCuesChange = async (newCues: Cue[]) => {
+  const handleCuesChange = useCallback(async (newCues: Cue[]) => {
     setCues(newCues);
     await window.electronAPI.saveCues(newCues);
-  };
+  }, []);
 
-  const handleCuestationsChange = async (newCuestations: Cuestation[]) => {
+  const handleCuestationsChange = useCallback(async (newCuestations: Cuestation[]) => {
     setCuestations(newCuestations);
     await window.electronAPI.saveCuestations(newCuestations);
-  };
+  }, []);
 
-  const handleServerToggle = async () => {
+  const handleServerToggle = useCallback(async () => {
     if (serverRunning) {
       await window.electronAPI.stopServer();
     } else {
       await window.electronAPI.startServer();
     }
-  };
+  }, [serverRunning]);
 
-  const handleSettingsSave = async (newConfig: any) => {
+  const handleSettingsSave = useCallback(async (newConfig: Config) => {
     setConfig(newConfig);
     await window.electronAPI.saveConfig(newConfig);
     setSettingsOpen(false);
@@ -90,7 +90,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ projectDir }) => {
       await window.electronAPI.stopServer();
       await window.electronAPI.startServer();
     }
-  };
+  }, [serverRunning]);
 
   return (
     <Box sx={{ flexGrow: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -197,5 +197,7 @@ const MainScreen: React.FC<MainScreenProps> = ({ projectDir }) => {
     </Box>
   );
 };
+
+const MainScreen = React.memo(MainScreenComponent);
 
 export default MainScreen;

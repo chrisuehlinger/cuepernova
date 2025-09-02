@@ -15,4 +15,5 @@ db.json
 # Development
 *.tsbuildinfo
 .vscode/
-.idea/
+.idea/*.tsbuildinfo
+.webpack-cache/

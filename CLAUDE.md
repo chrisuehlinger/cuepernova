@@ -48,7 +48,15 @@ npm run dist
 - **Automatic SSL**: CA certificate generation and management
 - **CA Download**: Easily distribute certificates to other devices
 
-## Architecture Overview
+## Architecture Overview (REFACTORED)
+
+### New Centralized Systems
+- **Type System**: All types in `/src/shared/types/` with Zod validation
+- **Data Layer**: `DataStore` class handles all database operations with caching
+- **WebSocket Manager**: Centralized WebSocket handling with rate limiting
+- **Performance**: React.memo on all components, TypeScript incremental builds
+
+## Original Architecture
 
 ### Electron Architecture  
 - **Main Process**: `electron/main.ts` - Handles app lifecycle, windows, IPC
@@ -99,13 +107,12 @@ npm run dist
 
 ### Screen Types
 Built-in screen types handled by `cuestation.js`:
-- `black`, `white` - Solid colors
-- `freeze` - Flashing message
 - `debug` - Connection status
 - `message [text] [subtitle]` - Text display
 - `video [path] [loop]` - Video playback
 - `image [path]` - Image display
 - `cueball [cueballname] [args...]` - Custom cueball from `/public/cueballs`
+- `clear` - Clear the display
 
 ## Project Structure
 
@@ -118,7 +125,16 @@ cuepernova/
 │   ├── server-manager.ts # Express server integration
 │   ├── certificate-manager.ts # SSL certificate handling
 │   └── ipc/
-│       └── handlers.ts   # IPC communication handlers
+│       └── handlers.ts   # IPC handlers (uses DataStore)
+├── src/                  # Server and shared code
+│   ├── shared/           # NEW: Shared modules
+│   │   ├── types/        # Consolidated type definitions
+│   │   ├── data/         # DataStore with validation
+│   │   └── websocket/    # WebSocketManager class
+│   ├── server/
+│   │   ├── sockets.ts    # WebSocket handling (uses WebSocketManager)
+│   │   └── signalmaster.ts # WebRTC signaling
+│   └── types/            # Legacy types (deprecated)
 ├── src-react/            # React application
 │   ├── index.tsx         # React entry point
 │   ├── App.tsx           # Main app component

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   Box,
   List,
@@ -23,7 +23,7 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { Cue } from '../types';
+import { Cue } from '../../src/shared/types';
 
 interface CueListProps {
   cues: Cue[];
@@ -31,35 +31,35 @@ interface CueListProps {
   serverRunning: boolean;
 }
 
-const CueList: React.FC<CueListProps> = ({ cues, onChange, serverRunning }) => {
+const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunning }) => {
   const [editDialog, setEditDialog] = useState(false);
   const [editingCue, setEditingCue] = useState<Cue | null>(null);
   const [formData, setFormData] = useState<Partial<Cue>>({});
 
-  const handleAdd = () => {
+  const handleAdd = useCallback(() => {
     const newCue: Cue = {
       id: Date.now().toString(),
       number: (cues.length + 1).toString(),
       name: 'New Cue',
-      type: 'black',
+      type: 'clear',
       args: [],
     };
     setEditingCue(null);
     setFormData(newCue);
     setEditDialog(true);
-  };
+  }, [cues.length]);
 
-  const handleEdit = (cue: Cue) => {
+  const handleEdit = useCallback((cue: Cue) => {
     setEditingCue(cue);
     setFormData({ ...cue });
     setEditDialog(true);
-  };
+  }, []);
 
-  const handleDelete = (cueId: string) => {
+  const handleDelete = useCallback((cueId: string) => {
     onChange(cues.filter(c => c.id !== cueId));
-  };
+  }, [cues, onChange]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (editingCue) {
       // Update existing cue
       onChange(cues.map(c => c.id === editingCue.id ? { ...formData } as Cue : c));
@@ -69,9 +69,9 @@ const CueList: React.FC<CueListProps> = ({ cues, onChange, serverRunning }) => {
     }
     setEditDialog(false);
     setFormData({});
-  };
+  }, [editingCue, formData, cues, onChange]);
 
-  const handleExecute = async (cue: Cue) => {
+  const handleExecute = useCallback(async (cue: Cue) => {
     if (!serverRunning) {
       alert('Server must be running to execute cues');
       return;
@@ -90,12 +90,11 @@ const CueList: React.FC<CueListProps> = ({ cues, onChange, serverRunning }) => {
     } catch (error) {
       console.error('Failed to execute cue:', error);
     }
-  };
+  }, [serverRunning]);
 
-  const cueTypes = [
-    'black', 'white', 'freeze', 'clear',
-    'message', 'video', 'image', 'cueball', 'osc'
-  ];
+  const cueTypes = useMemo(() => [
+    'clear', 'message', 'video', 'image', 'cueball', 'osc'
+  ], []);
 
   return (
     <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
@@ -173,7 +172,7 @@ const CueList: React.FC<CueListProps> = ({ cues, onChange, serverRunning }) => {
             <FormControl fullWidth>
               <InputLabel>Type</InputLabel>
               <Select
-                value={formData.type || 'black'}
+                value={formData.type || 'clear'}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as Cue['type'] })}
                 label="Type"
               >
@@ -210,5 +209,7 @@ const CueList: React.FC<CueListProps> = ({ cues, onChange, serverRunning }) => {
     </Box>
   );
 };
+
+const CueList = React.memo(CueListComponent);
 
 export default CueList;

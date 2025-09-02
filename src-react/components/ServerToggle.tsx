@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   IconButton,
@@ -12,10 +12,10 @@ interface ServerToggleProps {
   onToggle: () => Promise<void>;
 }
 
-const ServerToggle: React.FC<ServerToggleProps> = ({ isRunning, onToggle }) => {
+const ServerToggleComponent: React.FC<ServerToggleProps> = ({ isRunning, onToggle }) => {
   const [loading, setLoading] = useState(false);
 
-  const handleClick = async () => {
+  const handleClick = useCallback(async () => {
     setLoading(true);
     try {
       await onToggle();
@@ -24,7 +24,7 @@ const ServerToggle: React.FC<ServerToggleProps> = ({ isRunning, onToggle }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [onToggle]);
 
   return (
     <Tooltip title={isRunning ? 'Stop Server' : 'Start Server'}>
@@ -65,5 +65,7 @@ const ServerToggle: React.FC<ServerToggleProps> = ({ isRunning, onToggle }) => {
     </Tooltip>
   );
 };
+
+const ServerToggle = React.memo(ServerToggleComponent);
 
 export default ServerToggle;

@@ -44,18 +44,6 @@ const cueHandlers: Record<string, CueHandler> = {
     </div>`);
   },
   
-  freeze: (message: WebSocketMessage) => {
-    state.showtime.html('<div class="freeze-wrapper"><h1>FREEZE!</h1></div>');
-  },
-  
-  black: (message: WebSocketMessage) => {
-    state.showtime.html('');
-  },
-  
-  white: (message: WebSocketMessage) => {
-    state.showtime.html('<div style="width:100vw;height:100vh;background:white;"></div>');
-  },
-  
   message: (message: WebSocketMessage) => {
     const text = message.args?.[0] || 'No message';
     const subtitle = message.args?.[1] || '';

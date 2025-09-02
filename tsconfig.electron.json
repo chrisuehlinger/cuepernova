@@ -12,8 +12,10 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "electron"]
+    "types": ["node", "electron"],
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo/electron.tsbuildinfo"
   },
-  "include": ["electron/**/*", "src/**/*"],
+  "include": ["electron/**/*", "src/**/*", "src/shared/**/*"],
   "exclude": ["node_modules"]
 }

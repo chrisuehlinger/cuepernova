@@ -1,9 +1,15 @@
+/**
+ * Refactored IPC handlers using DataStore
+ */
+
 import { ipcMain, dialog, BrowserWindow } from 'electron';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { ServerManager } from '../server-manager.js';
 import { CertificateManager } from '../certificate-manager.js';
+import { DataStore } from '../../src/shared/data/DataStore.js';
+import { Cue, Cuestation, Config } from '../../src/shared/types/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,6 +21,8 @@ interface IpcContext {
   setProjectDir: (dir: string) => void;
   createCuestationWindow: (name: string) => Promise<void>;
 }
+
+let dataStore: DataStore | null = null;
 
 export function setupIpcHandlers(context: IpcContext) {
   // Directory selection
@@ -58,29 +66,35 @@ export function setupIpcHandlers(context: IpcContext) {
       await fs.writeFile(gitignorePath, '.cuepernova/\nnode_modules/\n');
     }
 
-    // Create default db.json if it doesn't exist
-    const dbPath = path.join(directory, 'db.json');
-    try {
-      await fs.access(dbPath);
-    } catch {
-      const defaultDb = {
+    // Initialize DataStore
+    dataStore = new DataStore({
+      projectDir: directory,
+      cacheEnabled: true,
+      cacheTTL: 5000,
+      autoSave: true
+    });
+
+    // Validate or create database
+    const validation = await dataStore.validateDatabaseFile();
+    if (!validation.success) {
+      // Create default database if validation fails
+      await dataStore.batchUpdate({
         cues: [],
         cuestations: [],
         config: {
           oscPort: 57121,
           httpPort: 8080,
           httpsPort: 8443,
-          defaultCuestation: 'main',
+          defaultCuestation: 'main'
         }
-      };
-      await fs.writeFile(dbPath, JSON.stringify(defaultDb, null, 2));
+      });
     }
 
     // Initialize CA certificate
     await context.certificateManager.initializeCA(directory);
   });
 
-  // File operations
+  // File operations (for non-database files)
   ipcMain.handle('read-file', async (event, filePath: string) => {
     const projectDir = context.getProjectDir();
     if (!projectDir) throw new Error('No project directory set');
@@ -97,91 +111,101 @@ export function setupIpcHandlers(context: IpcContext) {
     await fs.writeFile(fullPath, content);
   });
 
-  // Database operations helper
-  const readDatabase = async (): Promise<any> => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-    
-    const dbPath = path.join(projectDir, 'db.json');
-    try {
-      const data = await fs.readFile(dbPath, 'utf-8');
-      return JSON.parse(data);
-    } catch {
-      // Return default structure if file doesn't exist
-      return {
-        cues: [],
-        cuestations: [],
-        config: {
-          oscPort: 57121,
-          httpPort: 8080,
-          httpsPort: 8443,
-          defaultCuestation: 'main',
-        }
-      };
-    }
-  };
-
-  const writeDatabase = async (db: any): Promise<void> => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-    
-    const dbPath = path.join(projectDir, 'db.json');
-    await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
-  };
-
-  // Cues operations
+  // Cue operations using DataStore
   ipcMain.handle('get-cues', async () => {
-    const db = await readDatabase();
-    return db.cues || [];
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.getCues();
   });
 
-  ipcMain.handle('save-cues', async (event, cues: any[]) => {
-    const db = await readDatabase();
-    db.cues = cues;
-    await writeDatabase(db);
+  ipcMain.handle('save-cues', async (event, cues: Cue[]) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    await dataStore.saveCues(cues);
   });
 
-  // Cuestations operations
+  ipcMain.handle('add-cue', async (event, cue: Omit<Cue, 'id'>) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.addCue(cue);
+  });
+
+  ipcMain.handle('update-cue', async (event, id: string, updates: Partial<Cue>) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.updateCue(id, updates);
+  });
+
+  ipcMain.handle('delete-cue', async (event, id: string) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.deleteCue(id);
+  });
+
+  // Cuestation operations using DataStore
   ipcMain.handle('get-cuestations', async () => {
-    const db = await readDatabase();
-    return db.cuestations || [];
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.getCuestations();
   });
 
-  ipcMain.handle('save-cuestations', async (event, cuestations: any[]) => {
-    const db = await readDatabase();
-    db.cuestations = cuestations;
-    await writeDatabase(db);
+  ipcMain.handle('save-cuestations', async (event, cuestations: Cuestation[]) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    await dataStore.saveCuestations(cuestations);
   });
 
-  ipcMain.handle('open-cuestation', async (event, name: string) => {
-    await context.createCuestationWindow(name);
+  ipcMain.handle('add-cuestation', async (event, cuestation: Omit<Cuestation, 'id'>) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.addCuestation(cuestation);
   });
 
-  // Config operations
+  ipcMain.handle('update-cuestation', async (event, id: string, updates: Partial<Cuestation>) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.updateCuestation(id, updates);
+  });
+
+  ipcMain.handle('delete-cuestation', async (event, id: string) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.deleteCuestation(id);
+  });
+
+  // Config operations using DataStore
   ipcMain.handle('get-config', async () => {
-    const db = await readDatabase();
-    return db.config || {
-      oscPort: 57121,
-      httpPort: 8080,
-      httpsPort: 8443,
-      defaultCuestation: 'main',
-    };
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.getConfig();
   });
 
-  ipcMain.handle('save-config', async (event, config: any) => {
-    const db = await readDatabase();
-    db.config = config;
-    await writeDatabase(db);
+  ipcMain.handle('save-config', async (event, config: Config) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    await dataStore.saveConfig(config);
   });
 
-  // Server operations
+  ipcMain.handle('update-config', async (event, updates: Partial<Config>) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.updateConfig(updates);
+  });
+
+  // Database operations
+  ipcMain.handle('export-database', async () => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    return await dataStore.exportDatabase();
+  });
+
+  ipcMain.handle('import-database', async (event, jsonData: string) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    const result = await dataStore.importDatabase(jsonData);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  });
+
+  ipcMain.handle('backup-database', async (event, backupPath?: string) => {
+    if (!dataStore) throw new Error('DataStore not initialized');
+    await dataStore.backup(backupPath);
+  });
+
+  // Server management
   ipcMain.handle('start-server', async () => {
     const projectDir = context.getProjectDir();
     if (!projectDir) throw new Error('No project directory set');
     
     await context.serverManager.start(projectDir, context.certificateManager);
     
-    // Notify all windows
+    // Notify all windows that server started
     BrowserWindow.getAllWindows().forEach(window => {
       window.webContents.send('server-status-changed', true);
     });
@@ -190,86 +214,76 @@ export function setupIpcHandlers(context: IpcContext) {
   ipcMain.handle('stop-server', async () => {
     await context.serverManager.stop();
     
-    // Notify all windows
+    // Notify all windows that server stopped
     BrowserWindow.getAllWindows().forEach(window => {
       window.webContents.send('server-status-changed', false);
     });
   });
 
-  ipcMain.handle('get-server-status', async () => {
-    return context.serverManager.getStatus();
+  ipcMain.handle('get-server-status', () => {
+    return (context.serverManager as any).isRunning;
   });
 
-  // CA Certificate operations
+  // Certificate operations
   ipcMain.handle('download-ca-cert', async () => {
     const projectDir = context.getProjectDir();
     if (!projectDir) throw new Error('No project directory set');
     
-    return await context.certificateManager.getCACertificate(projectDir);
-  });
-
-  // Cueball creation
-  ipcMain.handle('create-cueball', async (event, cueballName: string) => {
-    const projectDir = context.getProjectDir();
-    if (!projectDir) throw new Error('No project directory set');
-
-    try {
-      // Convert name to kebab-case for file names
-      const kebabName = cueballName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-_]/g, '');
-      
-      // Check if cueball already exists
-      const htmlPath = path.join(projectDir, 'public', 'cueballs', `${kebabName}.html`);
-      const cssPath = path.join(projectDir, 'public', 'css', `${kebabName}.css`);
-      const jsPath = path.join(projectDir, 'public', 'js', `${kebabName}.js`);
-      
-      try {
-        await fs.access(htmlPath);
-        return { success: false, error: `Cueball "${kebabName}" already exists` };
-      } catch {
-        // File doesn't exist, which is what we want
-      }
-
-      // Read template files from the dist/main directory
-      // The templates are copied there during build
-      // __dirname is dist/main/electron/ipc, so go up 2 levels to dist/main
-      const templatesDir = path.join(__dirname, '..', '..', 'templates', 'cueball');
-      
-      // Try to read from templates directory
-      const htmlTemplate = await fs.readFile(path.join(templatesDir, 'cueball.html'), 'utf-8');
-      const cssTemplate = await fs.readFile(path.join(templatesDir, 'cueball.css'), 'utf-8');
-      const jsTemplate = await fs.readFile(path.join(templatesDir, 'cueball.js'), 'utf-8');
-
-      // Replace placeholders
-      const htmlContent = htmlTemplate
-        .replace(/{{NAME}}/g, cueballName)
-        .replace(/{{KEBAB_NAME}}/g, kebabName);
-      
-      const cssContent = cssTemplate
-        .replace(/{{NAME}}/g, cueballName)
-        .replace(/{{KEBAB_NAME}}/g, kebabName);
-      
-      const jsContent = jsTemplate
-        .replace(/{{NAME}}/g, cueballName)
-        .replace(/{{KEBAB_NAME}}/g, kebabName);
-
-      // Write files
-      await fs.writeFile(htmlPath, htmlContent, 'utf-8');
-      await fs.writeFile(cssPath, cssContent, 'utf-8');
-      await fs.writeFile(jsPath, jsContent, 'utf-8');
-
-      return { 
-        success: true, 
-        files: {
-          html: `public/cueballs/${kebabName}.html`,
-          css: `public/css/${kebabName}.css`,
-          js: `public/js/${kebabName}.js`
-        },
-        kebabName
-      };
-    } catch (error) {
-      console.error('Error creating cueball:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create cueball';
-      return { success: false, error: errorMessage };
+    const certPath = path.join(projectDir, '.cuepernova/ca-cert.pem');
+    const cert = await fs.readFile(certPath, 'utf-8');
+    
+    const { filePath } = await dialog.showSaveDialog({
+      defaultPath: 'cuepernova-ca-cert.pem',
+      filters: [{ name: 'Certificate', extensions: ['pem'] }],
+    });
+    
+    if (filePath) {
+      await fs.writeFile(filePath, cert);
     }
   });
+
+  // Window operations
+  ipcMain.handle('open-cuestation', async (event, name: string) => {
+    await context.createCuestationWindow(name);
+  });
+
+  // Cueball operations
+  ipcMain.handle('create-cueball', async (event, name: string, template: string) => {
+    const projectDir = context.getProjectDir();
+    if (!projectDir) throw new Error('No project directory set');
+    
+    const cueballDir = path.join(projectDir, 'public/cueballs', name);
+    await fs.mkdir(cueballDir, { recursive: true });
+    
+    // Read template files
+    const templateDir = path.join(__dirname, '../../templates/cueball');
+    const templateFiles = ['index.html', 'cueball.js', 'style.css'];
+    
+    for (const file of templateFiles) {
+      const content = await fs.readFile(path.join(templateDir, file), 'utf-8');
+      const processedContent = content.replace(/{{CUEBALL_NAME}}/g, name);
+      await fs.writeFile(path.join(cueballDir, file), processedContent);
+    }
+  });
+
+  ipcMain.handle('get-cueball-templates', async () => {
+    return ['basic', 'interactive', 'webrtc'];
+  });
+
+  // Cache operations
+  ipcMain.handle('invalidate-cache', () => {
+    if (dataStore) {
+      dataStore.invalidateCache();
+    }
+  });
+}
+
+// Export function to get DataStore instance
+export function getDataStore(): DataStore | null {
+  return dataStore;
+}
+
+// Export function to reset DataStore (useful for testing)
+export function resetDataStore(): void {
+  dataStore = null;
 }

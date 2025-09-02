@@ -6,7 +6,7 @@ import * as fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import morgan from 'morgan';
 import { WebSocketServer } from 'ws';
-import { setupSockets } from '../src/server/sockets.js';
+import { wsUpgrade, initOSCServer } from '../src/server/sockets.js';
 import { setupSignalmaster } from '../src/server/signalmaster.js';
 import { CertificateManager } from './certificate-manager.js';
 
@@ -143,7 +143,10 @@ export class ServerManager {
     this.httpsServer = https.createServer({ cert, key }, this.app);
 
     // Setup WebSocket server on HTTPS
-    this.wss = new WebSocketServer({ server: this.httpsServer });
+    this.wss = new WebSocketServer({ noServer: true });
+    
+    // Setup WebSocket upgrade handling
+    this.httpsServer.on('upgrade', wsUpgrade);
     
     // Load config from db.json and setup sockets
     const dbPath = path.join(projectDir, 'db.json');
@@ -167,8 +170,8 @@ export class ServerManager {
       };
     }
 
-    // Setup WebSocket and OSC handling
-    setupSockets(this.wss, config);
+    // Setup OSC handling
+    initOSCServer(config.oscPort || 57121);
 
     // Start servers
     await new Promise<void>((resolve, reject) => {

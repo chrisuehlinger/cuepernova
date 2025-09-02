@@ -10,6 +10,13 @@ export default (env, argv) => {
   const isDevelopment = argv.mode === 'development';
 
   return {
+    cache: {
+      type: 'filesystem',
+      buildDependencies: {
+        config: [import.meta.url],
+      },
+      cacheDirectory: path.resolve(__dirname, '.webpack-cache'),
+    },
     entry: {
       // React app entry
       'bundle': './src-react/index.tsx',
@@ -39,6 +46,8 @@ export default (env, argv) => {
               options: {
                 configFile: 'tsconfig.json',
                 transpileOnly: isDevelopment,
+                experimentalWatchApi: true,
+                experimentalFileCaching: true,
               },
             },
           ],

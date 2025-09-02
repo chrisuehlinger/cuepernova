@@ -1,17 +1,12 @@
-import { WebSocketServer, WebSocket } from 'ws';
+/**
+ * Refactored WebSocket server using centralized WebSocketManager
+ */
+
 import osc from 'osc';
-import url from 'node:url';
 import os from 'node:os';
-import { IncomingMessage } from 'node:http';
-import { Duplex } from 'node:stream';
-
+import { WebSocketManager } from '../shared/websocket/WebSocketManager.js';
+import { WebSocketMessage, OSCMessage } from '../shared/types/index.js';
 import rtcSignals from '../utils/rtc-signals.js';
-import { WebSocketMessage, OSCMessage, RTCSignals } from '../types/index.js';
-
-// Extended WebSocket with custom properties
-interface CuestationWebSocket extends WebSocket {
-  cuestationName?: string;
-}
 
 // Get local IP addresses for OSC logging
 const getIPAddresses = function (): string[] {
@@ -19,129 +14,96 @@ const getIPAddresses = function (): string[] {
   const ipAddresses: string[] = [];
 
   for (const deviceName in interfaces) {
-      const addresses = interfaces[deviceName];
-      if (addresses) {
-        for (let i = 0; i < addresses.length; i++) {
-            const addressInfo = addresses[i];
-            if (addressInfo.family === "IPv4" && !addressInfo.internal) {
-                ipAddresses.push(addressInfo.address);
-            }
+    const addresses = interfaces[deviceName];
+    if (addresses) {
+      for (let i = 0; i < addresses.length; i++) {
+        const addressInfo = addresses[i];
+        if (addressInfo.family === "IPv4" && !addressInfo.internal) {
+          ipAddresses.push(addressInfo.address);
         }
       }
+    }
   }
 
   return ipAddresses;
 };
 
-// Create WebSocket servers
-const cuestationWS = new WebSocketServer({ noServer: true });
-const controlWS = new WebSocketServer({ noServer: true });
-
-// Cuestation connections handle display/projection devices
-cuestationWS.on('connection', function connection(ws: CuestationWebSocket, request: IncomingMessage) {
-  const params = url.parse(request.url || '', true).query;
-  ws.cuestationName = (params.name as string) || 'unnamed';
-  
-  console.log(`CUESTATION CONNECTED: ${ws.cuestationName}`);
-  console.log(`Total cuestations: ${cuestationWS.clients.size}`);
-  
-  ws.on('close', () => {
-    console.log(`CUESTATION DISCONNECTED: ${ws.cuestationName}`);
-  });
-  
-  ws.on('error', (err: Error) => {
-    console.error(`CUESTATION ERROR (${ws.cuestationName}):`, err);
-  });
+// Create WebSocket manager instance
+export const wsManager = new WebSocketManager({
+  maxClients: 100,
+  heartbeatInterval: 30000,
+  enableLogging: true
 });
 
-// Control panel connections
-controlWS.on('connection', function connection(ws: WebSocket) {
-  console.log('CONTROL PANEL CONNECTED');
+// Setup connection/disconnection handlers
+wsManager.onConnection((client) => {
+  console.log(`Client connected: ${client.type} - ${client.name}`);
   
-  ws.on('message', (message: Buffer | ArrayBuffer | Buffer[]) => {
-    try {
-      const oscMessage: WebSocketMessage = JSON.parse(message.toString());
-      console.log('Control panel message:', JSON.stringify(oscMessage, null, 2));
-      
-      // Route messages based on address namespace
-      const pathParts = oscMessage.address.split('/');
-      const namespace = pathParts[1];
-      const subNamespace = pathParts[2];
-      
-      if (namespace === 'cuepernova') {
-        switch(subNamespace) {
-          case 'cuestation':
-            // Broadcast to all cuestation clients
-            cuestationWS.clients.forEach((client: WebSocket) => {
-              if (client.readyState === WebSocket.OPEN) {
-                client.send(JSON.stringify(oscMessage));
-              }
-            });
-            break;
-            
-          case 'system':
-            handleSystemMessage(oscMessage);
-            break;
-            
-          default:
-            console.log(`No handler for sub-namespace: ${subNamespace}`);
-        }
-      } else {
-        console.log(`No handler for namespace: ${namespace}`);
-      }
-    } catch(e) {
-      console.error('Error processing control message:', e);
-    }
-  });
+  // Send initial state if needed
+  if (client.type === 'control') {
+    // Send current system status
+    const status = wsManager.getStatus();
+    wsManager.sendToClient(client, {
+      address: '/system/status',
+      args: [status.cuestations, status.controlPanels]
+    });
+  }
 });
 
-// Handle system-level messages
-async function handleSystemMessage(message: WebSocketMessage): Promise<void> {
+wsManager.onDisconnection((client) => {
+  console.log(`Client disconnected: ${client.type} - ${client.name}`);
+});
+
+// Setup custom message routes
+wsManager.addRoute(/^\/cuepernova\/rtc\//, (message, client) => {
+  // Handle RTC signaling
   const command = message.address.split('/')[3];
   
-  switch(command) {
-    case 'clear-rtc':
-      rtcSignals.offer = {};
-      rtcSignals.answer = {};
-      console.log('Cleared RTC signals');
-      break;
-      
-    case 'clearMappings':
-      // Broadcast clearMappings message to all cuestations
-      cuestationWS.clients.forEach((client: WebSocket) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            address: '/cuepernova/cuestation/clearMappings',
-            args: []
-          }));
-        }
-      });
-      console.log('Sent clearMappings to all cuestations');
-      break;
-      
-    case 'resetMapping':
-      // Reset mapping for specific cuestation
-      const targetCuestation = message.args && message.args[0];
-      if (targetCuestation) {
-        cuestationWS.clients.forEach((client: CuestationWebSocket) => {
-          if (client.readyState === WebSocket.OPEN && client.cuestationName === targetCuestation) {
-            client.send(JSON.stringify({
-              address: '/cuepernova/cuestation/clearMappings',
-              args: []
-            }));
-          }
-        });
-        console.log(`Sent clearMappings to cuestation: ${targetCuestation}`);
+  switch (command) {
+    case 'offer':
+      if (message.args[0] && message.args[1]) {
+        const [fromId, offer] = message.args;
+        rtcSignals.offer[fromId as string] = offer;
       }
       break;
       
-    default:
-      console.log(`No handler for system command: ${command}`);
+    case 'answer':
+      if (message.args[0] && message.args[1]) {
+        const [fromId, answer] = message.args;
+        rtcSignals.answer[fromId as string] = answer;
+      }
+      break;
+      
+    case 'get-offer':
+      if (message.args[0]) {
+        const peerId = message.args[0] as string;
+        const offer = rtcSignals.offer[peerId];
+        if (offer) {
+          wsManager.sendToClient(client, {
+            address: '/cuepernova/rtc/offer',
+            args: [peerId, offer]
+          });
+        }
+      }
+      break;
+      
+    case 'get-answer':
+      if (message.args[0]) {
+        const peerId = message.args[0] as string;
+        const answer = rtcSignals.answer[peerId];
+        if (answer) {
+          wsManager.sendToClient(client, {
+            address: '/cuepernova/rtc/answer',
+            args: [peerId, answer]
+          });
+        }
+      }
+      break;
   }
-}
+});
 
-// Setup OSC server for QLab integration
-let udpPort: any; // osc types not available
+// Setup OSC server
+let udpPort: any;
 
 export function initOSCServer(port: number = 57121): void {
   udpPort = new osc.UDPPort({
@@ -153,38 +115,15 @@ export function initOSCServer(port: number = 57121): void {
     const ipAddresses = getIPAddresses();
     console.log("Listening for OSC over UDP:");
     ipAddresses.forEach((address: string) => {
-        console.log(` - ${address}:${udpPort.options.localPort}`);
+      console.log(` - ${address}:${udpPort.options.localPort}`);
     });
   });
 
   udpPort.on("message", function (oscMessage: OSCMessage) {
     console.log('OSC message received:', JSON.stringify(oscMessage, null, 2));
     
-    const pathParts = oscMessage.address.split('/');
-    const namespace = pathParts[1];
-    const subNamespace = pathParts[2];
-    
-    if (namespace === 'cuepernova') {
-      switch(subNamespace) {
-        case 'cuestation':
-          // Broadcast to all cuestation clients
-          cuestationWS.clients.forEach((client: WebSocket) => {
-            if (client.readyState === WebSocket.OPEN) {
-              client.send(JSON.stringify(oscMessage));
-            }
-          });
-          break;
-          
-        case 'system':
-          handleSystemMessage(oscMessage);
-          break;
-          
-        default:
-          console.log(`No OSC handler for sub-namespace: ${subNamespace}`);
-      }
-    } else {
-      console.log(`No OSC handler for namespace: ${namespace}`);
-    }
+    // Forward to WebSocketManager for routing
+    wsManager.handleOSCMessage(oscMessage);
   });
 
   udpPort.on("error", function (err: Error) {
@@ -194,44 +133,26 @@ export function initOSCServer(port: number = 57121): void {
   udpPort.open();
 }
 
+// Export functions for external use
+export const broadcastToCuestations = (message: WebSocketMessage) => {
+  wsManager.broadcastToCuestations(message);
+};
+
+export const broadcastToControl = (message: WebSocketMessage) => {
+  wsManager.broadcastToControl(message);
+};
+
+export const getConnectionStatus = () => {
+  return wsManager.getStatus();
+};
+
 // Export WebSocket upgrade handler
-export const wsUpgrade = function(request: IncomingMessage, socket: Duplex, head: Buffer): void {
-    const pathname = url.parse(request.url || '').pathname;
+export const wsUpgrade = wsManager.handleUpgrade.bind(wsManager);
 
-    if (pathname === '/cuestation') {
-      cuestationWS.handleUpgrade(request, socket, head, function done(ws) {
-        cuestationWS.emit('connection', ws, request);
-      });
-    } else if (pathname === '/control') {
-      controlWS.handleUpgrade(request, socket, head, function done(ws) {
-        controlWS.emit('connection', ws, request);
-      });
-    } else {
-      socket.destroy();
-    }
+// Cleanup function
+export const shutdown = () => {
+  if (udpPort) {
+    udpPort.close();
+  }
+  wsManager.shutdown();
 };
-
-export const sendControlMessage = function(message: WebSocketMessage): void {
-    controlWS.clients.forEach((client: WebSocket) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
-      }
-    });
-};
-
-// Setup function for WebSocket server integration
-export function setupSockets(wss: WebSocketServer, config: any): void {
-  // Initialize OSC server with configured port
-  initOSCServer(config.oscPort || 57121);
-  
-  // Setup WebSocket upgrade handling
-  wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
-    const pathname = url.parse(request.url || '').pathname;
-    
-    if (pathname === '/cuestation') {
-      cuestationWS.emit('connection', ws, request);
-    } else if (pathname === '/control') {
-      controlWS.emit('connection', ws, request);
-    }
-  });
-}
