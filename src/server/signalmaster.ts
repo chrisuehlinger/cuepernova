@@ -50,3 +50,8 @@ router.get('/answer/:id', (req: Request, res: Response) => {
 });
 
 export default router;
+
+// Helper function to setup signalmaster routes on an Express app
+export function setupSignalmaster(app: express.Application): void {
+  app.use('/signalmaster', router);
+}

@@ -4,73 +4,66 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Cuepernova is an open source theater projection control system, now distributed as an npm package. It provides multi-display control, OSC integration for QLab, WebSocket communication for real-time updates, WebRTC support for peer-to-peer streaming, and projection mapping capabilities.
+Cuepernova is an open source theater projection control system, now distributed as an Electron desktop application. It provides multi-display control, OSC integration for QLab, WebSocket communication for real-time updates, WebRTC support for peer-to-peer streaming, and projection mapping capabilities.
 
-**The codebase is written in TypeScript** with a build process that compiles to JavaScript for distribution. User projects use plain JavaScript without requiring a build step.
+**The codebase is written in TypeScript** with:
+- Electron main process for desktop integration
+- React frontend with Material-UI for the control interface  
+- Express server integrated directly in the Electron app
+- Automatic SSL certificate generation for secure connections
 
-## Package Architecture
+## Application Architecture
 
-Cuepernova is now an npm package that can be installed and used in any project:
-
-```bash
-npm install -g cuepernova
-npx cuepernova [command]
-```
+Cuepernova is now a cross-platform Electron application that runs on Windows, macOS, and Linux.
 
 ## Common Development Commands
 
-### For Package Development
+### Development
 ```bash
-# Build TypeScript to JavaScript
-npm run build
+# Build Electron and React for production
+npm run start
 
-# Clean build artifacts
-npm run clean
-
-# Build and run in development
+# Run in development mode with hot reload
 npm run dev
 
-# Link package locally for testing
-npm link
+# Build Electron main process
+npm run build:electron
 
-# Test commands after building
-cuepernova init          # Initialize a new project
-cuepernova start         # Start the server
-cuepernova cueball "Name" # Create a new cueball
+# Build React app
+npm run build:react
+
+# Clean all build artifacts
+npm run clean
+
+# Build distributable packages
+npm run dist
 ```
 
-### For End Users
-```bash
-# Initialize a new project
-npx cuepernova init
-
-# Start the server
-npx cuepernova start
-
-# Create a new cueball/effect
-npx cuepernova cueball "My Effect Name"
-# Creates: cueballs/my-effect-name.html
-#          css/my-effect-name.css
-#          js/my-effect-name.js
-```
-
-### SSL Certificate Setup (for WebRTC/HTTPS)
-```bash
-# Install mkcert first: https://github.com/FiloSottile/mkcert#installation
-mkcert -install
-mkcert -key-file certs/key.pem -cert-file certs/cert.pem localhost $(hostname) $(hostname).local
-```
+### Application Features
+- **Directory Picker**: Select or create a project directory on launch
+- **Main Screen**: Manage cues and cuestations with full CRUD operations
+- **Server Control**: ON/OFF toggle with visual feedback
+- **Settings Modal**: Configure OSC, HTTP, and HTTPS ports
+- **Cuestation Windows**: Open multiple display windows
+- **Automatic SSL**: CA certificate generation and management
+- **CA Download**: Easily distribute certificates to other devices
 
 ## Architecture Overview
 
-### Package Architecture
-- **Language**: TypeScript (compiled to JavaScript for distribution)
-- **Module System**: ES Modules (ESM) with `node:` prefix for built-ins
-- **CLI Entry Point**: `src/cli.ts` → `dist/cli.js` - Commander-based CLI
-- **Server Entry**: `src/server/app.ts` → `dist/server/app.js` - Express server
-- **Configuration**: JSON config file (cuepernova.config.json)
-- **Static Files**: Package serves built-in pages from `static/`, user content from project directories
-- **Type Definitions**: Shared types in `src/types/index.ts` for frontend/backend consistency
+### Electron Architecture  
+- **Main Process**: `electron/main.ts` - Handles app lifecycle, windows, IPC
+- **Preload Script**: `electron/preload.ts` - Secure bridge between main and renderer
+- **IPC Handlers**: `electron/ipc/handlers.ts` - File operations and server control
+- **Server Manager**: `electron/server-manager.ts` - Integrated Express server
+- **Certificate Manager**: `electron/certificate-manager.ts` - CA and SSL certificate generation
+
+### React Frontend Architecture
+- **Entry Point**: `src-react/index.tsx` - React app initialization
+- **Main App**: `src-react/App.tsx` - Route and state management
+- **Screens**: Directory picker and main control screen
+- **Components**: Modular UI components for cues, settings, and cuestations
+- **Material-UI**: Dark theme with responsive layout
+- **Type Safety**: Full TypeScript support with strict typing
 
 ### Server Architecture
 - **Express Server**: Default ports 8080 (HTTP) and 8443 (HTTPS)
@@ -116,59 +109,93 @@ Built-in screen types handled by `cuestation.js`:
 
 ## Project Structure
 
-### Source Structure (TypeScript)
+### Source Structure
 ```
 cuepernova/
-├── src/                   # TypeScript source files
-│   ├── cli.ts            # CLI entry point
+├── electron/              # Electron main process
+│   ├── main.ts           # Main entry point
+│   ├── preload.ts        # Preload script
+│   ├── server-manager.ts # Express server integration
+│   ├── certificate-manager.ts # SSL certificate handling
+│   └── ipc/
+│       └── handlers.ts   # IPC communication handlers
+├── src-react/            # React application
+│   ├── index.tsx         # React entry point
+│   ├── App.tsx           # Main app component
+│   ├── screens/
+│   │   ├── DirectoryPicker.tsx
+│   │   └── MainScreen.tsx
+│   ├── components/
+│   │   ├── CueList.tsx
+│   │   ├── CuestationManager.tsx
+│   │   ├── ServerToggle.tsx
+│   │   └── SettingsModal.tsx
+│   └── types.ts          # TypeScript interfaces
+├── src/                  # Server code
 │   ├── server/
-│   │   ├── app.ts        # Express server
 │   │   ├── sockets.ts    # WebSocket & OSC handling
 │   │   └── signalmaster.ts # WebRTC signaling
-│   ├── commands/
-│   │   ├── start.ts      # Start server command
-│   │   ├── init.ts       # Initialize project
-│   │   └── cueball.ts    # Scaffold cueball
-│   ├── config/
-│   │   └── loader.ts     # Config file loader
-│   ├── routes/
-│   │   └── index.ts      # Main routes
-│   ├── utils/
-│   │   └── rtc-signals.ts # RTC signal storage
-│   └── types/
-│       └── index.ts      # Shared TypeScript definitions
-├── static-src/           # TypeScript source for frontend
-│   └── js/
-│       ├── control.ts    # Control panel script
-│       ├── cuestation.ts    # Cuestation display script
-│       └── mapping.ts    # Mapping interface script
-├── dist/                 # Compiled JavaScript (generated)
-├── static/               # Static files including compiled JS
-│   ├── cuestation.html      # Display interface
-│   ├── control.html      # Control panel
-│   ├── mapping.html      # Projection mapping
-│   ├── css/              # Core stylesheets
-│   └── js/               # Compiled + vendor scripts
-├── templates/            # Templates for scaffolding
-├── views/                # Pug templates (error pages)
-└── build.js              # Build script
+│   └── types/            # Shared type definitions
+├── static/               # Static HTML/CSS/JS files
+│   ├── cuestation.html   # Display interface
+│   └── mapping.html      # Projection mapping
+├── dist-electron/        # Compiled Electron code
+├── dist-react/           # Compiled React app
+└── release/              # Packaged applications
 ```
 
-### User Project Structure (after `cuepernova init`)
+### User Project Structure
 ```
 user-project/
 ├── cueballs/              # Custom cueball pages
-├── media/                 # Media assets
+├── media/                 # Media assets  
 ├── css/                   # Cueball stylesheets
 ├── js/                    # Cueball scripts
-├── node_modules/          # Project dependencies
+├── .cuepernova/           # Certificate storage (gitignored)
+│   ├── ca-cert.pem       # CA certificate (shareable)
+│   └── ca-key.pem        # CA private key (keep secure)
 ├── cues.json              # Show cue list
-└── cuepernova.config.json # Configuration file
+├── cuestations.json       # Cuestation configurations
+├── cuepernova.config.json # App configuration
+└── .gitignore            # Excludes .cuepernova/
 ```
 
-### Cues.json
+### Data Files
 
-The `cues.json` file stores the show's cue list and is loaded by the control panel. It's served statically from the project root at `/cues.json`. The control panel fetches this file on load and includes a reload button for live updates during tech rehearsals.
+#### cues.json
+Stores the show's cue list with structure:
+```json
+{
+  "id": "unique-id",
+  "number": "1",
+  "name": "Opening",
+  "type": "video",
+  "args": ["intro.mp4", "false"],
+  "notes": "Play once at show start"
+}
+```
+
+#### cuestations.json
+Stores cuestation configurations:
+```json
+{
+  "id": "unique-id",
+  "name": "projector-1",
+  "description": "Main stage projector",
+  "mappings": {} // Optional projection mapping data
+}
+```
+
+#### cuepernova.config.json
+Application configuration:
+```json
+{
+  "oscPort": 57121,
+  "httpPort": 8080,
+  "httpsPort": 8443,
+  "defaultCuestation": "main"
+}
+```
 
 ## Key Implementation Details
 

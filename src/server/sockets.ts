@@ -218,3 +218,20 @@ export const sendControlMessage = function(message: WebSocketMessage): void {
       }
     });
 };
+
+// Setup function for WebSocket server integration
+export function setupSockets(wss: WebSocketServer, config: any): void {
+  // Initialize OSC server with configured port
+  initOSCServer(config.oscPort || 57121);
+  
+  // Setup WebSocket upgrade handling
+  wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
+    const pathname = url.parse(request.url || '').pathname;
+    
+    if (pathname === '/cuestation') {
+      cuestationWS.emit('connection', ws, request);
+    } else if (pathname === '/control') {
+      controlWS.emit('connection', ws, request);
+    }
+  });
+}
