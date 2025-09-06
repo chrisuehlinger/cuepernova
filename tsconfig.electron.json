@@ -17,5 +17,5 @@
     "tsBuildInfoFile": "./.tsbuildinfo/electron.tsbuildinfo"
   },
   "include": ["electron/**/*", "src/**/*", "src/shared/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/static/**/*"]
 }

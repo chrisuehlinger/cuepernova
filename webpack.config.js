@@ -2,6 +2,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,8 +22,8 @@ export default (env, argv) => {
       // React app entry
       'bundle': './src-react/index.tsx',
       // Static page entries
-      'static/control': './static-src/js/control.ts',
-      'static/cuestation': './static-src/js/cuestation.ts',
+      'static/control': './src/static/control.ts',
+      'static/cuestation': './src/static/cuestation.ts',
     },
     output: {
       path: path.resolve(__dirname, 'dist/renderer'),
@@ -39,6 +40,22 @@ export default (env, argv) => {
       rules: [
         {
           test: /\.tsx?$/,
+          include: path.resolve(__dirname, 'src/static'),
+          use: [
+            {
+              loader: 'ts-loader',
+              options: {
+                configFile: 'tsconfig.browser.json',
+                transpileOnly: isDevelopment,
+                experimentalWatchApi: true,
+                experimentalFileCaching: true,
+              },
+            },
+          ],
+        },
+        {
+          test: /\.tsx?$/,
+          include: path.resolve(__dirname, 'src-react'),
           use: [
             {
               loader: 'ts-loader',
@@ -50,7 +67,6 @@ export default (env, argv) => {
               },
             },
           ],
-          exclude: /node_modules/,
         },
         {
           test: /\.css$/,
@@ -78,6 +94,19 @@ export default (env, argv) => {
         title: 'Cuepernova',
         chunks: ['bundle'],
         filename: 'index.html',
+      }),
+      // Copy static HTML and CSS files to dist
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: 'src/static/*.html',
+            to: '../static/[name][ext]',
+          },
+          {
+            from: 'src/static/css',
+            to: '../static/css',
+          },
+        ],
       }),
       isDevelopment && new ReactRefreshWebpackPlugin({
         include: /src-react/,

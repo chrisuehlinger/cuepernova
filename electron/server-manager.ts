@@ -38,10 +38,10 @@ export class ServerManager {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
 
-    // Serve static files from package
-    this.app.use('/static', express.static(path.join(__dirname, '../../../static')));
+    // Serve static HTML and CSS files
+    this.app.use('/static', express.static(path.join(__dirname, '../../static')));
     
-    // Serve compiled renderer assets
+    // Serve compiled renderer JS assets
     this.app.use('/static/js', express.static(path.join(__dirname, '../../renderer/static')));
     
     // Serve project files from public directory
@@ -153,11 +153,11 @@ export class ServerManager {
 
     // Serve HTML pages
     this.app.get('/cuestation.html', (req, res) => {
-      res.sendFile(path.join(__dirname, '../../../static/cuestation.html'));
+      res.sendFile(path.join(__dirname, '../../static/cuestation.html'));
     });
 
     this.app.get('/control.html', (req, res) => {
-      res.sendFile(path.join(__dirname, '../../../static/control.html'));
+      res.sendFile(path.join(__dirname, '../../static/control.html'));
     });
 
     // Setup SignalMaster routes for WebRTC
