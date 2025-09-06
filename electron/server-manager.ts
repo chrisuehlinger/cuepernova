@@ -96,6 +96,49 @@ export class ServerManager {
       }
     });
 
+    // Serve individual cuestation configuration
+    this.app.get('/api/cuestation/:name', async (req, res) => {
+      try {
+        const dbPath = path.join(projectDir, 'db.json');
+        const data = await fs.readFile(dbPath, 'utf-8');
+        const db = JSON.parse(data);
+        const cuestation = db.cuestations?.find((c: any) => c.name === req.params.name);
+        
+        if (cuestation) {
+          // Ensure cuestation has showtime resolution
+          if (!cuestation.showtimeResolution) {
+            cuestation.showtimeResolution = { width: 1920, height: 1080 };
+          }
+          // Ensure cuestation has default mapping if none exists
+          if (!cuestation.mapping) {
+            cuestation.mapping = {
+              layers: [{
+                targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
+                sourcePoints: [[0, 0], [1, 0], [1, 1], [0, 1]]
+              }]
+            };
+          }
+          res.json(cuestation);
+        } else {
+          // Return default configuration for unknown cuestations
+          res.json({
+            id: 'default',
+            name: req.params.name,
+            showtimeResolution: { width: 1920, height: 1080 },
+            mapping: {
+              layers: [{
+                targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
+                sourcePoints: [[0, 0], [1, 0], [1, 1], [0, 1]]
+              }]
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching cuestation config:', error);
+        res.status(500).json({ error: 'Failed to fetch cuestation configuration' });
+      }
+    });
+
     // Serve CA root certificate
     this.app.get('/CAROOT.pem', async (req, res) => {
       try {
@@ -111,10 +154,6 @@ export class ServerManager {
     // Serve HTML pages
     this.app.get('/cuestation.html', (req, res) => {
       res.sendFile(path.join(__dirname, '../../../static/cuestation.html'));
-    });
-
-    this.app.get('/mapping.html', (req, res) => {
-      res.sendFile(path.join(__dirname, '../../../static/mapping.html'));
     });
 
     this.app.get('/control.html', (req, res) => {

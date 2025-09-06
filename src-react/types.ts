@@ -10,8 +10,17 @@ export interface Cue {
 export interface Cuestation {
   id: string;
   name: string;
-  mappings?: any; // Projection mapping data
   description?: string;
+  showtimeResolution: {
+    width: number;
+    height: number;
+  };
+  mapping?: {
+    layers?: Array<{
+      targetPoints: number[][];
+      sourcePoints: number[][];
+    }>;
+  };
 }
 
 export interface Config {

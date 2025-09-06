@@ -26,21 +26,22 @@ export const CueSchema = z.object({
   group: z.string().optional()
 });
 
-export const ProjectionMappingSchema = z.object({
-  id: z.string(),
-  cuestationName: z.string(),
-  corners: z.array(z.object({
-    x: z.number(),
-    y: z.number()
-  })).length(4),
-  transform: z.string()
+export const MaptasticMappingSchema = z.object({
+  layers: z.array(z.object({
+    targetPoints: z.array(z.array(z.number())),
+    sourcePoints: z.array(z.array(z.number()))
+  })).optional()
 });
 
 export const CuestationSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
   description: z.string().optional(),
-  mappings: ProjectionMappingSchema.optional(),
+  showtimeResolution: z.object({
+    width: z.number().positive(),
+    height: z.number().positive()
+  }),
+  mapping: MaptasticMappingSchema.optional(),
   connected: z.boolean().optional(),
   currentScreen: z.string().optional(),
   lastUpdate: z.number().optional()

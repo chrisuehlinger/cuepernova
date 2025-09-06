@@ -10,15 +10,15 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-#showtime-area {
-  width: 100vw;
-  height: 100vh;
-  position: relative;
+#its-showtime {
+  position: absolute;
+  top: 0;
+  left: 0;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
 
-#showtime-area.its-showtime {
+#its-showtime.show {
   opacity: 1;
 }
 

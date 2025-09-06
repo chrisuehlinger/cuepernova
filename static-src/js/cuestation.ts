@@ -1,7 +1,9 @@
 declare const $: JQueryStatic;
 declare const Maptastic: any; // External library without types
 
-interface MappingObject {
+interface MaptasticInstance {
+  setConfigData(data: any): void;
+  getConfigData(): any;
   clearMappings(): void;
 }
 
@@ -10,11 +12,28 @@ interface WebSocketMessage {
   args?: (string | number | boolean)[];
 }
 
+interface CuestationConfig {
+  id: string;
+  name: string;
+  description?: string;
+  showtimeResolution: {
+    width: number;
+    height: number;
+  };
+  mapping?: {
+    layers?: Array<{
+      targetPoints: number[][];
+      sourcePoints: number[][];
+    }>;
+  };
+}
+
 interface CuestationState {
   cuestationName: string;
+  config: CuestationConfig | null;
   showtime: JQuery<HTMLElement>;
   connection: WebSocket | null;
-  mapping?: MappingObject;
+  maptastic: MaptasticInstance | null;
 }
 
 // Get cuestation name from URL parameter
@@ -25,9 +44,10 @@ console.log(`Cuestation starting with name: ${CUESTATION_NAME}`);
 
 const state: CuestationState = {
   cuestationName: CUESTATION_NAME,
-  showtime: $('#showtime-area'),
+  config: null,
+  showtime: $('#its-showtime'),
   connection: null,
-  mapping: undefined
+  maptastic: null
 };
 
 // Cue handler type
@@ -41,6 +61,7 @@ const cueHandlers: Record<string, CueHandler> = {
       <h1>CUESTATION NAME: <strong>${CUESTATION_NAME}</strong></h1>
       <h1>TIME: <strong>${new Date().toLocaleTimeString()}</strong></h1>
       <h1>STATUS: <strong>CONNECTED</strong></h1>
+      <h1>RESOLUTION: <strong>${state.config?.showtimeResolution.width || '?'} x ${state.config?.showtimeResolution.height || '?'}</strong></h1>
     </div>`);
   },
   
@@ -62,7 +83,7 @@ const cueHandlers: Record<string, CueHandler> = {
       </div>`);
       if (!loop) {
         $('video').on('ended', () => {
-          state.showtime.removeClass('its-showtime');
+          state.showtime.removeClass('show');
           state.showtime.html('');
         });
       }
@@ -145,7 +166,7 @@ function handleOscMessage(message: WebSocketMessage): void {
       case 'showScreen':
         const screenType = pathParts[4];
         if (screenType && cueHandlers[screenType]) {
-          state.showtime.addClass('its-showtime');
+          state.showtime.addClass('show');
           cueHandlers[screenType](message);
         } else {
           console.warn(`Unknown screen type: ${screenType}`);
@@ -153,14 +174,14 @@ function handleOscMessage(message: WebSocketMessage): void {
         break;
         
       case 'clearScreen':
-        state.showtime.removeClass('its-showtime');
+        state.showtime.removeClass('show');
         state.showtime.html('');
         break;
         
       case 'fadeScreen':
         const duration = parseInt(String(message.args?.[0])) || 1000;
         state.showtime.fadeOut(duration, () => {
-          state.showtime.removeClass('its-showtime');
+          state.showtime.removeClass('show');
           state.showtime.html('');
           state.showtime.show();
         });
@@ -171,8 +192,8 @@ function handleOscMessage(message: WebSocketMessage): void {
         break;
         
       case 'clearMappings':
-        if (state.mapping) {
-          state.mapping.clearMappings();
+        if (state.maptastic) {
+          state.maptastic.clearMappings();
           console.log('Mappings cleared');
         }
         break;
@@ -183,27 +204,80 @@ function handleOscMessage(message: WebSocketMessage): void {
   }
 }
 
-// Initialize projection mapping if requested
-function initProjectionMapping(): void {
-  const enableMapping = urlParams.get('mapping') === 'true';
-  
-  if (enableMapping && Maptastic) {
-    state.mapping = Maptastic(CUESTATION_NAME);
-    console.log('Projection mapping enabled');
-    
-    // Load saved mappings from localStorage
-    const savedMappings = localStorage.getItem(`maptastic-${CUESTATION_NAME}`);
-    if (savedMappings) {
-      console.log('Loading saved projection mappings');
+// Fetch cuestation configuration from server
+async function fetchCuestationConfig(): Promise<CuestationConfig | null> {
+  try {
+    const response = await fetch(`/api/cuestation/${encodeURIComponent(CUESTATION_NAME)}`);
+    if (response.ok) {
+      const config = await response.json();
+      console.log('Loaded cuestation configuration:', config);
+      return config;
+    } else {
+      console.error('Failed to fetch cuestation config:', response.status);
+      // Use default configuration
+      return {
+        id: 'default',
+        name: CUESTATION_NAME,
+        showtimeResolution: {
+          width: 1920,
+          height: 1080
+        }
+      };
     }
+  } catch (error) {
+    console.error('Error fetching cuestation config:', error);
+    // Use default configuration
+    return {
+      id: 'default',
+      name: CUESTATION_NAME,
+      showtimeResolution: {
+        width: 1920,
+        height: 1080
+      }
+    };
+  }
+}
+
+// Initialize projection mapping with cuestation config
+function initProjectionMapping(): void {
+  if (!state.config) return;
+  
+  // Set the showtime div dimensions based on config
+  state.showtime.css({
+    width: `${state.config.showtimeResolution.width}px`,
+    height: `${state.config.showtimeResolution.height}px`
+  });
+  
+  // Initialize Maptastic if available
+  if (typeof Maptastic !== 'undefined') {
+    console.log('Initializing Maptastic...');
+    state.maptastic = Maptastic('its-showtime');
+    
+    // Apply saved mapping if available
+    if (state.config.mapping && state.config.mapping.layers && state.maptastic) {
+      console.log('Applying saved mapping configuration');
+      state.maptastic.setConfigData(state.config.mapping);
+    } else {
+      console.log('Using default Maptastic mapping');
+      // Maptastic will use its default mapping
+    }
+  } else {
+    console.warn('Maptastic library not loaded');
   }
 }
 
 // Initialize
 $(async () => {
-  state.showtime = $('#showtime-area');
-  connectWebSocket();
+  state.showtime = $('#its-showtime');
+  
+  // Fetch configuration from server
+  state.config = await fetchCuestationConfig();
+  
+  // Initialize projection mapping with the fetched config
   initProjectionMapping();
+  
+  // Connect WebSocket
+  connectWebSocket();
 });
 
 export {}; // Make this a module

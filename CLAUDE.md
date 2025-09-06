@@ -85,9 +85,8 @@ npm run dist
 - **Development**: TypeScript compiled to JavaScript
 - **User Projects**: Plain JavaScript with ES modules (no build required)
 - **Core Pages** (served from package):
-  - `cuestation.html` - Display device interface (projectors/monitors)
+  - `cuestation.html` - Display device interface with integrated projection mapping
   - `control.html` - Central control panel
-  - `mapping.html` - Projection mapping interface
 - **Custom Cueballs**: Located in user's `public/cueballs/` directory
 - **Communication**: WebSocket connections for real-time updates
 
@@ -153,8 +152,7 @@ cuepernova/
 │   │   └── signalmaster.ts # WebRTC signaling
 │   └── types/            # Shared type definitions
 ├── static/               # Static HTML/CSS/JS files
-│   ├── cuestation.html   # Display interface
-│   └── mapping.html      # Projection mapping
+│   └── cuestation.html   # Display interface with integrated mapping
 ├── dist-electron/        # Compiled Electron code
 ├── dist-react/           # Compiled React app
 └── release/              # Packaged applications
@@ -196,7 +194,16 @@ Consolidated data file containing all project data:
       "id": "unique-id",
       "name": "projector-1",
       "description": "Main stage projector",
-      "mappings": {} // Optional projection mapping data
+      "showtimeResolution": {
+        "width": 1920,
+        "height": 1080
+      },
+      "mapping": {
+        "layers": [{
+          "targetPoints": [[0, 0], [1, 0], [1, 1], [0, 1]],
+          "sourcePoints": [[0, 0], [1, 0], [1, 1], [0, 1]]
+        }]
+      }
     }
   ],
   "config": {
@@ -209,6 +216,20 @@ Consolidated data file containing all project data:
 ```
 
 ## Key Implementation Details
+
+### Cuestation Architecture
+Each cuestation consists of:
+- **Name**: Unique identifier for the cuestation
+- **Showtime Resolution**: Fixed width/height in pixels for content display (e.g., 1920x1080)
+- **Mapping**: Maptastic configuration for projection mapping transforms
+
+When a cuestation page loads:
+1. Fetches configuration from `/api/cuestation/:name` endpoint
+2. Sets the `#its-showtime` div to the specified resolution
+3. Initializes Maptastic with saved mapping configuration
+4. Connects WebSocket for real-time content updates
+
+The showtime resolution defines the content canvas size, while Maptastic handles transforming it to fit the actual display/projector output.
 
 ### Adding New Screen Types
 Edit `static-src/js/cuestation.ts` and add handler to `cueHandlers` object:

@@ -33,18 +33,22 @@ export interface Cuestation {
   id: string;
   name: string;
   description?: string;
-  mappings?: ProjectionMapping;
+  showtimeResolution: {
+    width: number;
+    height: number;
+  };
+  mapping?: MaptasticMapping;
   // Runtime state (not persisted)
   connected?: boolean;
   currentScreen?: string;
   lastUpdate?: number;
 }
 
-export interface ProjectionMapping {
-  id: string;
-  cuestationName: string;
-  corners: Array<{ x: number; y: number }>;
-  transform: string;
+export interface MaptasticMapping {
+  layers?: Array<{
+    targetPoints: number[][];
+    sourcePoints: number[][];
+  }>;
 }
 
 // ============================================

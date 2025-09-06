@@ -62,6 +62,19 @@ export class DataStore {
       const data = await fs.readFile(this.dbPath, 'utf-8');
       const parsed = JSON.parse(data);
       
+      // Migrate old cuestations to include showtimeResolution
+      if (parsed.cuestations) {
+        parsed.cuestations = parsed.cuestations.map((c: any) => {
+          if (!c.showtimeResolution) {
+            return {
+              ...c,
+              showtimeResolution: { width: 1920, height: 1080 }
+            };
+          }
+          return c;
+        });
+      }
+      
       // Validate with Zod
       const validated = validateDatabase(parsed);
       

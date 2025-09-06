@@ -23,7 +23,6 @@ export default (env, argv) => {
       // Static page entries
       'static/control': './static-src/js/control.ts',
       'static/cuestation': './static-src/js/cuestation.ts',
-      'static/mapping': './static-src/js/mapping.ts',
     },
     output: {
       path: path.resolve(__dirname, 'dist/renderer'),

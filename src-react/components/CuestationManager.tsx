@@ -19,7 +19,6 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import MapIcon from '@mui/icons-material/Map';
 import { Cuestation } from '../../src/shared/types';
 
 interface CuestationManagerProps {
@@ -42,6 +41,10 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
       id: Date.now().toString(),
       name: `Cuestation ${cuestations.length + 1}`,
       description: '',
+      showtimeResolution: {
+        width: 1920,
+        height: 1080
+      }
     };
     setEditingCuestation(null);
     setFormData(newCuestation);
@@ -65,8 +68,22 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
         c.id === editingCuestation.id ? { ...formData } as Cuestation : c
       ));
     } else {
-      // Add new cuestation
-      onChange([...cuestations, formData as Cuestation]);
+      // Add new cuestation with default mapping
+      const newCuestation = {
+        ...formData,
+        // Default Maptastic mapping (identity transform)
+        mapping: {
+          layers: [{
+            targetPoints: [
+              [0, 0], [1, 0], [1, 1], [0, 1]
+            ],
+            sourcePoints: [
+              [0, 0], [1, 0], [1, 1], [0, 1]
+            ]
+          }]
+        }
+      } as Cuestation;
+      onChange([...cuestations, newCuestation]);
     }
     setEditDialog(false);
     setFormData({});
@@ -83,17 +100,6 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
     } catch (error) {
       console.error('Failed to open cuestation:', error);
     }
-  }, [serverRunning]);
-
-  const handleOpenMapping = useCallback(async (cuestation: Cuestation) => {
-    if (!serverRunning) {
-      alert('Server must be running to access mapping interface');
-      return;
-    }
-
-    // Open mapping interface in new window
-    const mappingUrl = `https://localhost:8443/mapping.html?name=${encodeURIComponent(cuestation.name)}`;
-    window.open(mappingUrl, '_blank');
   }, [serverRunning]);
 
   return (
@@ -130,15 +136,6 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
               <Stack direction="row" spacing={1}>
                 <IconButton
                   edge="end"
-                  onClick={() => handleOpenMapping(cuestation)}
-                  disabled={!serverRunning}
-                  color="primary"
-                  title="Open Mapping Interface"
-                >
-                  <MapIcon />
-                </IconButton>
-                <IconButton
-                  edge="end"
                   onClick={() => handleOpen(cuestation)}
                   disabled={!serverRunning}
                   color="primary"
@@ -167,7 +164,12 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
               primary={
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="body1">{cuestation.name}</Typography>
-                  {cuestation.mappings && (
+                  <Chip 
+                    label={`${cuestation.showtimeResolution?.width || 1920}×${cuestation.showtimeResolution?.height || 1080}`} 
+                    size="small" 
+                    variant="outlined" 
+                  />
+                  {cuestation.mapping && (
                     <Chip label="Mapped" size="small" color="success" />
                   )}
                 </Box>
@@ -199,6 +201,41 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
               rows={2}
               helperText="Optional description for this cuestation"
             />
+            <Stack direction="row" spacing={2}>
+              <TextField
+                label="Width"
+                type="number"
+                value={formData.showtimeResolution?.width || 1920}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  showtimeResolution: {
+                    ...formData.showtimeResolution,
+                    width: parseInt(e.target.value) || 1920,
+                    height: formData.showtimeResolution?.height || 1080
+                  }
+                })}
+                fullWidth
+                helperText="Showtime width in pixels"
+              />
+              <TextField
+                label="Height"
+                type="number"
+                value={formData.showtimeResolution?.height || 1080}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  showtimeResolution: {
+                    ...formData.showtimeResolution,
+                    width: formData.showtimeResolution?.width || 1920,
+                    height: parseInt(e.target.value) || 1080
+                  }
+                })}
+                fullWidth
+                helperText="Showtime height in pixels"
+              />
+            </Stack>
+            <Typography variant="caption" color="text.secondary">
+              Common resolutions: 1920×1080 (Full HD), 1280×720 (HD), 3840×2160 (4K)
+            </Typography>
           </Stack>
         </DialogContent>
         <DialogActions>
