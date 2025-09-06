@@ -159,6 +159,21 @@ function connectWebSocket(): void {
 // Handle incoming OSC messages
 function handleOscMessage(message: WebSocketMessage): void {
   const pathParts = message.address.split('/');
+  
+  // Check for cuestation-specific mapping update
+  if (message.address === `/cuepernova/cuestation/${CUESTATION_NAME}/mapping-update`) {
+    if (state.maptastic && message.args?.[0]) {
+      try {
+        const mappingData = JSON.parse(String(message.args[0]));
+        console.log('Updating mapping:', mappingData);
+        state.maptastic.setConfigData(mappingData);
+      } catch (err) {
+        console.error('Error parsing mapping data:', err);
+      }
+    }
+    return;
+  }
+  
   const action = pathParts[3];
   
   if (pathParts[1] === 'cuepernova' && pathParts[2] === 'cuestation') {
@@ -253,13 +268,26 @@ function initProjectionMapping(): void {
     console.log('Initializing Maptastic...');
     state.maptastic = Maptastic('its-showtime');
     
-    // Apply saved mapping if available
-    if (state.config.mapping && state.config.mapping.layers && state.maptastic) {
+    // Apply saved mapping if available (single layer only)
+    if (state.config.mapping && state.config.mapping.layers && state.config.mapping.layers.length > 0 && state.maptastic) {
       console.log('Applying saved mapping configuration');
-      state.maptastic.setConfigData(state.config.mapping);
+      // Only use the first layer
+      const singleLayerMapping = {
+        layers: [state.config.mapping.layers[0]]
+      };
+      state.maptastic.setConfigData(singleLayerMapping);
     } else {
       console.log('Using default Maptastic mapping');
-      // Maptastic will use its default mapping
+      // Set default identity mapping explicitly
+      const defaultMapping = {
+        layers: [{
+          targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
+          sourcePoints: [[0, 0], [1, 0], [1, 1], [0, 1]]
+        }]
+      };
+      if (state.maptastic) {
+        state.maptastic.setConfigData(defaultMapping);
+      }
     }
   } else {
     console.warn('Maptastic library not loaded');

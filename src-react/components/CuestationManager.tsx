@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
   List,
@@ -19,7 +19,9 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Cuestation } from '../../src/shared/types';
+import MapIcon from '@mui/icons-material/Map';
+import { Cuestation, MaptasticMapping } from '../../src/shared/types';
+import MappingModal from './MappingModal';
 
 interface CuestationManagerProps {
   cuestations: Cuestation[];
@@ -35,6 +37,9 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
   const [editDialog, setEditDialog] = useState(false);
   const [editingCuestation, setEditingCuestation] = useState<Cuestation | null>(null);
   const [formData, setFormData] = useState<Partial<Cuestation>>({});
+  const [mappingModal, setMappingModal] = useState(false);
+  const [mappingCuestation, setMappingCuestation] = useState<Cuestation | null>(null);
+  const [wsConnection, setWsConnection] = useState<WebSocket | null>(null);
 
   const handleAdd = useCallback(() => {
     const newCuestation: Cuestation = {
@@ -102,6 +107,71 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
     }
   }, [serverRunning]);
 
+  // Setup WebSocket connection when server is running
+  useEffect(() => {
+    if (serverRunning && !wsConnection) {
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const ws = new WebSocket(`${protocol}://${window.location.host}/control`);
+      
+      ws.onopen = () => {
+        console.log('Control WebSocket connected');
+        setWsConnection(ws);
+      };
+      
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+      
+      ws.onclose = () => {
+        console.log('Control WebSocket disconnected');
+        setWsConnection(null);
+      };
+      
+      return () => {
+        ws.close();
+      };
+    }
+  }, [serverRunning, wsConnection]);
+
+  const handleEditMapping = useCallback((cuestation: Cuestation) => {
+    if (!serverRunning) {
+      alert('Server must be running to edit mappings');
+      return;
+    }
+    setMappingCuestation(cuestation);
+    setMappingModal(true);
+  }, [serverRunning]);
+
+  const handleMappingChange = useCallback((mapping: MaptasticMapping) => {
+    if (wsConnection && mappingCuestation) {
+      // Send mapping update to specific cuestation
+      const message = {
+        address: `/cuepernova/cuestation/${mappingCuestation.name}/mapping-update`,
+        args: [JSON.stringify(mapping)]
+      };
+      wsConnection.send(JSON.stringify(message));
+    }
+  }, [wsConnection, mappingCuestation]);
+
+  const handleMappingSave = useCallback((mapping: MaptasticMapping) => {
+    if (mappingCuestation) {
+      // Update the cuestation with the new mapping
+      const updatedCuestations = cuestations.map(c => 
+        c.id === mappingCuestation.id 
+          ? { ...c, mapping } 
+          : c
+      );
+      onChange(updatedCuestations);
+      setMappingModal(false);
+      setMappingCuestation(null);
+    }
+  }, [mappingCuestation, cuestations, onChange]);
+
+  const handleMappingClose = useCallback(() => {
+    setMappingModal(false);
+    setMappingCuestation(null);
+  }, []);
+
   return (
     <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ mb: 2 }}>
@@ -142,6 +212,15 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
                   title="Open Cuestation Window"
                 >
                   <OpenInNewIcon />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  onClick={() => handleEditMapping(cuestation)}
+                  disabled={!serverRunning}
+                  color="secondary"
+                  title="Edit Mapping"
+                >
+                  <MapIcon />
                 </IconButton>
                 <IconButton 
                   edge="end" 
@@ -249,6 +328,14 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <MappingModal
+        open={mappingModal}
+        cuestation={mappingCuestation}
+        onClose={handleMappingClose}
+        onSave={handleMappingSave}
+        onMappingChange={handleMappingChange}
+      />
     </Box>
   );
 };

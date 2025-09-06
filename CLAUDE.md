@@ -45,6 +45,7 @@ npm run dist
 - **Server Control**: ON/OFF toggle with visual feedback
 - **Settings Modal**: Configure OSC, HTTP, and HTTPS ports
 - **Cuestation Windows**: Open multiple display windows
+- **Mapping Editor**: Interactive projection mapping editor with live preview
 - **Automatic SSL**: CA certificate generation and management
 - **CA Download**: Easily distribute certificates to other devices
 
@@ -100,6 +101,7 @@ npm run dist
 - `/cuepernova/cuestation/clearScreen` - Clear all displays
 - `/cuepernova/cuestation/fadeScreen [duration]` - Fade out displays
 - `/cuepernova/cuestation/refreshScreen` - Refresh cuestation pages
+- `/cuepernova/cuestation/[name]/mapping-update` - Update mapping for specific cuestation (JSON in args[0])
 - `/cuepernova/system/clear-rtc` - Clear RTC signals
 - `/cuepernova/system/clearMappings` - Clear all projection mappings
 - `/cuepernova/system/resetMapping [cuestationName]` - Reset mapping for specific cuestation
@@ -143,6 +145,7 @@ cuepernova/
 │   ├── components/
 │   │   ├── CueList.tsx
 │   │   ├── CuestationManager.tsx
+│   │   ├── MappingModal.tsx
 │   │   ├── ServerToggle.tsx
 │   │   └── SettingsModal.tsx
 │   └── types.ts          # TypeScript interfaces
@@ -221,15 +224,23 @@ Consolidated data file containing all project data:
 Each cuestation consists of:
 - **Name**: Unique identifier for the cuestation
 - **Showtime Resolution**: Fixed width/height in pixels for content display (e.g., 1920x1080)
-- **Mapping**: Maptastic configuration for projection mapping transforms
+- **Mapping**: Maptastic configuration for projection mapping transforms (single layer only)
 
 When a cuestation page loads:
 1. Fetches configuration from `/api/cuestation/:name` endpoint
 2. Sets the `#its-showtime` div to the specified resolution
-3. Initializes Maptastic with saved mapping configuration
+3. Initializes Maptastic with saved mapping configuration (single layer)
 4. Connects WebSocket for real-time content updates
 
 The showtime resolution defines the content canvas size, while Maptastic handles transforming it to fit the actual display/projector output.
+
+### Mapping Editor
+The mapping editor allows users to interactively adjust projection mapping:
+1. Click the mapping button (map icon) next to any cuestation in the Main Screen
+2. A modal opens with a Maptastic editor showing a grid pattern
+3. Drag the corner handles to adjust the mapping transformation
+4. Changes are sent live to the cuestation display via WebSocket
+5. Click Save to persist the mapping to db.json, or Cancel to revert
 
 ### Adding New Screen Types
 Edit `static-src/js/cuestation.ts` and add handler to `cueHandlers` object:
@@ -267,5 +278,6 @@ case 'mycommand':
 - Media files go in `public/media/`
 - Custom cueballs go in `public/cueballs/`
 - All project data is stored in `db.json`
-- The mapping interface saves to browser localStorage
+- Mapping data is saved to db.json (not localStorage)
+- Live mapping updates are sent via WebSocket without throttling
 - Console logs OSC messages for debugging

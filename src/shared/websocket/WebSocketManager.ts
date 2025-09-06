@@ -215,7 +215,26 @@ export class WebSocketManager {
   }
 
   private setupDefaultRoutes(): void {
-    // Cuestation broadcast route
+    // Cuestation-specific mapping update route
+    this.addRoute(/^\/cuepernova\/cuestation\/([^\/]+)\/mapping-update$/, (message, client) => {
+      if (client.type === 'control') {
+        // Extract cuestation name from address
+        const match = message.address.match(/^\/cuepernova\/cuestation\/([^\/]+)\/mapping-update$/);
+        if (match && match[1]) {
+          const cuestationName = match[1];
+          // Send mapping update to specific cuestation
+          const targetCuestation = this.findCuestationByName(cuestationName);
+          if (targetCuestation) {
+            this.sendToClient(targetCuestation, message);
+            this.log(`Sent mapping update to cuestation: ${cuestationName}`);
+          } else {
+            this.log(`Cuestation not found: ${cuestationName}`, 'warn');
+          }
+        }
+      }
+    });
+
+    // Cuestation broadcast route (general)
     this.addRoute(/^\/cuepernova\/cuestation\//, (message, client) => {
       if (client.type === 'control') {
         this.broadcastToCuestations(message);

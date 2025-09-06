@@ -8,7 +8,7 @@ Open source theater projection control system as a cross-platform Electron deskt
 - 🎵 **QLab Integration** - Full OSC support for seamless QLab integration  
 - 🌐 **WebSocket Communication** - Real-time updates across all connected devices
 - 📹 **WebRTC Support** - Peer-to-peer video streaming between devices
-- 🗺️ **Projection Mapping** - Built-in mapping interface for complex surfaces
+- 🗺️ **Projection Mapping** - Interactive mapping editor with live preview
 - 🔒 **Automatic SSL** - Self-signed certificate generation for secure connections
 - 💻 **Cross-Platform** - Runs on Windows, macOS, and Linux
 
@@ -52,8 +52,18 @@ Download the latest release for your platform from the [Releases](https://github
 
 1. Click "Add Cuestation" to create a new display device
 2. Give it a unique name (no spaces)
-3. Click the window icon to open the cuestation display
-4. Click the map icon to configure projection mapping
+3. Set the showtime resolution (content canvas size)
+4. Click the window icon to open the cuestation display
+5. Click the map icon to configure projection mapping
+
+### Projection Mapping
+
+1. Click the map icon next to any cuestation
+2. A modal window opens with the mapping editor
+3. Drag the corner handles to adjust the projection transformation
+4. The grid pattern helps visualize the mapping distortion
+5. Changes are sent live to the cuestation display
+6. Click "Save" to persist the mapping or "Cancel" to revert
 
 ### Creating Cues
 
