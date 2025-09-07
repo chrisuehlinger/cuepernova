@@ -52,6 +52,7 @@
     "zod": "^4.1.5"
   },
   "devDependencies": {
+    "@electron/notarize": "^2.5.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.6.1",
     "@types/express": "^5.0.3",
     "@types/jquery": "^3.5.33",
@@ -91,7 +92,12 @@
       "target": [
         "dmg",
         "zip"
-      ]
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": false
     },
     "win": {
       "target": [
@@ -104,6 +110,7 @@
         "AppImage",
         "deb"
       ]
-    }
+    },
+    "afterSign": "scripts/notarize.js"
   }
 }
