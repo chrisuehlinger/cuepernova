@@ -11,12 +11,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Cuestation, MaptasticMapping } from '../../src/shared/types';
-
-declare global {
-  interface Window {
-    Maptastic: any;
-  }
-}
+// @ts-ignore - maptastic doesn't have TypeScript definitions
+import { Maptastic } from 'maptastic';
 
 interface MappingModalProps {
   open: boolean;
@@ -35,27 +31,12 @@ const MappingModal: React.FC<MappingModalProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const maptasticRef = useRef<any>(null);
-  const [maptasticLoaded, setMaptasticLoaded] = useState(false);
   const [originalMapping, setOriginalMapping] = useState<MaptasticMapping | null>(null);
   const [isTracking, setIsTracking] = useState(false);
 
-  // Load Maptastic script
-  useEffect(() => {
-    if (open && !window.Maptastic) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/gh/glowbox/maptasticjs@master/build/maptastic.min.js';
-      script.onload = () => {
-        setMaptasticLoaded(true);
-      };
-      document.head.appendChild(script);
-    } else if (window.Maptastic) {
-      setMaptasticLoaded(true);
-    }
-  }, [open]);
-
   // Initialize Maptastic when modal opens
   useEffect(() => {
-    if (open && maptasticLoaded && containerRef.current && cuestation) {
+    if (open && containerRef.current && cuestation) {
       // Store original mapping
       setOriginalMapping(cuestation.mapping || {
         layers: [{
@@ -76,31 +57,43 @@ const MappingModal: React.FC<MappingModalProps> = ({
 
       // Initialize Maptastic on the container
       setTimeout(() => {
-        if (window.Maptastic && !maptasticRef.current) {
-          maptasticRef.current = window.Maptastic('mapping-preview');
-          
-          // Apply existing mapping if available
-          if (cuestation.mapping?.layers?.[0]) {
-            maptasticRef.current.setConfigData({
-              layers: [cuestation.mapping.layers[0]]
-            });
-          }
+        if (!maptasticRef.current) {
+          try {
+            maptasticRef.current = new Maptastic('mapping-preview');
+            
+            // Apply existing mapping if available
+            if (cuestation.mapping?.layers?.[0]) {
+              maptasticRef.current.setLayout([{
+                id: 'mapping-preview',
+                targetPoints: cuestation.mapping.layers[0].targetPoints,
+                sourcePoints: cuestation.mapping.layers[0].sourcePoints
+              }]);
+            }
 
-          // Track mapping changes
-          setIsTracking(true);
+            // Enable config mode
+            maptasticRef.current.setConfigEnabled(true);
+
+            // Track mapping changes
+            setIsTracking(true);
+          } catch (error) {
+            console.error('Failed to initialize Maptastic:', error);
+          }
         }
       }, 100);
     }
 
     return () => {
       // Cleanup
+      if (maptasticRef.current) {
+        maptasticRef.current.setConfigEnabled(false);
+      }
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
       }
       maptasticRef.current = null;
       setIsTracking(false);
     };
-  }, [open, maptasticLoaded, cuestation]);
+  }, [open, cuestation]);
 
   // Track mapping changes and send via WebSocket
   useEffect(() => {
@@ -108,13 +101,20 @@ const MappingModal: React.FC<MappingModalProps> = ({
 
     const trackChanges = setInterval(() => {
       if (maptasticRef.current) {
-        const currentMapping = maptasticRef.current.getConfigData();
-        if (currentMapping && currentMapping.layers) {
-          // Only keep the first layer (single layer support)
-          const singleLayerMapping: MaptasticMapping = {
-            layers: [currentMapping.layers[0]]
-          };
-          onMappingChange(singleLayerMapping);
+        try {
+          const layout = maptasticRef.current.getLayout();
+          if (layout && layout.length > 0) {
+            // Only keep the first layer (single layer support)
+            const singleLayerMapping: MaptasticMapping = {
+              layers: [{
+                targetPoints: layout[0].targetPoints,
+                sourcePoints: layout[0].sourcePoints
+              }]
+            };
+            onMappingChange(singleLayerMapping);
+          }
+        } catch (error) {
+          console.error('Error getting Maptastic layout:', error);
         }
       }
     }, 100); // Send updates frequently without throttling
@@ -124,13 +124,20 @@ const MappingModal: React.FC<MappingModalProps> = ({
 
   const handleSave = useCallback(() => {
     if (maptasticRef.current) {
-      const mapping = maptasticRef.current.getConfigData();
-      if (mapping && mapping.layers) {
-        // Only save the first layer
-        const singleLayerMapping: MaptasticMapping = {
-          layers: [mapping.layers[0]]
-        };
-        onSave(singleLayerMapping);
+      try {
+        const layout = maptasticRef.current.getLayout();
+        if (layout && layout.length > 0) {
+          // Only save the first layer
+          const singleLayerMapping: MaptasticMapping = {
+            layers: [{
+              targetPoints: layout[0].targetPoints,
+              sourcePoints: layout[0].sourcePoints
+            }]
+          };
+          onSave(singleLayerMapping);
+        }
+      } catch (error) {
+        console.error('Error saving mapping:', error);
       }
     }
     onClose();
@@ -177,19 +184,7 @@ const MappingModal: React.FC<MappingModalProps> = ({
             position: 'relative',
             background: '#1a1a1a',
           }}
-        >
-          {!maptasticLoaded && (
-            <Box sx={{ 
-              position: 'absolute', 
-              top: '50%', 
-              left: '50%', 
-              transform: 'translate(-50%, -50%)',
-              color: 'text.secondary'
-            }}>
-              <Typography>Loading Maptastic...</Typography>
-            </Box>
-          )}
-        </Box>
+        />
         <Box sx={{ 
           position: 'absolute', 
           bottom: 16, 
