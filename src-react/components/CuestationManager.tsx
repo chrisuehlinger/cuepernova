@@ -43,7 +43,7 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
 
   const handleAdd = useCallback(() => {
     const newCuestation: Cuestation = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       name: `Cuestation ${cuestations.length + 1}`,
       description: '',
       showtimeResolution: {

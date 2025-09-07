@@ -38,7 +38,7 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
 
   const handleAdd = useCallback(() => {
     const newCue: Cue = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       number: (cues.length + 1).toString(),
       name: 'New Cue',
       type: 'clear',
