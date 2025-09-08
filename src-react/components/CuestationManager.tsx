@@ -27,12 +27,14 @@ interface CuestationManagerProps {
   cuestations: Cuestation[];
   onChange: (cuestations: Cuestation[]) => void;
   serverRunning: boolean;
+  config?: { httpPort?: number; httpsPort?: number; oscPort?: number };
 }
 
 const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
   cuestations,
   onChange,
   serverRunning,
+  config,
 }) => {
   const [editDialog, setEditDialog] = useState(false);
   const [editingCuestation, setEditingCuestation] = useState<Cuestation | null>(null);
@@ -109,29 +111,51 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
 
   // Setup WebSocket connection when server is running
   useEffect(() => {
-    if (serverRunning && !wsConnection) {
-      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = new WebSocket(`${protocol}://${window.location.host}/control`);
-      
-      ws.onopen = () => {
-        console.log('Control WebSocket connected');
-        setWsConnection(ws);
-      };
-      
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-      
-      ws.onclose = () => {
-        console.log('Control WebSocket disconnected');
+    if (!serverRunning) {
+      // Clean up connection if server stops
+      if (wsConnection) {
+        wsConnection.close();
         setWsConnection(null);
-      };
-      
-      return () => {
-        ws.close();
-      };
+      }
+      return;
     }
-  }, [serverRunning, wsConnection]);
+    
+    // Determine WebSocket URL based on context (Electron vs web)
+    let wsUrl: string;
+    
+    if (window.electronAPI) {
+      // Running in Electron - use localhost with configured ports
+      // In Electron, we always use ws:// since it's connecting to localhost
+      const port = config?.httpPort || 8080;
+      wsUrl = `ws://localhost:${port}/control`;
+    } else {
+      // Running in web browser - detect protocol from current page
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      wsUrl = `${protocol}://${window.location.host}/control`;
+    }
+    
+    const ws = new WebSocket(wsUrl);
+    
+    ws.onopen = () => {
+      console.log('Control WebSocket connected');
+      setWsConnection(ws);
+    };
+    
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+    
+    ws.onclose = () => {
+      console.log('Control WebSocket disconnected');
+      setWsConnection(null);
+    };
+    
+    return () => {
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+        ws.close();
+      }
+    };
+  }, [serverRunning, config]); // Removed wsConnection from dependencies
 
   const handleEditMapping = useCallback((cuestation: Cuestation) => {
     if (!serverRunning) {

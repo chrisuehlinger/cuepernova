@@ -29,9 +29,10 @@ interface CueListProps {
   cues: Cue[];
   onChange: (cues: Cue[]) => void;
   serverRunning: boolean;
+  config?: { httpPort?: number; httpsPort?: number; oscPort?: number };
 }
 
-const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunning }) => {
+const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunning, config }) => {
   const [editDialog, setEditDialog] = useState(false);
   const [editingCue, setEditingCue] = useState<Cue | null>(null);
   const [formData, setFormData] = useState<Partial<Cue>>({});
@@ -84,13 +85,38 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
     };
 
     try {
-      // This would normally send via WebSocket to the server
-      console.log('Executing cue:', message);
-      // TODO: Implement WebSocket connection to send cue
+      // Determine WebSocket URL based on context (Electron vs web)
+      let wsUrl: string;
+      
+      if (window.electronAPI) {
+        // Running in Electron - use localhost with configured ports
+        // In Electron, we always use ws:// since it's connecting to localhost
+        const port = config?.httpPort || 8080;
+        wsUrl = `ws://localhost:${port}/control`;
+      } else {
+        // Running in web browser - detect protocol from current page
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        wsUrl = `${protocol}://${window.location.host}/control`;
+      }
+      
+      // Create temporary WebSocket connection to send the cue
+      const ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        ws.send(JSON.stringify(message));
+        console.log('Executed cue:', message);
+        // Close after sending
+        setTimeout(() => ws.close(), 100);
+      };
+      
+      ws.onerror = (error) => {
+        console.error('Failed to execute cue:', error);
+        alert('Failed to connect to server. Make sure the server is running.');
+      };
     } catch (error) {
       console.error('Failed to execute cue:', error);
     }
-  }, [serverRunning]);
+  }, [serverRunning, config]);
 
   const cueTypes = useMemo(() => [
     'clear', 'message', 'video', 'image', 'cueball', 'osc'

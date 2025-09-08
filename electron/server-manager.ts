@@ -184,7 +184,8 @@ export class ServerManager {
     // Setup WebSocket server on HTTPS
     this.wss = new WebSocketServer({ noServer: true });
     
-    // Setup WebSocket upgrade handling
+    // Setup WebSocket upgrade handling on both HTTP and HTTPS servers
+    this.httpServer.on('upgrade', wsUpgrade);
     this.httpsServer.on('upgrade', wsUpgrade);
     
     // Load config from db.json and setup sockets

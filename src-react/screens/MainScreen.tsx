@@ -151,6 +151,7 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
                 cues={cues}
                 onChange={handleCuesChange}
                 serverRunning={serverRunning}
+                config={config}
               />
             </Paper>
           </Grid>
@@ -173,6 +174,7 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
                 cuestations={cuestations}
                 onChange={handleCuestationsChange}
                 serverRunning={serverRunning}
+                config={config}
               />
             </Paper>
           </Grid>
