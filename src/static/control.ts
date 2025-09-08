@@ -1,4 +1,4 @@
-declare const $: JQueryStatic;
+import $ from 'jquery';
 
 interface Cue {
   name: string;

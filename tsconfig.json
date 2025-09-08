@@ -20,6 +20,6 @@
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo/react.tsbuildinfo"
   },
-  "include": ["src-react/**/*", "static-src/**/*", "src/shared/**/*"],
+  "include": ["src-react/**/*", "src/shared/**/*"],
   "exclude": ["node_modules"]
 }

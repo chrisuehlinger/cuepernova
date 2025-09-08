@@ -1,5 +1,6 @@
-declare const $: JQueryStatic;
-declare const Maptastic: any; // External library without types
+import $ from 'jquery';
+// @ts-ignore - Maptastic doesn't have type definitions
+import Maptastic from 'maptastic';
 
 interface MaptasticInstance {
   setConfigData(data: any): void;
