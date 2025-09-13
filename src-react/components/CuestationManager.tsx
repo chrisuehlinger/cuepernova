@@ -81,12 +81,14 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
       const height = formData.showtimeResolution?.height || 1080;
       const newCuestation = {
         ...formData,
-        // Default Maptastic mapping using pixel coordinates
+        // Default Maptastic mapping with normalized target points (0-1)
         mapping: {
           layers: [{
+            // Target points are normalized (0-1)
             targetPoints: [
-              [0, 0], [width, 0], [width, height], [0, height]
+              [0, 0], [1, 0], [1, 1], [0, 1]
             ],
+            // Source points are in resolution coordinates
             sourcePoints: [
               [0, 0], [width, 0], [width, height], [0, height]
             ]

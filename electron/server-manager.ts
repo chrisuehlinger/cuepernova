@@ -115,7 +115,9 @@ export class ServerManager {
             const height = cuestation.showtimeResolution?.height || 1080;
             cuestation.mapping = {
               layers: [{
-                targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
+                // Target points are normalized (0-1)
+                targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
+                // Source points are in resolution coordinates
                 sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
               }]
             };
@@ -131,7 +133,9 @@ export class ServerManager {
             showtimeResolution: { width, height },
             mapping: {
               layers: [{
-                targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
+                // Target points are normalized (0-1)
+                targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
+                // Source points are in resolution coordinates
                 sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
               }]
             }

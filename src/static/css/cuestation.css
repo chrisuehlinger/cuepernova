@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100vh;
+  width: 100vw;
+}
+
 body {
   background: black;
   overflow: hidden;
@@ -55,6 +60,7 @@ body {
   background: #333;
   color: white;
   font-family: monospace;
+  border: 10px dashed dodgerblue;
 }
 
 .debug-wrapper h1 {

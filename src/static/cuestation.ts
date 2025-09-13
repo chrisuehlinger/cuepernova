@@ -189,10 +189,23 @@ function handleOscMessage(message: WebSocketMessage): void {
         console.log('Updating mapping:', mappingData);
         // Format for setLayout: array of layer objects with id and points
         if (mappingData.layers && mappingData.layers.length > 0) {
+          // Get current window dimensions
+          const width = window.innerWidth;
+          const height = window.innerHeight;
+          
+          // Denormalize target points from 0-1 to window pixels
+          const denormalizedTargetPoints = mappingData.layers[0].targetPoints.map((point: number[]) => [
+            point[0] * width,
+            point[1] * height
+          ]);
+          
+          // Source points stay in resolution coordinates
+          const sourcePoints = mappingData.layers[0].sourcePoints;
+          
           state.maptastic.setLayout([{
             id: 'its-showtime',
-            targetPoints: mappingData.layers[0].targetPoints,
-            sourcePoints: mappingData.layers[0].sourcePoints
+            targetPoints: denormalizedTargetPoints,
+            sourcePoints: sourcePoints
           }]);
         }
       } catch (err) {
@@ -233,13 +246,16 @@ function handleOscMessage(message: WebSocketMessage): void {
         
       case 'clearMappings':
         if (state.maptastic) {
-          // Reset to default mapping using pixel coordinates
-          const width = state.config?.showtimeResolution?.width || 1920;
-          const height = state.config?.showtimeResolution?.height || 1080;
+          // Reset to default mapping - normalized target points denormalized to window pixels
+          const windowWidth = window.innerWidth;
+          const windowHeight = window.innerHeight;
+          const sourceWidth = state.config?.showtimeResolution?.width || 1920;
+          const sourceHeight = state.config?.showtimeResolution?.height || 1080;
+          
           state.maptastic.setLayout([{
             id: 'its-showtime',
-            targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
-            sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
+            targetPoints: [[0, 0], [windowWidth, 0], [windowWidth, windowHeight], [0, windowHeight]],
+            sourcePoints: [[0, 0], [sourceWidth, 0], [sourceWidth, sourceHeight], [0, sourceHeight]]
           }]);
           console.log('Mappings reset to default');
         }
@@ -302,22 +318,36 @@ function initProjectionMapping(): void {
     // Apply saved mapping if available (single layer only)
     if (state.config.mapping && state.config.mapping.layers && state.config.mapping.layers.length > 0 && state.maptastic) {
       console.log('Applying saved mapping configuration:', state.config.mapping);
+      
+      // Get current window dimensions
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      
+      // Denormalize target points from normalized (0-1) to window pixels
+      const denormalizedTargetPoints = state.config.mapping.layers[0].targetPoints.map((point: number[]) => [
+        point[0] * windowWidth,
+        point[1] * windowHeight
+      ]);
+      
       // Format for setLayout: array of layer objects with id and points
       state.maptastic.setLayout([{
         id: 'its-showtime',
-        targetPoints: state.config.mapping.layers[0].targetPoints,
+        targetPoints: denormalizedTargetPoints,
         sourcePoints: state.config.mapping.layers[0].sourcePoints
       }]);
     } else {
       console.log('Using default Maptastic mapping');
-      // Set default mapping using pixel coordinates based on resolution
-      const width = state.config.showtimeResolution?.width || 1920;
-      const height = state.config.showtimeResolution?.height || 1080;
+      // Set default mapping - full window for target, full resolution for source
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const sourceWidth = state.config.showtimeResolution?.width || 1920;
+      const sourceHeight = state.config.showtimeResolution?.height || 1080;
+      
       if (state.maptastic) {
         state.maptastic.setLayout([{
           id: 'its-showtime',
-          targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
-          sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
+          targetPoints: [[0, 0], [windowWidth, 0], [windowWidth, windowHeight], [0, windowHeight]],
+          sourcePoints: [[0, 0], [sourceWidth, 0], [sourceWidth, sourceHeight], [0, sourceHeight]]
         }]);
       }
     }

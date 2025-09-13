@@ -86,11 +86,35 @@ class MappingEditor {
       
       // Apply existing mapping if available
       if (config.mapping?.layers?.[0] && this.maptastic) {
+        // Get window dimensions
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        
+        // Denormalize target points from 0-1 to window pixels
+        const denormalizedTargetPoints = config.mapping.layers[0].targetPoints.map((point: number[]) => [
+          point[0] * windowWidth,
+          point[1] * windowHeight
+        ]);
+        
         this.maptastic.setLayout([{
           id: 'maptastic-target',
-          targetPoints: config.mapping.layers[0].targetPoints,
+          targetPoints: denormalizedTargetPoints,
           sourcePoints: config.mapping.layers[0].sourcePoints
         }]);
+      } else {
+        // Set default mapping - full window
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const sourceWidth = config.showtimeResolution.width;
+        const sourceHeight = config.showtimeResolution.height;
+        
+        if (this.maptastic) {
+          this.maptastic.setLayout([{
+            id: 'maptastic-target',
+            targetPoints: [[0, 0], [windowWidth, 0], [windowWidth, windowHeight], [0, windowHeight]],
+            sourcePoints: [[0, 0], [sourceWidth, 0], [sourceWidth, sourceHeight], [0, sourceHeight]]
+          }]);
+        }
       }
       
       // Enable config mode
@@ -121,9 +145,19 @@ class MappingEditor {
     const layout = this.maptastic.getLayout();
     if (!layout || layout.length === 0) return null;
     
+    // Get window dimensions for normalization
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    // Normalize target points from window pixels to 0-1 (or beyond for offscreen points)
+    const normalizedTargetPoints = layout[0].targetPoints.map((point: number[]) => [
+      point[0] / windowWidth,
+      point[1] / windowHeight
+    ]);
+    
     return {
       layers: [{
-        targetPoints: layout[0].targetPoints,
+        targetPoints: normalizedTargetPoints,
         sourcePoints: layout[0].sourcePoints
       }]
     };
