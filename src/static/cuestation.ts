@@ -66,7 +66,7 @@ const cueHandlers: Record<string, CueHandler> = {
       <h1>RESOLUTION: <strong>${state.config?.showtimeResolution.width || '?'} x ${state.config?.showtimeResolution.height || '?'}</strong></h1>
     </div>`);
   },
-  
+
   message: (message: WebSocketMessage) => {
     const text = message.args?.[0] || 'No message';
     const subtitle = message.args?.[1] || '';
@@ -75,7 +75,7 @@ const cueHandlers: Record<string, CueHandler> = {
       ${subtitle ? `<p>${subtitle}</p>` : ''}
     </div>`);
   },
-  
+
   video: (message: WebSocketMessage) => {
     const videoPath = message.args?.[0];
     const loop = message.args?.[1] === 'loop';
@@ -91,7 +91,7 @@ const cueHandlers: Record<string, CueHandler> = {
       }
     }
   },
-  
+
   image: (message: WebSocketMessage) => {
     const imagePath = message.args?.[0];
     if (imagePath) {
@@ -100,14 +100,14 @@ const cueHandlers: Record<string, CueHandler> = {
       </div>`);
     }
   },
-  
+
   iframe: (message: WebSocketMessage) => {
     const url = message.args?.[0];
     if (url) {
       state.showtime.html(`<iframe class="fullscreen-frame" src="${url}"></iframe>`);
     }
   },
-  
+
   cueball: (message: WebSocketMessage) => {
     const cueballName = message.args?.[0];
     if (cueballName) {
@@ -129,28 +129,28 @@ function connectWebSocket(): void {
   console.log('Attempting to connect...');
   const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
   const wsUrl = `${protocol}://${location.host}/cuestation?name=${encodeURIComponent(CUESTATION_NAME)}`;
-  
+
   state.connection = new WebSocket(wsUrl);
-  
+
   state.connection.onopen = function () {
     console.log('WebSocket connected!');
     $('#connection-status').removeClass('disconnected').addClass('connected').text('Connected');
   };
-  
-  state.connection.onmessage = function(e: MessageEvent) {
+
+  state.connection.onmessage = function (e: MessageEvent) {
     try {
       const message: WebSocketMessage = JSON.parse(e.data);
       console.log('Received:', message);
       handleOscMessage(message);
-    } catch(err) {
+    } catch (err) {
       console.error('Error parsing message:', err);
     }
   };
-  
+
   state.connection.onerror = function (e: Event) {
     console.error('WebSocket error:', e);
   };
-  
+
   state.connection.onclose = function () {
     console.log('WebSocket closed, reconnecting...');
     $('#connection-status').removeClass('connected').addClass('disconnected').text('Disconnected');
@@ -161,26 +161,26 @@ function connectWebSocket(): void {
 // Handle incoming OSC messages
 function handleOscMessage(message: WebSocketMessage): void {
   const pathParts = message.address.split('/');
-  
+
   // Messages come in format: /cuepernova/cuestation/[name|all]/[command]
   // We need to check if this message is for us or for 'all'
-  
+
   if (pathParts[1] !== 'cuepernova' || pathParts[2] !== 'cuestation') {
     console.log('Not a cuestation message:', message.address);
     return;
   }
-  
+
   const target = pathParts[3];
-  
+
   // Check if message is for this cuestation or for all
   if (target !== CUESTATION_NAME && target !== 'all') {
     console.log(`Message not for this cuestation (${CUESTATION_NAME}):`, message.address);
     return;
   }
-  
+
   // Get the action from the correct position (after the target)
   const action = pathParts[4];
-  
+
   // Special case for mapping update
   if (action === 'mapping-update' && target === CUESTATION_NAME) {
     if (state.maptastic && message.args?.[0]) {
@@ -192,16 +192,16 @@ function handleOscMessage(message: WebSocketMessage): void {
           // Get current window dimensions
           const width = window.innerWidth;
           const height = window.innerHeight;
-          
+
           // Denormalize target points from 0-1 to window pixels
           const denormalizedTargetPoints = mappingData.layers[0].targetPoints.map((point: number[]) => [
             point[0] * width,
             point[1] * height
           ]);
-          
+
           // Source points stay in resolution coordinates
           const sourcePoints = mappingData.layers[0].sourcePoints;
-          
+
           state.maptastic.setLayout([{
             id: 'its-showtime',
             targetPoints: denormalizedTargetPoints,
@@ -214,55 +214,55 @@ function handleOscMessage(message: WebSocketMessage): void {
     }
     return;
   }
-  
-  switch(action) {
-      case 'showScreen':
-        const screenType = pathParts[5];
-        if (screenType && cueHandlers[screenType]) {
-          state.showtime.addClass('show');
-          cueHandlers[screenType](message);
-        } else {
-          console.warn(`Unknown screen type: ${screenType}`);
-        }
-        break;
-        
-      case 'clearScreen':
+
+  switch (action) {
+    case 'showScreen':
+      const screenType = pathParts[5];
+      if (screenType && cueHandlers[screenType]) {
+        state.showtime.addClass('show');
+        cueHandlers[screenType](message);
+      } else {
+        console.warn(`Unknown screen type: ${screenType}`);
+      }
+      break;
+
+    case 'clearScreen':
+      state.showtime.removeClass('show');
+      state.showtime.html('');
+      break;
+
+    case 'fadeScreen':
+      const duration = parseInt(String(message.args?.[0])) || 1000;
+      state.showtime.fadeOut(duration, () => {
         state.showtime.removeClass('show');
         state.showtime.html('');
-        break;
-        
-      case 'fadeScreen':
-        const duration = parseInt(String(message.args?.[0])) || 1000;
-        state.showtime.fadeOut(duration, () => {
-          state.showtime.removeClass('show');
-          state.showtime.html('');
-          state.showtime.show();
-        });
-        break;
-        
-      case 'refreshScreen':
-        window.location.reload();
-        break;
-        
-      case 'clearMappings':
-        if (state.maptastic) {
-          // Reset to default mapping - normalized target points denormalized to window pixels
-          const windowWidth = window.innerWidth;
-          const windowHeight = window.innerHeight;
-          const sourceWidth = state.config?.showtimeResolution?.width || 1920;
-          const sourceHeight = state.config?.showtimeResolution?.height || 1080;
-          
-          state.maptastic.setLayout([{
-            id: 'its-showtime',
-            targetPoints: [[0, 0], [windowWidth, 0], [windowWidth, windowHeight], [0, windowHeight]],
-            sourcePoints: [[0, 0], [sourceWidth, 0], [sourceWidth, sourceHeight], [0, sourceHeight]]
-          }]);
-          console.log('Mappings reset to default');
-        }
-        break;
-        
-      default:
-        console.log(`No handler for action: ${action}`);
+        state.showtime.show();
+      });
+      break;
+
+    case 'refreshScreen':
+      window.location.reload();
+      break;
+
+    case 'clearMappings':
+      if (state.maptastic) {
+        // Reset to default mapping - normalized target points denormalized to window pixels
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const sourceWidth = state.config?.showtimeResolution?.width || 1920;
+        const sourceHeight = state.config?.showtimeResolution?.height || 1080;
+
+        state.maptastic.setLayout([{
+          id: 'its-showtime',
+          targetPoints: [[0, 0], [windowWidth, 0], [windowWidth, windowHeight], [0, windowHeight]],
+          sourcePoints: [[0, 0], [sourceWidth, 0], [sourceWidth, sourceHeight], [0, sourceHeight]]
+        }]);
+        console.log('Mappings reset to default');
+      }
+      break;
+
+    default:
+      console.log(`No handler for action: ${action}`);
   }
 }
 
@@ -303,32 +303,40 @@ async function fetchCuestationConfig(): Promise<CuestationConfig | null> {
 // Initialize projection mapping with cuestation config
 function initProjectionMapping(): void {
   if (!state.config) return;
-  
+
   // Set the showtime div dimensions based on config
   state.showtime.css({
     width: `${state.config.showtimeResolution.width}px`,
     height: `${state.config.showtimeResolution.height}px`
   });
-  
+
   // Initialize Maptastic
   try {
     console.log('Initializing Maptastic...');
     state.maptastic = new Maptastic('its-showtime');
-    
+
     // Apply saved mapping if available (single layer only)
     if (state.config.mapping && state.config.mapping.layers && state.config.mapping.layers.length > 0 && state.maptastic) {
       console.log('Applying saved mapping configuration:', state.config.mapping);
-      
+
       // Get current window dimensions
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
-      
+
+      console.log('Window dimensions:', windowWidth, windowHeight);
+      console.log('Original target points:', state.config.mapping.layers[0].targetPoints);
+
       // Denormalize target points from normalized (0-1) to window pixels
       const denormalizedTargetPoints = state.config.mapping.layers[0].targetPoints.map((point: number[]) => [
         point[0] * windowWidth,
         point[1] * windowHeight
       ]);
-      
+
+      console.log('Denormalized target points:', denormalizedTargetPoints);
+
+      document.getElementById('its-showtime')!.style.width = state.config.showtimeResolution.width + 'px';
+      document.getElementById('its-showtime')!.style.height = state.config.showtimeResolution.height + 'px';
+
       // Format for setLayout: array of layer objects with id and points
       state.maptastic.setLayout([{
         id: 'its-showtime',
@@ -342,7 +350,7 @@ function initProjectionMapping(): void {
       const windowHeight = window.innerHeight;
       const sourceWidth = state.config.showtimeResolution?.width || 1920;
       const sourceHeight = state.config.showtimeResolution?.height || 1080;
-      
+
       if (state.maptastic) {
         state.maptastic.setLayout([{
           id: 'its-showtime',
@@ -359,15 +367,15 @@ function initProjectionMapping(): void {
 // Initialize
 $(async () => {
   state.showtime = $('#its-showtime');
-  
+
   // Fetch configuration from server
   state.config = await fetchCuestationConfig();
-  
+
   // Initialize projection mapping with the fetched config
   initProjectionMapping();
-  
+
   // Connect WebSocket
   connectWebSocket();
 });
 
-export {}; // Make this a module
+export { }; // Make this a module
