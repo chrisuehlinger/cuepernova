@@ -83,11 +83,13 @@ Download the latest release for your platform from the [Releases](https://github
 Cuepernova listens for OSC commands on port 57121 (configurable):
 
 ```
-/cuepernova/cuestation/showScreen/video "path/to/video.mp4" "true"
-/cuepernova/cuestation/showScreen/message "Hello World" "Subtitle"
-/cuepernova/cuestation/clearScreen
-/cuepernova/cuestation/fadeScreen 2000
+/cuepernova/cuestation/[cuestation-name]/showScreen/video "path/to/video.mp4" "true"
+/cuepernova/cuestation/[cuestation-name]/showScreen/message "Hello World" "Subtitle"
+/cuepernova/cuestation/[cuestation-name]/clearScreen
+/cuepernova/cuestation/[cuestation-name]/fadeScreen 2000
 ```
+
+If you pass `all` as the cuestation-name, the message will be broadcast to all cuestations.
 
 ### SSL Certificates for Remote Devices
 
