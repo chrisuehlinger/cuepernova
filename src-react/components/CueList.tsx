@@ -78,9 +78,9 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
       return;
     }
 
-    // Send OSC message via WebSocket to server
+    // Send OSC message via WebSocket to server (broadcast to all by default)
     const message = {
-      address: `/cuepernova/cuestation/showScreen/${cue.type}`,
+      address: `/cuepernova/cuestation/all/showScreen/${cue.type}`,
       args: cue.args,
     };
 

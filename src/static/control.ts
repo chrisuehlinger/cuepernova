@@ -101,18 +101,18 @@ function bindEventHandlers(): void {
   // Emergency controls
   $('#bail').on('click', () => {
     if (confirm('Clear all screens?')) {
-      sendMessage('/cuepernova/cuestation/clearScreen');
+      sendMessage('/cuepernova/cuestation/all/clearScreen');
     }
   });
   
   $('#refresh').on('click', () => {
     if (confirm('Refresh all cuestation pages?')) {
-      sendMessage('/cuepernova/cuestation/refreshScreen');
+      sendMessage('/cuepernova/cuestation/all/refreshScreen');
     }
   });
   
   $('#debug').on('click', () => {
-    sendMessage('/cuepernova/cuestation/showScreen/debug');
+    sendMessage('/cuepernova/cuestation/all/showScreen/debug');
   });
   
   // Reload cues button
@@ -124,13 +124,13 @@ function bindEventHandlers(): void {
   
   // Quick controls
   $('#clear-screen').on('click', () => {
-    sendMessage('/cuepernova/cuestation/clearScreen');
+    sendMessage('/cuepernova/cuestation/all/clearScreen');
   });
   
   $('#fade-screen').on('click', () => {
     const duration = prompt('Fade duration in ms:', '1000');
     if (duration) {
-      sendMessage('/cuepernova/cuestation/fadeScreen', [duration]);
+      sendMessage('/cuepernova/cuestation/all/fadeScreen', [duration]);
     }
   });
   
@@ -139,7 +139,7 @@ function bindEventHandlers(): void {
     const text = $('#message-text').val() as string;
     const subtitle = $('#message-subtitle').val() as string;
     if (text) {
-      sendMessage('/cuepernova/cuestation/showScreen/message', [text, subtitle || '']);
+      sendMessage('/cuepernova/cuestation/all/showScreen/message', [text, subtitle || '']);
     }
   });
   
@@ -148,7 +148,7 @@ function bindEventHandlers(): void {
     const path = $('#video-path').val() as string;
     const loop = $('#video-loop').is(':checked');
     if (path) {
-      sendMessage('/cuepernova/cuestation/showScreen/video', [path, loop.toString()]);
+      sendMessage('/cuepernova/cuestation/all/showScreen/video', [path, loop.toString()]);
     }
   });
   
@@ -156,7 +156,7 @@ function bindEventHandlers(): void {
   $('#send-image').on('click', () => {
     const path = $('#image-path').val() as string;
     if (path) {
-      sendMessage('/cuepernova/cuestation/showScreen/image', [path]);
+      sendMessage('/cuepernova/cuestation/all/showScreen/image', [path]);
     }
   });
   
@@ -166,7 +166,7 @@ function bindEventHandlers(): void {
     const argsStr = $('#cueball-args').val() as string;
     if (name) {
       const args = argsStr ? argsStr.split(',').map(s => s.trim()) : [];
-      sendMessage('/cuepernova/cuestation/showScreen/cueball', [name, ...args]);
+      sendMessage('/cuepernova/cuestation/all/showScreen/cueball', [name, ...args]);
     }
   });
   

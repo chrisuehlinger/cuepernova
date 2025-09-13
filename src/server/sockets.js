@@ -50,12 +50,7 @@ controlWS.on('connection', function connection(ws) {
             if (namespace === 'cuepernova') {
                 switch (subNamespace) {
                     case 'cuestation':
-                        // Broadcast to all cuestation clients
-                        cuestationWS.clients.forEach((client) => {
-                            if (client.readyState === WebSocket.OPEN) {
-                                client.send(JSON.stringify(oscMessage));
-                            }
-                        });
+                        handleCuestationMessage(oscMessage);
                         break;
                     case 'system':
                         handleSystemMessage(oscMessage);
@@ -73,6 +68,41 @@ controlWS.on('connection', function connection(ws) {
         }
     });
 });
+// Handle cuestation messages with proper routing
+function handleCuestationMessage(message) {
+    const pathParts = message.address.split('/');
+    const targetName = pathParts[3]; // Get the cuestation name or 'all'
+    
+    if (!targetName) {
+        console.log('Invalid cuestation message format:', message.address);
+        return;
+    }
+    
+    if (targetName === 'all') {
+        // Broadcast to all cuestations
+        cuestationWS.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+                client.send(JSON.stringify(message));
+            }
+        });
+        console.log(`Broadcast to all cuestations: ${message.address}`);
+    } else {
+        // Send to specific cuestation
+        let found = false;
+        cuestationWS.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN && client.cuestationName === targetName) {
+                client.send(JSON.stringify(message));
+                found = true;
+            }
+        });
+        if (found) {
+            console.log(`Sent to cuestation '${targetName}': ${message.address}`);
+        } else {
+            console.log(`Cuestation '${targetName}' not found or not connected`);
+        }
+    }
+}
+
 // Handle system-level messages
 async function handleSystemMessage(message) {
     const command = message.address.split('/')[3];
@@ -83,30 +113,20 @@ async function handleSystemMessage(message) {
             console.log('Cleared RTC signals');
             break;
         case 'clearMappings':
-            // Broadcast clearMappings message to all cuestations
-            cuestationWS.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({
-                        address: '/cuepernova/cuestation/clearMappings',
-                        args: []
-                    }));
-                }
+            // Use the new routing to send to all cuestations
+            handleCuestationMessage({
+                address: '/cuepernova/cuestation/all/clearMappings',
+                args: []
             });
-            console.log('Sent clearMappings to all cuestations');
             break;
         case 'resetMapping':
             // Reset mapping for specific cuestation
             const targetCuestation = message.args && message.args[0];
             if (targetCuestation) {
-                cuestationWS.clients.forEach((client) => {
-                    if (client.readyState === WebSocket.OPEN && client.cuestationName === targetCuestation) {
-                        client.send(JSON.stringify({
-                            address: '/cuepernova/cuestation/clearMappings',
-                            args: []
-                        }));
-                    }
+                handleCuestationMessage({
+                    address: `/cuepernova/cuestation/${targetCuestation}/clearMappings`,
+                    args: []
                 });
-                console.log(`Sent clearMappings to cuestation: ${targetCuestation}`);
             }
             break;
         default:
@@ -135,12 +155,7 @@ export function initOSCServer(port = 57121) {
         if (namespace === 'cuepernova') {
             switch (subNamespace) {
                 case 'cuestation':
-                    // Broadcast to all cuestation clients
-                    cuestationWS.clients.forEach((client) => {
-                        if (client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify(oscMessage));
-                        }
-                    });
+                    handleCuestationMessage(oscMessage);
                     break;
                 case 'system':
                     handleSystemMessage(oscMessage);

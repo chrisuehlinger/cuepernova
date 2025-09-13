@@ -161,8 +161,27 @@ function connectWebSocket(): void {
 function handleOscMessage(message: WebSocketMessage): void {
   const pathParts = message.address.split('/');
   
-  // Check for cuestation-specific mapping update
-  if (message.address === `/cuepernova/cuestation/${CUESTATION_NAME}/mapping-update`) {
+  // Messages come in format: /cuepernova/cuestation/[name|all]/[command]
+  // We need to check if this message is for us or for 'all'
+  
+  if (pathParts[1] !== 'cuepernova' || pathParts[2] !== 'cuestation') {
+    console.log('Not a cuestation message:', message.address);
+    return;
+  }
+  
+  const target = pathParts[3];
+  
+  // Check if message is for this cuestation or for all
+  if (target !== CUESTATION_NAME && target !== 'all') {
+    console.log(`Message not for this cuestation (${CUESTATION_NAME}):`, message.address);
+    return;
+  }
+  
+  // Get the action from the correct position (after the target)
+  const action = pathParts[4];
+  
+  // Special case for mapping update
+  if (action === 'mapping-update' && target === CUESTATION_NAME) {
     if (state.maptastic && message.args?.[0]) {
       try {
         const mappingData = JSON.parse(String(message.args[0]));
@@ -175,12 +194,9 @@ function handleOscMessage(message: WebSocketMessage): void {
     return;
   }
   
-  const action = pathParts[3];
-  
-  if (pathParts[1] === 'cuepernova' && pathParts[2] === 'cuestation') {
-    switch(action) {
+  switch(action) {
       case 'showScreen':
-        const screenType = pathParts[4];
+        const screenType = pathParts[5];
         if (screenType && cueHandlers[screenType]) {
           state.showtime.addClass('show');
           cueHandlers[screenType](message);
@@ -216,7 +232,6 @@ function handleOscMessage(message: WebSocketMessage): void {
         
       default:
         console.log(`No handler for action: ${action}`);
-    }
   }
 }
 

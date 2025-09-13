@@ -20,6 +20,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import MapIcon from '@mui/icons-material/Map';
+import BugReportIcon from '@mui/icons-material/BugReport';
 import { Cuestation, MaptasticMapping } from '../../src/shared/types';
 import MappingModal from './MappingModal';
 
@@ -196,6 +197,27 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
     setMappingCuestation(null);
   }, []);
 
+  const handleSendDebug = useCallback((cuestation: Cuestation) => {
+    if (!serverRunning) {
+      alert('Server must be running to send messages');
+      return;
+    }
+    
+    if (!wsConnection) {
+      alert('Not connected to server');
+      return;
+    }
+    
+    // Send debug message to specific cuestation
+    const message = {
+      address: `/cuepernova/cuestation/${cuestation.name}/showScreen/debug`,
+      args: []
+    };
+    
+    wsConnection.send(JSON.stringify(message));
+    console.log(`Sent debug message to cuestation: ${cuestation.name}`);
+  }, [serverRunning, wsConnection]);
+
   return (
     <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ mb: 2 }}>
@@ -228,6 +250,15 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
             }}
             secondaryAction={
               <Stack direction="row" spacing={1}>
+                <IconButton
+                  edge="end"
+                  onClick={() => handleSendDebug(cuestation)}
+                  disabled={!serverRunning || !wsConnection}
+                  color="info"
+                  title="Send Debug to Cuestation"
+                >
+                  <BugReportIcon />
+                </IconButton>
                 <IconButton
                   edge="end"
                   onClick={() => handleOpen(cuestation)}
