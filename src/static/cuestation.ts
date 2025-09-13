@@ -1,11 +1,12 @@
 import $ from 'jquery';
 // @ts-ignore - Maptastic doesn't have type definitions
-import Maptastic from 'maptastic';
+import * as maptastic from 'maptastic';
+const Maptastic = (maptastic as any).Maptastic;
 
 interface MaptasticInstance {
-  setConfigData(data: any): void;
-  getConfigData(): any;
-  clearMappings(): void;
+  setLayout(layout: any[]): void;
+  getLayout(): any[];
+  setConfigEnabled(enabled: boolean): void;
 }
 
 interface WebSocketMessage {
@@ -186,7 +187,14 @@ function handleOscMessage(message: WebSocketMessage): void {
       try {
         const mappingData = JSON.parse(String(message.args[0]));
         console.log('Updating mapping:', mappingData);
-        state.maptastic.setConfigData(mappingData);
+        // Format for setLayout: array of layer objects with id and points
+        if (mappingData.layers && mappingData.layers.length > 0) {
+          state.maptastic.setLayout([{
+            id: 'its-showtime',
+            targetPoints: mappingData.layers[0].targetPoints,
+            sourcePoints: mappingData.layers[0].sourcePoints
+          }]);
+        }
       } catch (err) {
         console.error('Error parsing mapping data:', err);
       }
@@ -225,8 +233,15 @@ function handleOscMessage(message: WebSocketMessage): void {
         
       case 'clearMappings':
         if (state.maptastic) {
-          state.maptastic.clearMappings();
-          console.log('Mappings cleared');
+          // Reset to default mapping using pixel coordinates
+          const width = state.config?.showtimeResolution?.width || 1920;
+          const height = state.config?.showtimeResolution?.height || 1080;
+          state.maptastic.setLayout([{
+            id: 'its-showtime',
+            targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
+            sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
+          }]);
+          console.log('Mappings reset to default');
         }
         break;
         
@@ -279,34 +294,35 @@ function initProjectionMapping(): void {
     height: `${state.config.showtimeResolution.height}px`
   });
   
-  // Initialize Maptastic if available
-  if (typeof Maptastic !== 'undefined') {
+  // Initialize Maptastic
+  try {
     console.log('Initializing Maptastic...');
-    state.maptastic = Maptastic('its-showtime');
+    state.maptastic = new Maptastic('its-showtime');
     
     // Apply saved mapping if available (single layer only)
     if (state.config.mapping && state.config.mapping.layers && state.config.mapping.layers.length > 0 && state.maptastic) {
-      console.log('Applying saved mapping configuration');
-      // Only use the first layer
-      const singleLayerMapping = {
-        layers: [state.config.mapping.layers[0]]
-      };
-      state.maptastic.setConfigData(singleLayerMapping);
+      console.log('Applying saved mapping configuration:', state.config.mapping);
+      // Format for setLayout: array of layer objects with id and points
+      state.maptastic.setLayout([{
+        id: 'its-showtime',
+        targetPoints: state.config.mapping.layers[0].targetPoints,
+        sourcePoints: state.config.mapping.layers[0].sourcePoints
+      }]);
     } else {
       console.log('Using default Maptastic mapping');
-      // Set default identity mapping explicitly
-      const defaultMapping = {
-        layers: [{
-          targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
-          sourcePoints: [[0, 0], [1, 0], [1, 1], [0, 1]]
-        }]
-      };
+      // Set default mapping using pixel coordinates based on resolution
+      const width = state.config.showtimeResolution?.width || 1920;
+      const height = state.config.showtimeResolution?.height || 1080;
       if (state.maptastic) {
-        state.maptastic.setConfigData(defaultMapping);
+        state.maptastic.setLayout([{
+          id: 'its-showtime',
+          targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
+          sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
+        }]);
       }
     }
-  } else {
-    console.warn('Maptastic library not loaded');
+  } catch (error) {
+    console.error('Failed to initialize Maptastic:', error);
   }
 }
 

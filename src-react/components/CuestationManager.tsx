@@ -21,7 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import MapIcon from '@mui/icons-material/Map';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import { Cuestation, MaptasticMapping } from '../../src/shared/types';
+import { Cuestation } from '../../src/shared/types';
 import MappingModal from './MappingModal';
 
 interface CuestationManagerProps {
@@ -77,16 +77,18 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
       ));
     } else {
       // Add new cuestation with default mapping
+      const width = formData.showtimeResolution?.width || 1920;
+      const height = formData.showtimeResolution?.height || 1080;
       const newCuestation = {
         ...formData,
-        // Default Maptastic mapping (identity transform)
+        // Default Maptastic mapping using pixel coordinates
         mapping: {
           layers: [{
             targetPoints: [
-              [0, 0], [1, 0], [1, 1], [0, 1]
+              [0, 0], [width, 0], [width, height], [0, height]
             ],
             sourcePoints: [
-              [0, 0], [1, 0], [1, 1], [0, 1]
+              [0, 0], [width, 0], [width, height], [0, height]
             ]
           }]
         }
@@ -167,30 +169,21 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
     setMappingModal(true);
   }, [serverRunning]);
 
-  const handleMappingChange = useCallback((mapping: MaptasticMapping) => {
-    if (wsConnection && mappingCuestation) {
-      // Send mapping update to specific cuestation
-      const message = {
-        address: `/cuepernova/cuestation/${mappingCuestation.name}/mapping-update`,
-        args: [JSON.stringify(mapping)]
-      };
-      wsConnection.send(JSON.stringify(message));
+  const handleMappingSave = useCallback(async () => {
+    // Mapping is already saved by the iframe, just refresh the cuestations
+    // to get the updated mapping from the server
+    try {
+      const response = await fetch('/api/cuestations');
+      if (response.ok) {
+        const updatedCuestations = await response.json();
+        onChange(updatedCuestations);
+      }
+    } catch (error) {
+      console.error('Failed to refresh cuestations:', error);
     }
-  }, [wsConnection, mappingCuestation]);
-
-  const handleMappingSave = useCallback((mapping: MaptasticMapping) => {
-    if (mappingCuestation) {
-      // Update the cuestation with the new mapping
-      const updatedCuestations = cuestations.map(c => 
-        c.id === mappingCuestation.id 
-          ? { ...c, mapping } 
-          : c
-      );
-      onChange(updatedCuestations);
-      setMappingModal(false);
-      setMappingCuestation(null);
-    }
-  }, [mappingCuestation, cuestations, onChange]);
+    setMappingModal(false);
+    setMappingCuestation(null);
+  }, [onChange]);
 
   const handleMappingClose = useCallback(() => {
     setMappingModal(false);
@@ -389,7 +382,6 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
         cuestation={mappingCuestation}
         onClose={handleMappingClose}
         onSave={handleMappingSave}
-        onMappingChange={handleMappingChange}
       />
     </Box>
   );

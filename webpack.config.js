@@ -24,6 +24,7 @@ export default (env, argv) => {
       // Static page entries
       'static/control': './src/static/control.ts',
       'static/cuestation': './src/static/cuestation.ts',
+      'static/mapping-editor': './src/static/mapping-editor.ts',
     },
     output: {
       path: path.resolve(__dirname, 'dist/renderer'),

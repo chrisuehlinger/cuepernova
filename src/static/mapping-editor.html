@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapping Editor</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+        }
+        
+        #mapping-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: repeating-linear-gradient(0deg, #333 0px, #333 20px, #444 20px, #444 40px), 
+                        repeating-linear-gradient(90deg, #333 0px, #333 20px, #444 20px, #444 40px);
+            background-size: 40px 40px;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+        }
+        
+        #controls h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        #controls p {
+            margin: 5px 0;
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        
+        #status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            font-size: 12px;
+        }
+        
+        #status.saving {
+            background: rgba(33, 150, 243, 0.9);
+        }
+        
+        #status.error {
+            background: rgba(244, 67, 54, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <div id="mapping-container"></div>
+    
+    <div id="controls">
+        <h3>Mapping Controls</h3>
+        <p>• Drag corners to adjust mapping</p>
+        <p>• Hold SHIFT for fine control</p>
+        <p>• Press R to rotate</p>
+        <p>• Press H to flip horizontal</p>
+        <p>• Press V to flip vertical</p>
+    </div>
+    
+    <div id="status">Ready</div>
+    
+    <script src="/static/js/mapping-editor.js"></script>
+</body>
+</html>

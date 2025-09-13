@@ -29,6 +29,16 @@ async function createWindow() {
     icon: path.join(__dirname, '../../../static/images/icon.png'),
   });
 
+  // Disable CSP entirely for development
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': []
+      }
+    });
+  });
+
   // Load React app
   if (isDev) {
     await mainWindow.loadURL('http://localhost:3000');

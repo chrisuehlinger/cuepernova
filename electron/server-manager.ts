@@ -6,7 +6,7 @@ import * as fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import morgan from 'morgan';
 import { WebSocketServer } from 'ws';
-import { wsUpgrade, initOSCServer } from '../src/server/sockets.js';
+import { wsUpgrade, initOSCServer, broadcastToCuestations } from '../src/server/sockets.js';
 import { setupSignalmaster } from '../src/server/signalmaster.js';
 import { CertificateManager } from './certificate-manager.js';
 
@@ -111,24 +111,28 @@ export class ServerManager {
           }
           // Ensure cuestation has default mapping if none exists
           if (!cuestation.mapping) {
+            const width = cuestation.showtimeResolution?.width || 1920;
+            const height = cuestation.showtimeResolution?.height || 1080;
             cuestation.mapping = {
               layers: [{
-                targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
-                sourcePoints: [[0, 0], [1, 0], [1, 1], [0, 1]]
+                targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
+                sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
               }]
             };
           }
           res.json(cuestation);
         } else {
           // Return default configuration for unknown cuestations
+          const width = 1920;
+          const height = 1080;
           res.json({
             id: 'default',
             name: req.params.name,
-            showtimeResolution: { width: 1920, height: 1080 },
+            showtimeResolution: { width, height },
             mapping: {
               layers: [{
-                targetPoints: [[0, 0], [1, 0], [1, 1], [0, 1]],
-                sourcePoints: [[0, 0], [1, 0], [1, 1], [0, 1]]
+                targetPoints: [[0, 0], [width, 0], [width, height], [0, height]],
+                sourcePoints: [[0, 0], [width, 0], [width, height], [0, height]]
               }]
             }
           });
@@ -136,6 +140,39 @@ export class ServerManager {
       } catch (error) {
         console.error('Error fetching cuestation config:', error);
         res.status(500).json({ error: 'Failed to fetch cuestation configuration' });
+      }
+    });
+
+    // Update cuestation mapping
+    this.app.put('/api/cuestation/:name/mapping', async (req, res) => {
+      try {
+        const dbPath = path.join(projectDir, 'db.json');
+        const data = await fs.readFile(dbPath, 'utf-8');
+        const db = JSON.parse(data);
+        
+        const cuestationIndex = db.cuestations?.findIndex((c: any) => c.name === req.params.name);
+        
+        if (cuestationIndex >= 0) {
+          // Update the mapping
+          db.cuestations[cuestationIndex].mapping = req.body;
+          
+          // Save the updated database
+          await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
+          
+          // Send mapping update to the specific cuestation via WebSocket
+          const message = {
+            address: `/cuepernova/cuestation/${req.params.name}/mapping-update`,
+            args: [JSON.stringify(req.body)]
+          };
+          broadcastToCuestations(message);
+          
+          res.json({ success: true });
+        } else {
+          res.status(404).json({ error: 'Cuestation not found' });
+        }
+      } catch (error) {
+        console.error('Error updating cuestation mapping:', error);
+        res.status(500).json({ error: 'Failed to update mapping' });
       }
     });
 
@@ -158,6 +195,10 @@ export class ServerManager {
 
     this.app.get('/control.html', (req, res) => {
       res.sendFile(path.join(__dirname, '../../static/control.html'));
+    });
+
+    this.app.get('/mapping-editor.html', (req, res) => {
+      res.sendFile(path.join(__dirname, '../../static/mapping-editor.html'));
     });
 
     // Setup SignalMaster routes for WebRTC
