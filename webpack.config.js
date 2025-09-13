@@ -14,7 +14,7 @@ export default (env, argv) => {
     cache: {
       type: 'filesystem',
       buildDependencies: {
-        config: [import.meta.url],
+        config: [__filename],
       },
       cacheDirectory: path.resolve(__dirname, '.webpack-cache'),
     },
@@ -119,16 +119,10 @@ export default (env, argv) => {
       port: 3000,
       hot: true,
       historyApiFallback: true,
-      static: [
-        {
-          directory: path.join(__dirname, 'static'),
-          publicPath: '/static',
-        },
-        {
-          directory: path.join(__dirname, 'dist/renderer'),
-          publicPath: '/',
-        },
-      ],
+      static: {
+        directory: path.join(__dirname, 'dist/renderer'),
+        publicPath: '/',
+      },
     },
     devtool: isDevelopment ? 'inline-source-map' : false,
   };

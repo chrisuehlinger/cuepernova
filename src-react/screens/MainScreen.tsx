@@ -131,9 +131,9 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="xl" sx={{ py: 3, flexGrow: 1, overflow: 'auto' }}>
+      <Container maxWidth={false} sx={{ py: 3, flexGrow: 1, overflow: 'auto' }}>
         <Grid container spacing={3} sx={{ height: '100%' }}>
-          <Grid size={{ xs: 12, md: 8 }}>
+          <Grid size={{ xs: 12, md: 7 }}>
             <Paper
               elevation={2}
               sx={{
@@ -156,7 +156,7 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
             </Paper>
           </Grid>
           
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Grid size={{ xs: 12, md: 5 }}>
             <Paper
               elevation={2}
               sx={{

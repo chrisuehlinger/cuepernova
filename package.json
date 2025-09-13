@@ -6,7 +6,7 @@
   "main": "dist/main/electron/main.js",
   "scripts": {
     "start": "npm run build:electron && npm run build:preload && npm run build:react && electron .",
-    "dev": "npm run build:electron && npm run build:preload && concurrently \"npm run dev:react\" \"wait-on http://localhost:3000 && electron .\"",
+    "dev": "npm run build:electron && npm run build:preload && concurrently \"npm run dev:react\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
     "build:electron": "tsc -p tsconfig.electron.json && npm run copy:templates",
     "build:preload": "tsc -p tsconfig.preload.json",
     "copy:templates": "mkdir -p dist/main && cp -r templates dist/main/",
@@ -66,6 +66,7 @@
     "@types/ws": "^8.18.1",
     "concurrently": "^9.2.1",
     "copy-webpack-plugin": "^13.0.1",
+    "cross-env": "^10.0.0",
     "css-loader": "^7.1.2",
     "electron-builder": "^26.0.12",
     "html-webpack-plugin": "^5.6.4",
