@@ -41,8 +41,10 @@ interface MessageRoute {
 export class WebSocketManager {
   private cuestationServer: WebSocketServer;
   private controlServer: WebSocketServer;
+  private cueballServer: WebSocketServer;
   private cuestationClients = new Map<string, WebSocketClient>();
   private controlClients = new Map<string, WebSocketClient>();
+  private cueballClients = new Map<string, WebSocketClient>();
   private messageRoutes: MessageRoute[] = [];
   private connectionHandlers = new Set<ConnectionHandler>();
   private disconnectionHandlers = new Set<DisconnectionHandler>();
@@ -59,6 +61,7 @@ export class WebSocketManager {
     // Create WebSocket servers
     this.cuestationServer = new WebSocketServer({ noServer: true });
     this.controlServer = new WebSocketServer({ noServer: true });
+    this.cueballServer = new WebSocketServer({ noServer: true });
 
     this.setupServers();
     this.startHeartbeat();
@@ -111,6 +114,31 @@ export class WebSocketManager {
 
       this.controlClients.set(client.id, client);
       this.log(`Control panel connected: ${client.id}`);
+      
+      this.setupClientHandlers(client);
+      this.notifyConnectionHandlers(client);
+    });
+
+    // Cueball server
+    this.cueballServer.on('connection', (ws: WebSocket, request: IncomingMessage) => {
+      const params = url.parse(request.url || '', true).query;
+      const name = (params.name as string) || `cueball-${uuidv4()}`;
+      
+      const typedWs = ws as any as TypedWebSocket;
+      typedWs.id = uuidv4();
+      typedWs.type = 'cueball';
+      typedWs.cueballName = name;
+      typedWs.lastActivity = Date.now();
+
+      const client: WebSocketClient = {
+        id: typedWs.id,
+        socket: typedWs,
+        type: 'cueball',
+        name
+      };
+
+      this.cueballClients.set(client.id, client);
+      this.log(`Cueball connected: ${name} (${client.id})`);
       
       this.setupClientHandlers(client);
       this.notifyConnectionHandlers(client);
@@ -168,9 +196,12 @@ export class WebSocketManager {
     if (client.type === 'cuestation') {
       this.cuestationClients.delete(client.id);
       this.log(`Cuestation disconnected: ${client.name} (${client.id})`);
-    } else {
+    } else if (client.type === 'control') {
       this.controlClients.delete(client.id);
       this.log(`Control panel disconnected: ${client.id}`);
+    } else if (client.type === 'cueball') {
+      this.cueballClients.delete(client.id);
+      this.log(`Cueball disconnected: ${client.name} (${client.id})`);
     }
     
     this.notifyDisconnectionHandlers(client);
@@ -230,6 +261,28 @@ export class WebSocketManager {
           } else {
             this.log(`Cuestation not found: ${cuestationName}`, 'warn');
           }
+        }
+      }
+    });
+
+    // Cueball-specific route
+    this.addRoute(/^\/cuepernova\/cueball\//, (message, client) => {
+      // Messages to cueballs can come from control or cuestations
+      if (client.type === 'control' || client.type === 'cuestation') {
+        // Check if targeting specific cueball
+        const match = message.address.match(/^\/cuepernova\/cueball\/([^\/]+)\//); 
+        if (match && match[1]) {
+          const cueballName = match[1];
+          const targetCueball = this.findCueballByName(cueballName);
+          if (targetCueball) {
+            this.sendToClient(targetCueball, message);
+            this.log(`Sent message to cueball: ${cueballName}`);
+          } else {
+            this.log(`Cueball not found: ${cueballName}`, 'warn');
+          }
+        } else {
+          // Broadcast to all cueballs
+          this.broadcastToCueballs(message);
         }
       }
     });
@@ -310,6 +363,20 @@ export class WebSocketManager {
     this.log(`Broadcast to ${count} control panels: ${message.address}`);
   }
 
+  public broadcastToCueballs(message: WebSocketMessage): void {
+    const serialized = JSON.stringify(message);
+    let count = 0;
+    
+    this.cueballClients.forEach(client => {
+      if (client.socket.readyState === WebSocket.OPEN) {
+        client.socket.send(serialized);
+        count++;
+      }
+    });
+    
+    this.log(`Broadcast to ${count} cueballs: ${message.address}`);
+  }
+
   public broadcastToAll(message: WebSocketMessage): void {
     this.broadcastToCuestations(message);
     this.broadcastToControl(message);
@@ -323,6 +390,15 @@ export class WebSocketManager {
 
   public sendToCuestation(name: string, message: WebSocketMessage): boolean {
     const client = this.findCuestationByName(name);
+    if (client) {
+      this.sendToClient(client, message);
+      return true;
+    }
+    return false;
+  }
+
+  public sendToCueball(name: string, message: WebSocketMessage): boolean {
+    const client = this.findCueballByName(name);
     if (client) {
       this.sendToClient(client, message);
       return true;
@@ -349,12 +425,21 @@ export class WebSocketManager {
     return Array.from(this.controlClients.values());
   }
 
+  public getCueballs(): WebSocketClient[] {
+    return Array.from(this.cueballClients.values());
+  }
+
   public getAllClients(): WebSocketClient[] {
-    return [...this.getCuestations(), ...this.getControlPanels()];
+    return [...this.getCuestations(), ...this.getControlPanels(), ...this.getCueballs()];
   }
 
   public findCuestationByName(name: string): WebSocketClient | undefined {
     return Array.from(this.cuestationClients.values())
+      .find(client => client.name === name);
+  }
+
+  public findCueballByName(name: string): WebSocketClient | undefined {
+    return Array.from(this.cueballClients.values())
       .find(client => client.name === name);
   }
 
@@ -370,6 +455,13 @@ export class WebSocketManager {
     if (control) {
       control.socket.close();
       this.controlClients.delete(clientId);
+      return true;
+    }
+    
+    const cueball = this.cueballClients.get(clientId);
+    if (cueball) {
+      cueball.socket.close();
+      this.cueballClients.delete(clientId);
       return true;
     }
     
@@ -399,6 +491,16 @@ export class WebSocketManager {
       this.controlClients.forEach((client, id) => {
         if (now - client.socket.lastActivity > timeout) {
           this.log(`Control panel timeout: ${id}`);
+          this.disconnectClient(id);
+        } else {
+          (client.socket as any).ping();
+        }
+      });
+      
+      // Check cueballs
+      this.cueballClients.forEach((client, id) => {
+        if (now - client.socket.lastActivity > timeout) {
+          this.log(`Cueball timeout: ${client.name}`);
           this.disconnectClient(id);
         } else {
           (client.socket as any).ping();
@@ -455,6 +557,10 @@ export class WebSocketManager {
       this.controlServer.handleUpgrade(request, socket, head, (ws) => {
         this.controlServer.emit('connection', ws, request);
       });
+    } else if (pathname === '/cueball') {
+      this.cueballServer.handleUpgrade(request, socket, head, (ws) => {
+        this.cueballServer.emit('connection', ws, request);
+      });
     } else {
       socket.destroy();
     }
@@ -481,6 +587,9 @@ export class WebSocketManager {
       switch (subNamespace) {
         case 'cuestation':
           this.broadcastToCuestations(wsMessage);
+          break;
+        case 'cueball':
+          this.broadcastToCueballs(wsMessage);
           break;
         case 'system':
           if (isSystemMessage(wsMessage)) {
@@ -518,13 +627,15 @@ export class WebSocketManager {
   public getStatus(): {
     cuestations: number;
     controlPanels: number;
+    cueballs: number;
     totalConnections: number;
     uptime: number;
   } {
     return {
       cuestations: this.cuestationClients.size,
       controlPanels: this.controlClients.size,
-      totalConnections: this.cuestationClients.size + this.controlClients.size,
+      cueballs: this.cueballClients.size,
+      totalConnections: this.cuestationClients.size + this.controlClients.size + this.cueballClients.size,
       uptime: process.uptime()
     };
   }
@@ -541,9 +652,11 @@ export class WebSocketManager {
     
     this.cuestationClients.clear();
     this.controlClients.clear();
+    this.cueballClients.clear();
     
     this.cuestationServer.close();
     this.controlServer.close();
+    this.cueballServer.close();
     
     this.log('WebSocketManager shutdown complete');
   }

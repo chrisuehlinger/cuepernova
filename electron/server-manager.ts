@@ -23,7 +23,7 @@ export class ServerManager {
   private httpPort = 8080;
   private httpsPort = 8443;
 
-  constructor() {}
+  constructor() { }
 
   async start(projectDir: string, certificateManager: CertificateManager): Promise<void> {
     if (this.isRunning) {
@@ -40,19 +40,20 @@ export class ServerManager {
 
     // Serve static HTML and CSS files
     this.app.use('/static', express.static(path.join(__dirname, '../../static')));
-    
+
     // Serve compiled renderer JS assets
     this.app.use('/static/js', express.static(path.join(__dirname, '../../renderer/static')));
-    
+
     // Serve project files from public directory
     this.app.use('/cueballs', express.static(path.join(projectDir, 'public/cueballs')));
     this.app.use('/media', express.static(path.join(projectDir, 'public/media')));
     this.app.use('/css', express.static(path.join(projectDir, 'public/css')));
     this.app.use('/js', express.static(path.join(projectDir, 'public/js')));
-    
+    this.app.use('/node_modules', express.static(path.join(projectDir, 'node_modules')));
+
     // Also serve entire public directory at /public for convenience
     this.app.use('/public', express.static(path.join(projectDir, 'public')));
-    
+
     // Serve data from db.json
     this.app.get('/cues.json', async (req, res) => {
       try {
@@ -103,7 +104,7 @@ export class ServerManager {
         const data = await fs.readFile(dbPath, 'utf-8');
         const db = JSON.parse(data);
         const cuestation = db.cuestations?.find((c: any) => c.name === req.params.name);
-        
+
         if (cuestation) {
           // Ensure cuestation has showtime resolution
           if (!cuestation.showtimeResolution) {
@@ -153,23 +154,23 @@ export class ServerManager {
         const dbPath = path.join(projectDir, 'db.json');
         const data = await fs.readFile(dbPath, 'utf-8');
         const db = JSON.parse(data);
-        
+
         const cuestationIndex = db.cuestations?.findIndex((c: any) => c.name === req.params.name);
-        
+
         if (cuestationIndex >= 0) {
           // Update the mapping
           db.cuestations[cuestationIndex].mapping = req.body;
-          
+
           // Save the updated database
           await fs.writeFile(dbPath, JSON.stringify(db, null, 2));
-          
+
           // Send mapping update to the specific cuestation via WebSocket
           const message = {
             address: `/cuepernova/cuestation/${req.params.name}/mapping-update`,
             args: [JSON.stringify(req.body)]
           };
           broadcastToCuestations(message);
-          
+
           res.json({ success: true });
         } else {
           res.status(404).json({ error: 'Cuestation not found' });
@@ -228,11 +229,11 @@ export class ServerManager {
 
     // Setup WebSocket server on HTTPS
     this.wss = new WebSocketServer({ noServer: true });
-    
+
     // Setup WebSocket upgrade handling on both HTTP and HTTPS servers
     this.httpServer.on('upgrade', wsUpgrade);
     this.httpsServer.on('upgrade', wsUpgrade);
-    
+
     // Load config from db.json and setup sockets
     const dbPath = path.join(projectDir, 'db.json');
     let config: any = {};

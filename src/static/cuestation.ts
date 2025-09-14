@@ -109,7 +109,9 @@ const cueHandlers: Record<string, CueHandler> = {
   },
 
   cueball: (message: WebSocketMessage) => {
+    console.log('Cueball message args:', message.args);
     const cueballName = message.args?.[0];
+    console.log('Cueball name:', cueballName);
     if (cueballName) {
       // Pass any additional args as query parameters
       const params = new URLSearchParams();

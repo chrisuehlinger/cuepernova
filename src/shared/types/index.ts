@@ -110,15 +110,16 @@ import { WebSocket } from 'ws';
 
 export interface TypedWebSocket extends WebSocket {
   id: string;
-  type: 'cuestation' | 'control';
+  type: 'cuestation' | 'control' | 'cueball';
   cuestationName?: string;
+  cueballName?: string;
   lastActivity: number;
 }
 
 export interface WebSocketClient {
   id: string;
   socket: TypedWebSocket;
-  type: 'cuestation' | 'control';
+  type: 'cuestation' | 'control' | 'cueball';
   name?: string;
 }
 
