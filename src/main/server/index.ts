@@ -161,7 +161,7 @@ export class ServerManager {
     this.app.get('/cuestation.html', async (req, res) => {
       if (process.env.NODE_ENV === 'development') {
         const port = 1212;
-        const url = new URL(`http://localhost:${port}`);
+        const url = new URL(`http://${req.hostname}:${port}`);
         url.pathname = 'cuestation.html';
         req.query.name && url.searchParams.set('name', req.query.name as string);
         res.redirect(url.toString());
@@ -173,7 +173,7 @@ export class ServerManager {
     this.app.get('/control.html', (req, res) => {
       if (process.env.NODE_ENV === 'development') {
         const port = 1212;
-        const url = new URL(`http://localhost:${port}`);
+        const url = new URL(`http://${req.hostname}:${port}`);
         url.pathname = 'control.html';
         req.query.name && url.searchParams.set('name', req.query.name as string);
         res.redirect(url.toString());
@@ -185,7 +185,7 @@ export class ServerManager {
     this.app.get('/mapping-editor.html', (req, res) => {
       if (process.env.NODE_ENV === 'development') {
         const port = 1212;
-        const url = new URL(`http://localhost:${port}`);
+        const url = new URL(`http://${req.hostname}:${port}`);
         url.pathname = 'mapping-editor.html';
         req.query.name && url.searchParams.set('name', req.query.name as string);
         res.redirect(url.toString());
