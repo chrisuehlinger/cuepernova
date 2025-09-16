@@ -21,22 +21,13 @@ Cuepernova is now a cross-platform Electron application that runs on Windows, ma
 ### Development
 ```bash
 # Build Electron and React for production
-npm run start
+npm run build
 
 # Run in development mode with hot reload
-npm run dev
-
-# Build Electron main process
-npm run build:electron
-
-# Build React app
-npm run build:react
-
-# Clean all build artifacts
-npm run clean
+npm start
 
 # Build distributable packages
-npm run dist
+npm run packate
 ```
 
 ### Application Features

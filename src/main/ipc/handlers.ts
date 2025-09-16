@@ -10,6 +10,7 @@ import { ServerManager } from '../server/index';
 import { CertificateManager } from '../server/certificate-manager';
 import { DataStore } from '@shared/data/DataStore';
 import { Cue, Cuestation, Config } from '@shared/types/index';
+import { getLastProjectDirectory, setLastProjectDirectory } from '../store';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,9 +39,17 @@ export function setupIpcHandlers(context: IpcContext) {
     return result.filePaths[0];
   });
 
+  // Get last project directory
+  ipcMain.handle('get-last-project-directory', async () => {
+    return getLastProjectDirectory();
+  });
+
   // Project initialization
   ipcMain.handle('initialize-project', async (event, directory: string) => {
     context.setProjectDir(directory);
+    
+    // Save last project directory
+    setLastProjectDirectory(directory);
     
     // Create necessary directories
     const dirs = [

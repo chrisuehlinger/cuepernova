@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Directory operations
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   initializeProject: (directory: string) => ipcRenderer.invoke('initialize-project', directory),
+  getLastProjectDirectory: () => ipcRenderer.invoke('get-last-project-directory'),
   
   // File operations
   readFile: (filePath: string) => ipcRenderer.invoke('read-file', filePath),
@@ -50,6 +51,7 @@ declare global {
     electronAPI: {
       selectDirectory: () => Promise<string | null>;
       initializeProject: (directory: string) => Promise<void>;
+      getLastProjectDirectory: () => Promise<string | undefined>;
       readFile: (filePath: string) => Promise<string>;
       writeFile: (filePath: string, content: string) => Promise<void>;
       getCues: () => Promise<any[]>;

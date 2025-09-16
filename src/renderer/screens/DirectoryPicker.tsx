@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -24,6 +24,18 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ onDirectorySelect }) 
       onDirectorySelect(directory);
     }
   };
+
+  // Check for last project directory on component mount
+  useEffect(() => {
+    const checkLastDirectory = async () => {
+      const lastDir = await window.electronAPI.getLastProjectDirectory();
+      if (lastDir) {
+        setSelectedDir(lastDir);
+        onDirectorySelect(lastDir);
+      }
+    };
+    checkLastDirectory();
+  }, [onDirectorySelect]);
 
   return (
     <Container maxWidth="sm">
