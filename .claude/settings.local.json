@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm start)",
       "Bash(resvg:*)",
-      "Bash(convert:*)"
+      "Bash(convert:*)",
+      "Bash(magick:*)"
     ],
     "deny": [],
     "ask": []
