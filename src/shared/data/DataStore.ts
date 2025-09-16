@@ -12,7 +12,7 @@ import {
   Cuestation, 
   Config,
   AsyncResult
-} from '../types/index.js';
+} from '../types/index';
 import { 
   validateDatabase, 
   safeValidate,
@@ -20,7 +20,7 @@ import {
   CueSchema,
   CuestationSchema,
   ConfigSchema
-} from '../types/validation.js';
+} from '../types/validation';
 
 export interface DataStoreOptions {
   projectDir: string;

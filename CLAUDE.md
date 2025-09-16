@@ -60,15 +60,15 @@ npm run dist
 ## Original Architecture
 
 ### Electron Architecture  
-- **Main Process**: `electron/main.ts` - Handles app lifecycle, windows, IPC
-- **Preload Script**: `electron/preload.ts` - Secure bridge between main and renderer
-- **IPC Handlers**: `electron/ipc/handlers.ts` - File operations and server control
-- **Server Manager**: `electron/server-manager.ts` - Integrated Express server
-- **Certificate Manager**: `electron/certificate-manager.ts` - CA and SSL certificate generation
+- **Main Process**: `src/electron/main.ts` - Handles app lifecycle, windows, IPC
+- **Preload Script**: `src/electron/preload.ts` - Secure bridge between main and renderer
+- **IPC Handlers**: `src/electron/ipc/handlers.ts` - File operations and server control
+- **Server Manager**: `src/electron/server-manager.ts` - Integrated Express server
+- **Certificate Manager**: `src/electron/certificate-manager.ts` - CA and SSL certificate generation
 
 ### React Frontend Architecture
-- **Entry Point**: `src-react/index.tsx` - React app initialization
-- **Main App**: `src-react/App.tsx` - Route and state management
+- **Entry Point**: `src/react/index.tsx` - React app initialization
+- **Main App**: `src/react/App.tsx` - Route and state management
 - **Screens**: Directory picker and main control screen
 - **Components**: Modular UI components for cues, settings, and cuestations
 - **Material-UI**: Dark theme with responsive layout
@@ -117,49 +117,6 @@ Built-in screen types handled by `cuestation.js`:
 
 ## Project Structure
 
-### Source Structure
-```
-cuepernova/
-├── electron/              # Electron main process
-│   ├── main.ts           # Main entry point
-│   ├── preload.ts        # Preload script
-│   ├── server-manager.ts # Express server integration
-│   ├── certificate-manager.ts # SSL certificate handling
-│   └── ipc/
-│       └── handlers.ts   # IPC handlers (uses DataStore)
-├── src/                  # Server and shared code
-│   ├── shared/           # NEW: Shared modules
-│   │   ├── types/        # Consolidated type definitions
-│   │   ├── data/         # DataStore with validation
-│   │   └── websocket/    # WebSocketManager class
-│   ├── server/
-│   │   ├── sockets.ts    # WebSocket handling (uses WebSocketManager)
-│   │   └── signalmaster.ts # WebRTC signaling
-│   └── types/            # Legacy types (deprecated)
-├── src-react/            # React application
-│   ├── index.tsx         # React entry point
-│   ├── App.tsx           # Main app component
-│   ├── screens/
-│   │   ├── DirectoryPicker.tsx
-│   │   └── MainScreen.tsx
-│   ├── components/
-│   │   ├── CueList.tsx
-│   │   ├── CuestationManager.tsx
-│   │   ├── MappingModal.tsx
-│   │   ├── ServerToggle.tsx
-│   │   └── SettingsModal.tsx
-│   └── types.ts          # TypeScript interfaces
-├── src/                  # Server code
-│   ├── server/
-│   │   ├── sockets.ts    # WebSocket & OSC handling
-│   │   └── signalmaster.ts # WebRTC signaling
-│   └── types/            # Shared type definitions
-├── static/               # Static HTML/CSS/JS files
-│   └── cuestation.html   # Display interface with integrated mapping
-├── dist-electron/        # Compiled Electron code
-├── dist-react/           # Compiled React app
-└── release/              # Packaged applications
-```
 
 ### User Project Structure
 ```
@@ -243,7 +200,7 @@ The mapping editor allows users to interactively adjust projection mapping:
 5. Click Save to persist the mapping to db.json, or Cancel to revert
 
 ### Adding New Screen Types
-Edit `static-src/js/cuestation.ts` and add handler to `cueHandlers` object:
+Edit `src/static/js/cuestation.ts` and add handler to `cueHandlers` object:
 ```javascript
 cueHandlers['mytype'] = function(args) {
   // args[0], args[1], etc. from OSC message
@@ -251,7 +208,7 @@ cueHandlers['mytype'] = function(args) {
 ```
 
 ### Adding New OSC Commands
-Edit `src/server/sockets.ts` `handleSystemMessage()` function:
+Edit `src/electron/server/sockets.ts` `handleSystemMessage()` function:
 ```javascript
 case 'mycommand':
   // Handle /cuepernova/system/mycommand

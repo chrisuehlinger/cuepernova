@@ -7,13 +7,7 @@
 // Core Domain Types
 // ============================================
 
-export type CueType = 
-  | 'osc' 
-  | 'cueball' 
-  | 'video' 
-  | 'image' 
-  | 'message' 
-  | 'clear';
+export type CueType = 'osc' | 'cueball' | 'video' | 'image' | 'message' | 'clear';
 
 export type CueArgument = string | number | boolean;
 

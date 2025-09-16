@@ -1,25 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "incremental": true,
+    "target": "es2022",
+    "module": "node16",
+    "lib": ["dom", "es2022"],
     "jsx": "react-jsx",
-    "outDir": "./dist/react",
-    "rootDir": "./",
     "strict": true,
+    "sourceMap": true,
+    "moduleResolution": "node16",
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["react", "react-dom", "jquery"],
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": ".erb/dll",
     "paths": {
       "@shared/*": ["./src/shared/*"]
-    },
-    "incremental": true,
-    "tsBuildInfoFile": "./.tsbuildinfo/react.tsbuildinfo"
+    }
   },
-  "include": ["src/react/**/*", "src/shared/**/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
 }

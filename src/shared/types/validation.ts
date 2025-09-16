@@ -3,7 +3,7 @@
  */
 
 import { z } from 'zod';
-import { CUE_TYPES, SYSTEM_COMMANDS } from './index.js';
+import { CUE_TYPES, SYSTEM_COMMANDS } from './index';
 
 // ============================================
 // Core Schemas
