@@ -85,8 +85,9 @@ const cueHandlers: Record<string, CueHandler> = {
       </div>`);
       if (!loop) {
         $('video').on('ended', () => {
-          state.showtime.removeClass('show');
-          state.showtime.html('');
+          state.showtime.fadeOut(500, () => {
+            state.showtime.html('');
+          });
         });
       }
     }
@@ -223,24 +224,35 @@ function handleOscMessage(message: WebSocketMessage): void {
     case 'showScreen':
       const screenType = pathParts[5];
       if (screenType && cueHandlers[screenType]) {
-        state.showtime.addClass('show');
         cueHandlers[screenType](message);
+        state.showtime.show();
       } else {
         console.warn(`Unknown screen type: ${screenType}`);
       }
       break;
 
     case 'clearScreen':
-      state.showtime.removeClass('show');
+      state.showtime.hide();
       state.showtime.html('');
       break;
 
     case 'fadeScreen':
-      const duration = parseInt(String(message.args?.[0])) || 1000;
-      state.showtime.fadeOut(duration, () => {
-        state.showtime.removeClass('show');
+      const screenTypeForFade = pathParts[5];
+      const fadeDuration = parseInt(String(message.args?.[0])) || 500;
+      
+      if (screenTypeForFade && cueHandlers[screenTypeForFade]) {
+        state.showtime.hide();
+        cueHandlers[screenTypeForFade](message);
+        state.showtime.fadeIn(fadeDuration);
+      } else {
+        console.warn(`Unknown screen type for fadeScreen: ${screenTypeForFade}`);
+      }
+      break;
+
+    case 'fadeOut':
+      const fadeOutDuration = parseInt(String(message.args?.[0])) || 500;
+      state.showtime.fadeOut(fadeOutDuration, () => {
         state.showtime.html('');
-        state.showtime.show();
       });
       break;
 

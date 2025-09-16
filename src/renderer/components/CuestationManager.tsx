@@ -21,6 +21,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import MapIcon from '@mui/icons-material/Map';
 import BugReportIcon from '@mui/icons-material/BugReport';
+import ClearIcon from '@mui/icons-material/Clear';
 import { Cuestation } from '@shared/types';
 import MappingModal from './MappingModal';
 
@@ -213,9 +214,72 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
     console.log(`Sent debug message to cuestation: ${cuestation.name}`);
   }, [serverRunning, wsConnection]);
 
+  const handleClearScreen = useCallback((cuestation: Cuestation) => {
+    if (!serverRunning) {
+      alert('Server must be running to send messages');
+      return;
+    }
+    
+    if (!wsConnection) {
+      alert('Not connected to server');
+      return;
+    }
+    
+    // Send clear message to specific cuestation
+    const message = {
+      address: `/cuepernova/cuestation/${cuestation.name}/clearScreen`,
+      args: []
+    };
+    
+    wsConnection.send(JSON.stringify(message));
+    console.log(`Sent clear message to cuestation: ${cuestation.name}`);
+  }, [serverRunning, wsConnection]);
+
+  const handleSendDebugToAll = useCallback(() => {
+    if (!serverRunning) {
+      alert('Server must be running to send messages');
+      return;
+    }
+    
+    if (!wsConnection) {
+      alert('Not connected to server');
+      return;
+    }
+    
+    // Send debug message to all cuestations
+    const message = {
+      address: `/cuepernova/cuestation/all/showScreen/debug`,
+      args: []
+    };
+    
+    wsConnection.send(JSON.stringify(message));
+    console.log('Sent debug message to all cuestations');
+  }, [serverRunning, wsConnection]);
+
+  const handleClearAll = useCallback(() => {
+    if (!serverRunning) {
+      alert('Server must be running to send messages');
+      return;
+    }
+    
+    if (!wsConnection) {
+      alert('Not connected to server');
+      return;
+    }
+    
+    // Send clear message to all cuestations
+    const message = {
+      address: `/cuepernova/cuestation/all/clearScreen`,
+      args: []
+    };
+    
+    wsConnection.send(JSON.stringify(message));
+    console.log('Sent clear message to all cuestations');
+  }, [serverRunning, wsConnection]);
+
   return (
     <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -223,6 +287,23 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
         >
           Add Cuestation
         </Button>
+        <Box sx={{ flexGrow: 1 }} />
+        <IconButton
+          onClick={handleSendDebugToAll}
+          disabled={!serverRunning || !wsConnection}
+          color="info"
+          title="Send Debug to All Cuestations"
+        >
+          <BugReportIcon />
+        </IconButton>
+        <IconButton
+          onClick={handleClearAll}
+          disabled={!serverRunning || !wsConnection}
+          color="default"
+          title="Clear All Cuestations"
+        >
+          <ClearIcon />
+        </IconButton>
       </Box>
 
       {cuestations.length === 0 && (
@@ -253,6 +334,15 @@ const CuestationManagerComponent: React.FC<CuestationManagerProps> = ({
                   title="Send Debug to Cuestation"
                 >
                   <BugReportIcon />
+                </IconButton>
+                <IconButton
+                  edge="end"
+                  onClick={() => handleClearScreen(cuestation)}
+                  disabled={!serverRunning || !wsConnection}
+                  color="default"
+                  title="Clear Cuestation"
+                >
+                  <ClearIcon />
                 </IconButton>
                 <IconButton
                   edge="end"
