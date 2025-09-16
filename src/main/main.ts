@@ -87,7 +87,7 @@ const createWindow = async () => {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-  
+
   // Open urls in the user's browser
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
@@ -244,11 +244,11 @@ app
 // Handle certificate errors (accept self-signed certs for localhost)
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
   // Only accept certificates for localhost
-  const urlObj = new URL(url);
-  if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+  // const urlObj = new URL(url);
+  // if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
     event.preventDefault();
     callback(true);
-  } else {
-    callback(false);
-  }
+  // } else {
+  //   callback(false);
+  // }
 });

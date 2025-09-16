@@ -6,9 +6,12 @@ import {
   Paper,
   Container,
   Stack,
+  TextField,
+  Divider,
 } from '@mui/material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import ConnectedTvIcon from '@mui/icons-material/ConnectedTv';
 
 interface DirectoryPickerProps {
   onDirectorySelect: (directory: string) => void;
@@ -16,12 +19,21 @@ interface DirectoryPickerProps {
 
 const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ onDirectorySelect }) => {
   const [selectedDir, setSelectedDir] = useState<string | null>(null);
+  const [hostIP, setHostIP] = useState<string>('');
+  const [cuestationName, setCuestationName] = useState<string>('');
 
   const handleSelectDirectory = async () => {
     const directory = await window.electronAPI.selectDirectory();
     if (directory) {
       setSelectedDir(directory);
       onDirectorySelect(directory);
+    }
+  };
+
+  const handleLaunchCuestation = () => {
+    if (hostIP && cuestationName) {
+      const url = `https://${hostIP}:8443/cuestation.html?name=${encodeURIComponent(cuestationName)}`;
+      window.location.href = url;
     }
   };
 
@@ -88,6 +100,52 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ onDirectorySelect }) 
                 Selected: {selectedDir}
               </Typography>
             )}
+
+            <Divider sx={{ width: '100%', my: 3 }}>
+              <Typography variant="body2" color="text.secondary">
+                OR
+              </Typography>
+            </Divider>
+
+            <Typography variant="body1" color="text.secondary">
+              Connect to a remote Cuepernova server
+            </Typography>
+
+            <Stack direction="row" spacing={2} alignItems="center">
+              <TextField
+                label="Server IP"
+                variant="outlined"
+                size="small"
+                value={hostIP}
+                onChange={(e) => setHostIP(e.target.value)}
+                placeholder="192.168.1.100"
+                sx={{ width: 180 }}
+              />
+              <TextField
+                label="Cuestation Name"
+                variant="outlined"
+                size="small"
+                value={cuestationName}
+                onChange={(e) => setCuestationName(e.target.value)}
+                placeholder="projector-1"
+                sx={{ width: 180 }}
+              />
+            </Stack>
+
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<ConnectedTvIcon />}
+              onClick={handleLaunchCuestation}
+              disabled={!hostIP || !cuestationName}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+              }}
+            >
+              Launch Cuestation
+            </Button>
           </Stack>
         </Paper>
       </Box>
