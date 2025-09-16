@@ -6,8 +6,8 @@ import * as fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import morgan from 'morgan';
 import { WebSocketServer } from 'ws';
-import { wsUpgrade, initOSCServer, broadcastToCuestations } from '../src/server/sockets.js';
-import { setupSignalmaster } from '../src/server/signalmaster.js';
+import { wsUpgrade, initOSCServer, broadcastToCuestations } from './sockets.js';
+import { setupSignalmaster } from './signalmaster.js';
 import { CertificateManager } from './certificate-manager.js';
 
 const __filename = fileURLToPath(import.meta.url);

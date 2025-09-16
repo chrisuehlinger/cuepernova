@@ -124,15 +124,6 @@ export interface WebSocketClient {
 }
 
 // ============================================
-// RTC Types
-// ============================================
-
-export interface RTCSignals {
-  offer: { [key: string]: any };
-  answer: { [key: string]: any };
-}
-
-// ============================================
 // IPC Types (Electron)
 // ============================================
 

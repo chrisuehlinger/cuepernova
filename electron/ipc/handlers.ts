@@ -6,8 +6,8 @@ import { ipcMain, dialog, BrowserWindow } from 'electron';
 import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { ServerManager } from '../server-manager.js';
-import { CertificateManager } from '../certificate-manager.js';
+import { ServerManager } from '../server/index.js';
+import { CertificateManager } from '../server/certificate-manager.js';
 import { DataStore } from '../../src/shared/data/DataStore.js';
 import { Cue, Cuestation, Config } from '../../src/shared/types/index.js';
 

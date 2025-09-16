@@ -43,11 +43,6 @@ export interface OSCMessage {
   args: any[];
 }
 
-export interface RTCSignals {
-  offer: { [key: string]: any };
-  answer: { [key: string]: any };
-}
-
 export interface CuestationState {
   name: string;
   connected: boolean;

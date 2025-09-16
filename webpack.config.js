@@ -20,7 +20,7 @@ export default (env, argv) => {
     },
     entry: {
       // React app entry
-      'bundle': './src-react/index.tsx',
+      'bundle': './src/react/index.tsx',
       // Static page entries
       'static/control': './src/static/control.ts',
       'static/cuestation': './src/static/cuestation.ts',
@@ -56,7 +56,7 @@ export default (env, argv) => {
         },
         {
           test: /\.tsx?$/,
-          include: path.resolve(__dirname, 'src-react'),
+          include: path.resolve(__dirname, 'src/react'),
           use: [
             {
               loader: 'ts-loader',
@@ -91,7 +91,7 @@ export default (env, argv) => {
     plugins: [
       // Only generate HTML for the React app
       new HtmlWebpackPlugin({
-        template: './src-react/index.html',
+        template: './src/react/index.html',
         title: 'Cuepernova',
         chunks: ['bundle'],
         filename: 'index.html',
@@ -110,7 +110,7 @@ export default (env, argv) => {
         ],
       }),
       isDevelopment && new ReactRefreshWebpackPlugin({
-        include: /src-react/,
+        include: /src\/react/,
       }),
     ].filter(Boolean),
     optimization: {

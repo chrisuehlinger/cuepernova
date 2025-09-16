@@ -4,8 +4,8 @@
 
 import osc from 'osc';
 import os from 'node:os';
-import { WebSocketManager } from '../shared/websocket/WebSocketManager.js';
-import { WebSocketMessage, OSCMessage } from '../shared/types/index.js';
+import { WebSocketManager } from './WebSocketManager.js';
+import { WebSocketMessage, OSCMessage } from '@shared/types/index.js';
 import rtcSignals from '../utils/rtc-signals.js';
 
 // Get local IP addresses for OSC logging

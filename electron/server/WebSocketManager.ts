@@ -14,13 +14,13 @@ import {
   WebSocketMessage,
   OSCMessage,
   SystemMessage
-} from '../types/index.js';
+} from '../../src/shared/types/index.js';
 import { 
   validateWebSocketMessage,
   isSystemMessage,
   safeValidate,
   WebSocketMessageSchema
-} from '../types/validation.js';
+} from '../../src/shared/types/validation.js';
 
 export interface WebSocketManagerOptions {
   maxClients?: number;

@@ -4,6 +4,7 @@
     "module": "ES2022",
     "moduleResolution": "node",
     "lib": ["ES2022"],
+    "jsx": "react-jsx",
     "outDir": "./dist/main",
     "rootDir": "./",
     "strict": true,
@@ -12,10 +13,13 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@shared/*": ["./src/shared/*"]
+    },
     "types": ["node", "electron"],
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo/electron.tsbuildinfo"
   },
-  "include": ["electron/**/*", "src/**/*", "src/shared/**/*"],
+  "include": ["electron/**/*", "src/shared/**/*"],
   "exclude": ["node_modules", "src/static/**/*"]
 }

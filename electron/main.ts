@@ -3,8 +3,8 @@ import * as path from 'node:path';
 import * as fs from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { setupIpcHandlers } from './ipc/handlers.js';
-import { ServerManager } from './server-manager.js';
-import { CertificateManager } from './certificate-manager.js';
+import { ServerManager } from './server/index.js';
+import { CertificateManager } from './server/certificate-manager.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

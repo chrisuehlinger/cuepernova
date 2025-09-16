@@ -4,7 +4,7 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "react-jsx",
-    "outDir": "./dist-react",
+    "outDir": "./dist/react",
     "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
@@ -20,6 +20,6 @@
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo/react.tsbuildinfo"
   },
-  "include": ["src-react/**/*", "src/shared/**/*"],
+  "include": ["src/react/**/*", "src/shared/**/*"],
   "exclude": ["node_modules"]
 }
