@@ -49,26 +49,29 @@ npm run dist
 - **Automatic SSL**: CA certificate generation and management
 - **CA Download**: Easily distribute certificates to other devices
 
-## Architecture Overview (REFACTORED)
+## Architecture Overview
 
-### New Centralized Systems
-- **Type System**: All types in `/src/shared/types/` with Zod validation
-- **Data Layer**: `DataStore` class handles all database operations with caching
-- **WebSocket Manager**: Centralized WebSocket handling with rate limiting
-- **Performance**: React.memo on all components, TypeScript incremental builds
-
-## Original Architecture
+### Build System
+- **Electron React Boilerplate (ERB)**: Webpack-based build configuration
+- **Development Server**: Webpack dev server runs on port 1212 for hot reload
+- **Production Build**: Optimized bundles for distribution
 
 ### Electron Architecture  
-- **Main Process**: `src/electron/main.ts` - Handles app lifecycle, windows, IPC
-- **Preload Script**: `src/electron/preload.ts` - Secure bridge between main and renderer
-- **IPC Handlers**: `src/electron/ipc/handlers.ts` - File operations and server control
-- **Server Manager**: `src/electron/server-manager.ts` - Integrated Express server
-- **Certificate Manager**: `src/electron/certificate-manager.ts` - CA and SSL certificate generation
+- **Main Process**: `src/main/main.ts` - Handles app lifecycle, windows, IPC
+- **Preload Script**: `src/main/preload.ts` - Secure bridge between main and renderer
+- **IPC Handlers**: `src/main/ipc/handlers.ts` - File operations and server control
+- **Server Manager**: `src/main/server/index.ts` - Integrated Express server (ServerManager class)
+- **Certificate Manager**: `src/main/server/certificate-manager.ts` - CA and SSL certificate generation
+
+### Centralized Systems
+- **Type System**: All types in `/src/shared/types/` with Zod validation
+- **Data Layer**: `DataStore` class in `/src/shared/data/DataStore.ts` handles all database operations with caching
+- **WebSocket Manager**: `src/main/server/WebSocketManager.ts` - Centralized WebSocket handling with rate limiting and client tracking
+- **Performance**: React.memo on all components, TypeScript incremental builds
 
 ### React Frontend Architecture
-- **Entry Point**: `src/react/index.tsx` - React app initialization
-- **Main App**: `src/react/App.tsx` - Route and state management
+- **Entry Point**: `src/renderer/index.tsx` - React app initialization
+- **Main App**: `src/renderer/App.tsx` - Route and state management
 - **Screens**: Directory picker and main control screen
 - **Components**: Modular UI components for cues, settings, and cuestations
 - **Material-UI**: Dark theme with responsive layout
@@ -80,21 +83,23 @@ npm run dist
   - `/cuestation` - Display/projection devices
   - `/control` - Control panel interfaces
 - **OSC Server**: UDP port 57121 for QLab integration (configurable)
-- **WebRTC Signaling**: Via `/signalmaster` routes
+- **WebRTC Signaling**: Via `/signalmaster` routes handled by `src/main/server/signalmaster.ts`
 
-### Frontend Architecture
-- **Development**: TypeScript compiled to JavaScript
-- **User Projects**: Plain JavaScript with ES modules (no build required)
-- **Core Pages** (served from package):
-  - `cuestation.html` - Display device interface with integrated projection mapping
-  - `control.html` - Central control panel
+### Frontend Pages Architecture
+- **Development**: TypeScript compiled to JavaScript via Webpack
+- **Templates**: EJS templates in `src/renderer/` compiled to HTML during build
+- **Core Pages** (built from templates):
+  - `cuestation.html` - Display device interface with integrated projection mapping (from `cuestation.ejs`)
+  - `control.html` - Central control panel (from `control.ejs`)
+  - `mapping-editor.html` - Projection mapping editor (from `mapping-editor.ejs`)
+- **Client Scripts**: TypeScript modules in `src/renderer/` (cuestation.ts, control.ts, mapping-editor.ts)
 - **Custom Cueballs**: Located in user's `public/cueballs/` directory
 - **Communication**: WebSocket connections for real-time updates
 
 ### Message Flow
-1. **OSC Commands** (port 57121) → `sockets.js` → WebSocket broadcast to cuestations
-2. **Control Panel** → WebSocket → `sockets.js` → Cuestation clients
-3. **WebRTC Signaling** → `signalmaster.js` → Peer connections
+1. **OSC Commands** (port 57121) → `src/main/server/sockets.ts` → WebSocketManager → Broadcast to cuestations
+2. **Control Panel** → WebSocket → `src/main/server/sockets.ts` → WebSocketManager → Cuestation clients
+3. **WebRTC Signaling** → `src/main/server/signalmaster.ts` → Peer connections via `src/main/utils/rtc-signals.ts`
 
 ### OSC Command Structure
 - `/cuepernova/cuestation/showScreen/[screenType]` - Display content on cuestations
@@ -107,7 +112,7 @@ npm run dist
 - `/cuepernova/system/resetMapping [cuestationName]` - Reset mapping for specific cuestation
 
 ### Screen Types
-Built-in screen types handled by `cuestation.js`:
+Built-in screen types handled by `src/renderer/cuestation.ts`:
 - `debug` - Connection status
 - `message [text] [subtitle]` - Text display
 - `video [path] [loop]` - Video playback
@@ -117,6 +122,41 @@ Built-in screen types handled by `cuestation.js`:
 
 ## Project Structure
 
+### Application Source Structure
+```
+src/
+├── main/                     # Electron main process
+│   ├── main.ts              # App entry point and window management
+│   ├── preload.ts           # Secure IPC bridge
+│   ├── util.ts              # Utilities
+│   ├── ipc/                 # IPC handlers
+│   │   └── handlers.ts      # File operations and server control
+│   ├── server/              # Integrated Express server
+│   │   ├── index.ts         # ServerManager class
+│   │   ├── sockets.ts       # WebSocket and OSC management
+│   │   ├── signalmaster.ts  # WebRTC signaling
+│   │   ├── WebSocketManager.ts # Centralized WebSocket handling
+│   │   └── certificate-manager.ts # SSL certificate management
+│   └── utils/               # Utilities
+│       └── rtc-signals.ts   # RTC signal storage
+├── renderer/                # Frontend (React + static pages)
+│   ├── App.tsx              # Main React application
+│   ├── index.tsx            # React entry point
+│   ├── components/          # React UI components
+│   ├── screens/             # Main app screens
+│   ├── cuestation.ts        # Cuestation client logic
+│   ├── control.ts           # Control panel logic
+│   ├── mapping-editor.ts    # Projection mapping editor
+│   ├── *.ejs                # HTML templates for static pages
+│   └── types.ts             # Frontend type definitions
+├── shared/                  # Shared code between main and renderer
+│   ├── types/               # Centralized TypeScript types
+│   │   ├── index.ts         # All type definitions
+│   │   └── validation.ts    # Zod validation schemas
+│   └── data/                # Data layer
+│       └── DataStore.ts     # Centralized database operations
+└── __tests__/               # Test files
+```
 
 ### User Project Structure
 ```
@@ -200,7 +240,7 @@ The mapping editor allows users to interactively adjust projection mapping:
 5. Click Save to persist the mapping to db.json, or Cancel to revert
 
 ### Adding New Screen Types
-Edit `src/static/js/cuestation.ts` and add handler to `cueHandlers` object:
+Edit `src/renderer/cuestation.ts` and add handler to `cueHandlers` object:
 ```javascript
 cueHandlers['mytype'] = function(args) {
   // args[0], args[1], etc. from OSC message
@@ -208,7 +248,7 @@ cueHandlers['mytype'] = function(args) {
 ```
 
 ### Adding New OSC Commands
-Edit `src/electron/server/sockets.ts` `handleSystemMessage()` function:
+Edit `src/main/server/sockets.ts` `handleSystemMessage()` function:
 ```javascript
 case 'mycommand':
   // Handle /cuepernova/system/mycommand
@@ -229,12 +269,17 @@ case 'mycommand':
 
 ## Development Tips
 
-- Development mode uses ports 8080/8443, production uses 80/443
+- Development mode runs webpack dev server on port 1212 with hot reload
+- Express server uses ports 8080/8443 (development), 80/443 (production)
 - WebRTC features require HTTPS (self-signed certs work locally)
 - Each cuestation needs a unique name parameter
-- Media files go in `public/media/`
-- Custom cueballs go in `public/cueballs/`
+- Media files go in user project's `public/media/`
+- Custom cueballs go in user project's `public/cueballs/`
 - All project data is stored in `db.json`
 - Mapping data is saved to db.json (not localStorage)
 - Live mapping updates are sent via WebSocket without throttling
 - Console logs OSC messages for debugging
+- Two concurrent processes in development: Electron main and webpack dev server
+- TypeScript strict mode is enabled - ensure proper type definitions
+- React 19 with Material-UI v5 for UI components
+
