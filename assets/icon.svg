@@ -1,23 +1,331 @@
-<svg width="232" height="232" viewBox="0 0 232 232" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g filter="url(#filter0_b)">
-<path d="M231.5 1V0.5H231H1H0.5V1V231V231.5H1H231H231.5V231V1ZM40.5 25C40.5 33.0082 34.0082 39.5 26 39.5C17.9918 39.5 11.5 33.0082 11.5 25C11.5 16.9918 17.9918 10.5 26 10.5C34.0082 10.5 40.5 16.9918 40.5 25ZM220.5 25C220.5 33.0082 214.008 39.5 206 39.5C197.992 39.5 191.5 33.0082 191.5 25C191.5 16.9918 197.992 10.5 206 10.5C214.008 10.5 220.5 16.9918 220.5 25ZM40.5 205C40.5 213.008 34.0082 219.5 26 219.5C17.9918 219.5 11.5 213.008 11.5 205C11.5 196.992 17.9918 190.5 26 190.5C34.0082 190.5 40.5 196.992 40.5 205ZM220.5 205C220.5 213.008 214.008 219.5 206 219.5C197.992 219.5 191.5 213.008 191.5 205C191.5 196.992 197.992 190.5 206 190.5C214.008 190.5 220.5 196.992 220.5 205ZM209.5 111C209.5 162.639 167.639 204.5 116 204.5C64.3613 204.5 22.5 162.639 22.5 111C22.5 59.3613 64.3613 17.5 116 17.5C167.639 17.5 209.5 59.3613 209.5 111Z" fill="white" stroke="white"/>
-<path d="M63.5 146.5C63.5 149.959 60.8969 152.5 58 152.5C55.1031 152.5 52.5 149.959 52.5 146.5C52.5 143.041 55.1031 140.5 58 140.5C60.8969 140.5 63.5 143.041 63.5 146.5Z" stroke="white" stroke-width="5"/>
-<path d="M54.9856 139.466C54.9856 139.466 51.1973 116.315 83.1874 93.1647C115.178 70.014 133.698 69.5931 133.698 69.5931" stroke="white" stroke-width="5" stroke-linecap="round"/>
-<path d="M178.902 142.686C177.27 139.853 173.652 138.88 170.819 140.512C167.987 142.144 167.014 145.762 168.646 148.595C170.277 151.427 173.896 152.4 176.728 150.768C179.561 149.137 180.534 145.518 178.902 142.686Z" stroke="white" stroke-width="5"/>
-<path d="M169.409 151.555C169.409 151.555 151.24 166.394 115.211 150.232C79.182 134.07 69.5718 118.232 69.5718 118.232" stroke="white" stroke-width="5" stroke-linecap="round"/>
-<path d="M109.577 41.9707C107.966 44.8143 108.964 48.4262 111.808 50.038C114.651 51.6498 118.263 50.6512 119.875 47.8075C121.487 44.9639 120.488 41.3521 117.645 39.7403C114.801 38.1285 111.189 39.1271 109.577 41.9707Z" stroke="white" stroke-width="5"/>
-<path d="M122.038 45.6467C122.038 45.6467 144.047 53.7668 148.412 93.0129C152.778 132.259 144.012 148.579 144.012 148.579" stroke="white" stroke-width="5" stroke-linecap="round"/>
-<path d="M59.6334 105C59.6334 105 50.4373 82.1038 61.3054 73.3616C72.1736 64.6194 96 69.1987 96 69.1987" stroke="white" stroke-width="5" stroke-linecap="round"/>
-<path d="M149.532 66.9784C149.532 66.9784 174.391 68.9134 177.477 82.6384C180.564 96.3634 165.799 115.833 165.799 115.833" stroke="white" stroke-width="5" stroke-linecap="round"/>
-<path d="M138.248 163.363C138.248 163.363 124.023 183.841 110.618 179.573C97.2129 175.305 87.8662 152.728 87.8662 152.728" stroke="white" stroke-width="5" stroke-linecap="round"/>
-<path d="M116 119C120.418 119 124 115.642 124 111.5C124 107.358 120.418 104 116 104C111.582 104 108 107.358 108 111.5C108 115.642 111.582 119 116 119Z" fill="white"/>
-</g>
-<defs>
-<filter id="filter0_b" x="-4" y="-4" width="240" height="240" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feGaussianBlur in="BackgroundImage" stdDeviation="2"/>
-<feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur" result="shape"/>
-</filter>
-</defs>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients for nebula effect -->
+    <radialGradient id="purpleNebula" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="20%" style="stop-color:#ff00ff;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#9900ff;stop-opacity:0.6" />
+      <stop offset="80%" style="stop-color:#6600cc;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#330066;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="pinkNebula" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="20%" style="stop-color:#ff0080;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#ff0066;stop-opacity:0.6" />
+      <stop offset="80%" style="stop-color:#cc0052;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#660029;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="cyanNebula" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="20%" style="stop-color:#00ffff;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#00cccc;stop-opacity:0.6" />
+      <stop offset="80%" style="stop-color:#008080;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#003333;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="yellowNebula" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="20%" style="stop-color:#ffff00;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#ffcc00;stop-opacity:0.6" />
+      <stop offset="80%" style="stop-color:#ff8800;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#663300;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="greenNebula" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="20%" style="stop-color:#00ff40;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#00cc33;stop-opacity:0.6" />
+      <stop offset="80%" style="stop-color:#008026;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#003311;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="blueNebula" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="20%" style="stop-color:#0080ff;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#0066cc;stop-opacity:0.6" />
+      <stop offset="80%" style="stop-color:#004080;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#001a33;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="orangeNebula" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+      <stop offset="20%" style="stop-color:#ff8000;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#ff6600;stop-opacity:0.6" />
+      <stop offset="80%" style="stop-color:#cc4400;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#662200;stop-opacity:0.1" />
+    </radialGradient>
+    
+    <radialGradient id="superCore" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#ff33ff;stop-opacity:0.0" />
+      <stop offset="10%" style="stop-color:#33ffff;stop-opacity:0.05" />
+      <stop offset="20%" style="stop-color:#ffff33;stop-opacity:0.1" />
+      <stop offset="30%" style="stop-color:#ff00ff;stop-opacity:0.2" />
+      <stop offset="40%" style="stop-color:#00ffff;stop-opacity:0.3" />
+      <stop offset="50%" style="stop-color:#ffff00;stop-opacity:0.3" />
+      <stop offset="60%" style="stop-color:#ff0099;stop-opacity:0.2" />
+      <stop offset="70%" style="stop-color:#0099ff;stop-opacity:0.1" />
+      <stop offset="80%" style="stop-color:#ff9900;stop-opacity:0.05" />
+      <stop offset="90%" style="stop-color:#ff0066;stop-opacity:0" />
+    </radialGradient>
+    
+    <!-- Glow and blur filters for nebula effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="heavyBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="16"/>
+    </filter>
+    
+    <filter id="mediumBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+    </filter>
+    
+    <filter id="lightBlur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+    </filter>
+
+    <filter id="superGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <filter id="tinyGlow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Black space background -->
+  <!-- <rect width="512" height="512" fill="#000000"/> -->
+
+    <!-- Dense colorful pixel sparkles everywhere -->
+  <g id="sparkles" opacity="0.5">
+    <!-- Massive sparkle field - positioned semi-randomly across the canvas -->
+    <circle cx="23" cy="18" r="1.2" fill="#ff00ff" opacity="0.8" filter="url(#tinyGlow)"/>
+    <circle cx="45" cy="38" r="1.8" fill="#ff00ff" opacity="0.9" filter="url(#softGlow)"/>
+    <circle cx="67" cy="25" r="0.8" fill="#00ffff" opacity="0.7"/>
+    <circle cx="78" cy="62" r="1.2" fill="#00ffff" opacity="0.8"/>
+    <circle cx="89" cy="42" r="1" fill="#ffff00" opacity="0.6"/>
+    <circle cx="112" cy="45" r="1.5" fill="#ffff00" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="92" cy="89" r="1" fill="#00ff00" opacity="0.9"/>
+    <circle cx="134" cy="67" r="0.9" fill="#ff66ff" opacity="0.8"/>
+    <circle cx="65" cy="112" r="1.6" fill="#ff00aa" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="125" cy="78" r="1.2" fill="#ff6600" opacity="0.8"/>
+    <circle cx="38" cy="95" r="1.8" fill="#00ffaa" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="105" cy="125" r="1.1" fill="#ff0066" opacity="0.8"/>
+    <circle cx="145" cy="98" r="0.7" fill="#66ffff" opacity="0.9"/>
+    <circle cx="167" cy="112" r="1.3" fill="#ffff66" opacity="0.7" filter="url(#tinyGlow)"/>
+    <circle cx="178" cy="89" r="0.9" fill="#66ff66" opacity="0.8"/>
+    <circle cx="189" cy="125" r="1.4" fill="#ff66cc" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="201" cy="78" r="1" fill="#ffaa66" opacity="0.7"/>
+    <circle cx="212" cy="98" r="1.2" fill="#66ffaa" opacity="0.8"/>
+    <circle cx="223" cy="45" r="0.8" fill="#ff99ff" opacity="0.9"/>
+    <circle cx="234" cy="72" r="1.5" fill="#99ffff" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="245" cy="112" r="1.1" fill="#ffff99" opacity="0.7"/>
+    <circle cx="256" cy="38" r="0.9" fill="#99ff99" opacity="0.8"/>
+    <circle cx="267" cy="95" r="1.3" fill="#ff99cc" opacity="0.6" filter="url(#tinyGlow)"/>
+    <circle cx="278" cy="125" r="1" fill="#ffcc99" opacity="0.7"/>
+    <circle cx="289" cy="67" r="1.6" fill="#ff00ff" opacity="0.8" filter="url(#softGlow)"/>
+    <circle cx="298" cy="38" r="1.2" fill="#00ffff" opacity="0.8"/>
+    <circle cx="312" cy="89" r="0.8" fill="#ffff00" opacity="0.7"/>
+    <circle cx="324" cy="125" r="1.8" fill="#00ff00" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="334" cy="45" r="1" fill="#ff00aa" opacity="0.9"/>
+    <circle cx="345" cy="98" r="1.4" fill="#ff6600" opacity="0.6" filter="url(#tinyGlow)"/>
+    <circle cx="356" cy="82" r="0.9" fill="#00ffaa" opacity="0.7"/>
+    <circle cx="367" cy="112" r="1.2" fill="#ff0066" opacity="0.8"/>
+    <circle cx="378" cy="67" r="1.5" fill="#ff66ff" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="389" cy="38" r="0.7" fill="#66ffff" opacity="0.9"/>
+    <circle cx="398" cy="125" r="1.3" fill="#ffff66" opacity="0.6" filter="url(#tinyGlow)"/>
+    <circle cx="412" cy="48" r="1.5" fill="#66ff66" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="423" cy="42" r="1.2" fill="#ff66cc" opacity="0.8"/>
+    <circle cx="434" cy="89" r="0.9" fill="#ffaa66" opacity="0.7"/>
+    <circle cx="445" cy="112" r="1.1" fill="#66ffaa" opacity="0.8"/>
+    <circle cx="456" cy="85" r="1.8" fill="#ff99ff" opacity="0.9" filter="url(#softGlow)"/>
+    <circle cx="467" cy="38" r="1" fill="#99ffff" opacity="0.6"/>
+    <circle cx="478" cy="67" r="1.4" fill="#ffff99" opacity="0.7" filter="url(#tinyGlow)"/>
+    <circle cx="489" cy="98" r="0.8" fill="#99ff99" opacity="0.8"/>
+    <circle cx="498" cy="125" r="1.2" fill="#ff99cc" opacity="0.9"/>
+    
+    <!-- Middle band sparkles -->
+    <circle cx="18" cy="178" r="1.1" fill="#ff00ff" opacity="0.7" filter="url(#tinyGlow)"/>
+    <circle cx="34" cy="201" r="0.9" fill="#00ffff" opacity="0.8"/>
+    <circle cx="48" cy="234" r="1.5" fill="#ffff00" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="56" cy="189" r="1" fill="#00ff00" opacity="0.9"/>
+    <circle cx="72" cy="298" r="0.8" fill="#ff00aa" opacity="0.8"/>
+    <circle cx="82" cy="267" r="1.3" fill="#ff6600" opacity="0.7" filter="url(#tinyGlow)"/>
+    <circle cx="95" cy="189" r="1" fill="#00ffaa" opacity="0.7"/>
+    <circle cx="108" cy="223" r="1.6" fill="#ff0066" opacity="0.8" filter="url(#softGlow)"/>
+    <circle cx="112" cy="156" r="1.8" fill="#ff66ff" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="125" cy="267" r="1.3" fill="#66ffff" opacity="0.6" filter="url(#tinyGlow)"/>
+    <circle cx="134" cy="245" r="0.7" fill="#ffff66" opacity="0.8"/>
+    <circle cx="145" cy="178" r="1.2" fill="#66ff66" opacity="0.9"/>
+    <circle cx="156" cy="298" r="1.4" fill="#ff66cc" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="167" cy="234" r="0.9" fill="#ffaa66" opacity="0.7"/>
+    <circle cx="178" cy="201" r="1.1" fill="#66ffaa" opacity="0.8"/>
+    <circle cx="189" cy="267" r="1.5" fill="#ff99ff" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="201" cy="178" r="0.8" fill="#99ffff" opacity="0.9"/>
+    <circle cx="212" cy="245" r="1.3" fill="#ffff99" opacity="0.6" filter="url(#tinyGlow)"/>
+    <circle cx="223" cy="289" r="1" fill="#99ff99" opacity="0.8"/>
+    <circle cx="234" cy="156" r="1.6" fill="#ff99cc" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="245" cy="234" r="0.9" fill="#ffcc99" opacity="0.8"/>
+    <circle cx="256" cy="201" r="1.2" fill="#ff00ff" opacity="0.9"/>
+    <circle cx="267" cy="178" r="1.4" fill="#00ffff" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="278" cy="245" r="0.7" fill="#ffff00" opacity="0.8"/>
+    <circle cx="289" cy="289" r="1.1" fill="#00ff00" opacity="0.7"/>
+    <circle cx="298" cy="167" r="1.5" fill="#ff00aa" opacity="0.9" filter="url(#softGlow)"/>
+    <circle cx="312" cy="234" r="0.8" fill="#ff6600" opacity="0.6"/>
+    <circle cx="324" cy="201" r="1.3" fill="#00ffaa" opacity="0.8" filter="url(#tinyGlow)"/>
+    <circle cx="334" cy="178" r="1" fill="#ff0066" opacity="0.7"/>
+    <circle cx="345" cy="267" r="1.6" fill="#ff66ff" opacity="0.8" filter="url(#softGlow)"/>
+    <circle cx="356" cy="245" r="0.9" fill="#66ffff" opacity="0.9"/>
+    <circle cx="367" cy="189" r="1.2" fill="#ffff66" opacity="0.6"/>
+    <circle cx="378" cy="298" r="1.4" fill="#66ff66" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="389" cy="156" r="0.7" fill="#ff66cc" opacity="0.8"/>
+    <circle cx="398" cy="234" r="1.1" fill="#ffaa66" opacity="0.9"/>
+    <circle cx="412" cy="201" r="1.5" fill="#66ffaa" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="423" cy="178" r="0.8" fill="#ff99ff" opacity="0.8"/>
+    <circle cx="434" cy="267" r="1.3" fill="#99ffff" opacity="0.7" filter="url(#tinyGlow)"/>
+    <circle cx="445" cy="298" r="0.9" fill="#ffff99" opacity="0.7"/>
+    <circle cx="456" cy="189" r="1" fill="#99ff99" opacity="0.8"/>
+    <circle cx="467" cy="234" r="1.6" fill="#ff99cc" opacity="0.9" filter="url(#softGlow)"/>
+    <circle cx="478" cy="156" r="1.2" fill="#ffcc99" opacity="0.6"/>
+    <circle cx="489" cy="201" r="0.8" fill="#ff00ff" opacity="0.7"/>
+    <circle cx="498" cy="245" r="1.4" fill="#00ffff" opacity="0.8" filter="url(#softGlow)"/>
+    
+    <!-- Bottom band sparkles -->
+    <circle cx="23" cy="334" r="0.9" fill="#ff00ff" opacity="0.8"/>
+    <circle cx="34" cy="378" r="1.3" fill="#00ffff" opacity="0.7" filter="url(#tinyGlow)"/>
+    <circle cx="45" cy="412" r="1.6" fill="#ffff00" opacity="0.9" filter="url(#softGlow)"/>
+    <circle cx="52" cy="398" r="1.6" fill="#00ff00" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="67" cy="356" r="1" fill="#ff00aa" opacity="0.8"/>
+    <circle cx="75" cy="378" r="1.8" fill="#ff6600" opacity="0.8" filter="url(#softGlow)"/>
+    <circle cx="85" cy="425" r="1.2" fill="#00ffaa" opacity="0.9"/>
+    <circle cx="89" cy="445" r="0.8" fill="#ff0066" opacity="0.6"/>
+    <circle cx="95" cy="468" r="1.5" fill="#ff66ff" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="108" cy="398" r="1.1" fill="#66ffff" opacity="0.8"/>
+    <circle cx="112" cy="385" r="1" fill="#ffff66" opacity="0.8"/>
+    <circle cx="125" cy="456" r="1.4" fill="#66ff66" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="128" cy="412" r="0.9" fill="#ff66cc" opacity="0.6"/>
+    <circle cx="134" cy="378" r="1.2" fill="#ffaa66" opacity="0.9"/>
+    <circle cx="145" cy="445" r="1.5" fill="#66ffaa" opacity="0.8" filter="url(#softGlow)"/>
+    <circle cx="156" cy="456" r="1.8" fill="#ff99ff" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="167" cy="398" r="0.7" fill="#99ffff" opacity="0.8"/>
+    <circle cx="178" cy="334" r="1.3" fill="#ffff99" opacity="0.9" filter="url(#tinyGlow)"/>
+    <circle cx="189" cy="398" r="1.5" fill="#99ff99" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="201" cy="378" r="0.9" fill="#ff99cc" opacity="0.8"/>
+    <circle cx="212" cy="445" r="1.1" fill="#ffcc99" opacity="0.6"/>
+    <circle cx="223" cy="412" r="1.4" fill="#ff00ff" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="234" cy="468" r="0.9" fill="#00ffff" opacity="0.6"/>
+    <circle cx="245" cy="356" r="1.2" fill="#ffff00" opacity="0.8"/>
+    <circle cx="256" cy="398" r="1.6" fill="#00ff00" opacity="0.9" filter="url(#softGlow)"/>
+    <circle cx="267" cy="425" r="1" fill="#ff00aa" opacity="0.6"/>
+    <circle cx="278" cy="378" r="0.8" fill="#ff6600" opacity="0.7"/>
+    <circle cx="289" cy="445" r="1.3" fill="#00ffaa" opacity="0.8" filter="url(#tinyGlow)"/>
+    <circle cx="298" cy="445" r="1.6" fill="#ff0066" opacity="0.8" filter="url(#softGlow)"/>
+    <circle cx="312" cy="412" r="1.1" fill="#ff66ff" opacity="0.7"/>
+    <circle cx="324" cy="385" r="1.2" fill="#66ffff" opacity="0.8"/>
+    <circle cx="334" cy="456" r="0.9" fill="#ffff66" opacity="0.9"/>
+    <circle cx="345" cy="398" r="1.5" fill="#66ff66" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="356" cy="378" r="0.7" fill="#ff66cc" opacity="0.8"/>
+    <circle cx="367" cy="445" r="1.3" fill="#ffaa66" opacity="0.7" filter="url(#tinyGlow)"/>
+    <circle cx="378" cy="445" r="1.8" fill="#66ffaa" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="389" cy="334" r="1" fill="#ff99ff" opacity="0.8"/>
+    <circle cx="398" cy="398" r="1.2" fill="#99ffff" opacity="0.9"/>
+    <circle cx="412" cy="378" r="0.9" fill="#ffff99" opacity="0.8"/>
+    <circle cx="425" cy="456" r="1.8" fill="#99ff99" opacity="0.6" filter="url(#softGlow)"/>
+    <circle cx="434" cy="412" r="1.4" fill="#ff99cc" opacity="0.7" filter="url(#softGlow)"/>
+    <circle cx="445" cy="445" r="1.2" fill="#ffcc99" opacity="0.6"/>
+    <circle cx="456" cy="425" r="1.5" fill="#ff00ff" opacity="0.8" filter="url(#softGlow)"/>
+    <circle cx="467" cy="398" r="0.8" fill="#00ffff" opacity="0.9"/>
+    <circle cx="478" cy="378" r="1.1" fill="#ffff00" opacity="0.7"/>
+    <circle cx="489" cy="445" r="1.3" fill="#00ff00" opacity="0.8" filter="url(#tinyGlow)"/>
+    <circle cx="498" cy="412" r="1.6" fill="#ff00aa" opacity="0.6" filter="url(#softGlow)"/>
+    
+    <!-- Extra random sparkles for depth -->
+    <circle cx="143" cy="289" r="0.6" fill="#ff00ff" opacity="0.5"/>
+    <circle cx="369" cy="234" r="0.7" fill="#00ffff" opacity="0.6"/>
+    <circle cx="243" cy="321" r="0.8" fill="#ffff00" opacity="0.7"/>
+    <circle cx="189" cy="189" r="0.6" fill="#00ff00" opacity="0.5"/>
+    <circle cx="323" cy="289" r="0.7" fill="#ff00aa" opacity="0.6"/>
+    <circle cx="412" cy="134" r="0.8" fill="#ff6600" opacity="0.7"/>
+    <circle cx="98" cy="334" r="0.6" fill="#00ffaa" opacity="0.5"/>
+    <circle cx="267" cy="267" r="0.7" fill="#ff0066" opacity="0.6"/>
+    <circle cx="345" cy="167" r="0.8" fill="#ff66ff" opacity="0.7"/>
+    <circle cx="134" cy="423" r="0.6" fill="#66ffff" opacity="0.5"/>
+    <circle cx="423" cy="323" r="0.7" fill="#ffff66" opacity="0.6"/>
+    <circle cx="87" cy="223" r="0.8" fill="#66ff66" opacity="0.7"/>
+    <circle cx="298" cy="298" r="0.6" fill="#ff66cc" opacity="0.5"/>
+    <circle cx="167" cy="367" r="0.7" fill="#ffaa66" opacity="0.6"/>
+    <circle cx="389" cy="89" r="0.8" fill="#66ffaa" opacity="0.7"/>
+  </g>
+  
+  <!-- Background stars -->
+  <circle cx="40" cy="60" r="1" fill="#ffffff" opacity="0.8"/>
+  <circle cx="470" cy="50" r="0.5" fill="#ffffff" opacity="0.6"/>
+  <circle cx="480" cy="470" r="1" fill="#ffffff" opacity="0.7"/>
+  <circle cx="30" cy="450" r="0.5" fill="#ffffff" opacity="0.5"/>
+  <circle cx="490" cy="250" r="0.8" fill="#ffffff" opacity="0.6"/>
+  <circle cx="50" cy="490" r="0.5" fill="#ffffff" opacity="0.7"/>
+  <circle cx="450" cy="30" r="1" fill="#ffffff" opacity="0.5"/>
+  <circle cx="80" cy="420" r="0.5" fill="#ffffff" opacity="0.6"/>
+  
+  <!-- Outer nebula gas clouds with heavy blur - much larger -->
+  <ellipse cx="180" cy="320" rx="200" ry="200" fill="url(#purpleNebula)" opacity="0.4" filter="url(#heavyBlur)" transform="rotate(-20 180 320)"/>
+  <ellipse cx="340" cy="200" rx="220" ry="200" fill="url(#pinkNebula)" opacity="0.4" filter="url(#heavyBlur)" transform="rotate(30 340 200)"/>
+  
+  <!-- Mid-layer nebula clouds - expanded -->
+  <ellipse cx="256" cy="256" rx="200" ry="200" fill="url(#cyanNebula)" opacity="0.5" filter="url(#mediumBlur)" transform="rotate(-45 160 256)"/>
+  <ellipse cx="370" cy="320" rx="150" ry="180" fill="url(#yellowNebula)" opacity="0.5" filter="url(#mediumBlur)" transform="rotate(60 350 280)"/>
+  <ellipse cx="256" cy="180" rx="200" ry="170" fill="url(#greenNebula)" opacity="0.5" filter="url(#mediumBlur)" transform="rotate(15 256 180)"/>
+  
+  <!-- Inner nebula with bright colors - larger -->
+  <ellipse cx="260" cy="260" rx="160" ry="140" fill="url(#blueNebula)" opacity="0.6" filter="url(#lightBlur)" transform="rotate(-30 260 260)"/>
+  <ellipse cx="240" cy="270" rx="150" ry="130" fill="url(#orangeNebula)" opacity="0.6" filter="url(#lightBlur)" transform="rotate(45 240 270)"/>
+  <ellipse cx="270" cy="250" rx="140" ry="120" fill="url(#cyanNebula)" opacity="0.7" filter="url(#lightBlur)" transform="rotate(-15 270 250)"/>
+  
+  <!-- Additional outer wisps extending to edges -->
+  <ellipse cx="150" cy="256" rx="180" ry="150" fill="url(#greenNebula)" opacity="0.3" filter="url(#heavyBlur)" transform="rotate(75 100 256)"/>
+  <ellipse cx="380" cy="256" rx="180" ry="150" fill="url(#orangeNebula)" opacity="0.3" filter="url(#heavyBlur)" transform="rotate(-75 412 256)"/>
+
+  <ellipse cx="256" cy="256" rx="128" ry="128" fill="url(#superCore)" opacity="0.8" filter="url(#glow)" />
+  <!-- Bright core region - larger -->
+  <!-- <ellipse cx="256" cy="256" rx="70" ry="65" fill="url(#pinkNebula)" opacity="0.8" filter="url(#glow)" transform="rotate(20 256 256)"/>
+  <ellipse cx="250" cy="260" rx="50" ry="45" fill="url(#yellowNebula)" opacity="0.8" filter="url(#glow)" transform="rotate(-40 250 260)"/> -->
+  
+  <!-- Central bright core -->
+  <!-- <ellipse cx="256" cy="256" rx="40" ry="38" fill="#ffffff" opacity="0.9" filter="url(#glow)"/> -->
+  <!-- <ellipse cx="256" cy="256" rx="25" ry="23" fill="#ffccff" opacity="1" filter="url(#glow)"/> -->
+  <!-- <ellipse cx="256" cy="256" rx="12" ry="11" fill="#ffffff" opacity="1"/> -->
+  
+  <!-- Additional nebula wisps - extended to fill canvas -->
+  <!-- <path d="M 50 400 Q 256 350, 460 380" stroke="url(#purpleNebula)" stroke-width="30" fill="none" opacity="0.3" filter="url(#mediumBlur)"/> -->
+  <!-- <path d="M 80 120 Q 256 160, 440 100" stroke="url(#cyanNebula)" stroke-width="25" fill="none" opacity="0.3" filter="url(#mediumBlur)"/> -->
+  <!-- <path d="M 100 256 Q 256 220, 420 256" stroke="url(#orangeNebula)" stroke-width="40" fill="none" opacity="0.4" filter="url(#lightBlur)"/> -->
+  <!-- <path d="M 256 50 Q 200 256, 256 460" stroke="url(#blueNebula)" stroke-width="35" fill="none" opacity="0.3" filter="url(#mediumBlur)"/> -->
+  <!-- <path d="M 50 256 Q 256 300, 460 256" stroke="url(#greenNebula)" stroke-width="35" fill="none" opacity="0.3" filter="url(#mediumBlur)"/> -->
+
+    
+
 </svg>

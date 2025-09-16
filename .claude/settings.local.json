@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(resvg:*)",
+      "Bash(convert:*)"
     ],
     "deny": [],
     "ask": []
