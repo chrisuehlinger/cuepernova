@@ -5,7 +5,9 @@ node_modules/
 .env.local
 
 # Build outputs
-dist/
+release/app/dist
+release/build
+.erb/dll
 
 # User project files (when running from source)
 .cuepernova/
