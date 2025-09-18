@@ -5,9 +5,7 @@
   "runArgs": [
     "--privileged",
     "--network=host",
-    "--ipc=host",
-    "--gpus=all",
-    "--device=/dev/dri"
+    "--ipc=host"
   ],
   "appPort": [
     "8080",
@@ -16,9 +14,7 @@
   ],
   "mounts": [
     "source=claude-code-bashhistory,target=/commandhistory,type=volume",
-    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
-    "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind",
-    "source=${localEnv:HOME}/.Xauthority,target=/home/node/.Xauthority,type=bind"
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
   ],
   "customizations": {
     "vscode": {
@@ -50,10 +46,7 @@
     "NODE_OPTIONS": "--max-old-space-size=8192",
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
-    "DISPLAY": "${localEnv:DISPLAY}",
-    "ELECTRON_DISABLE_SANDBOX": "1",
-    "NVIDIA_VISIBLE_DEVICES": "all",
-    "NVIDIA_DRIVER_CAPABILITIES": "all"
+    "ELECTRON_DISABLE_SANDBOX": "1"
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace"

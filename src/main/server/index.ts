@@ -1,3 +1,5 @@
+
+import { app } from 'electron';
 import express from 'express';
 import * as http from 'node:http';
 import * as https from 'node:https';
@@ -9,6 +11,7 @@ import { WebSocketServer } from 'ws';
 import { wsUpgrade, initOSCServer, broadcastToCuestations } from './sockets';
 import { setupSignalmaster } from './signalmaster';
 import { CertificateManager } from './certificate-manager';
+
 
 export class ServerManager {
   private app: express.Application | null = null;
@@ -157,42 +160,27 @@ export class ServerManager {
       }
     });
 
+    const serveAsset = (fileName: string) => {
+      this.app!.get(`/${fileName}`, (req, res) => {
+        if (process.env.NODE_ENV === 'development') {
+          const port = 1212;
+          const url = new URL(`http://${req.hostname}:${port}`);
+          url.pathname = fileName;
+          req.query.name && url.searchParams.set('name', req.query.name as string);
+          res.redirect(url.toString());
+        } else {
+          res.sendFile(path.join(__dirname, app.isPackaged ? '../renderer/' : '../../renderer/', fileName));
+        }
+      });
+    };
+
     // Serve HTML pages
-    this.app.get('/cuestation.html', async (req, res) => {
-      if (process.env.NODE_ENV === 'development') {
-        const port = 1212;
-        const url = new URL(`http://${req.hostname}:${port}`);
-        url.pathname = 'cuestation.html';
-        req.query.name && url.searchParams.set('name', req.query.name as string);
-        res.redirect(url.toString());
-      } else {
-        res.sendFile(path.resolve(__dirname, '../../renderer/', 'cuestation.html'));
-      }
-    });
-
-    this.app.get('/control.html', (req, res) => {
-      if (process.env.NODE_ENV === 'development') {
-        const port = 1212;
-        const url = new URL(`http://${req.hostname}:${port}`);
-        url.pathname = 'control.html';
-        req.query.name && url.searchParams.set('name', req.query.name as string);
-        res.redirect(url.toString());
-      } else {
-        res.sendFile(path.resolve(__dirname, '../../renderer/', 'control.html'));
-      }
-    });
-
-    this.app.get('/mapping-editor.html', (req, res) => {
-      if (process.env.NODE_ENV === 'development') {
-        const port = 1212;
-        const url = new URL(`http://${req.hostname}:${port}`);
-        url.pathname = 'mapping-editor.html';
-        req.query.name && url.searchParams.set('name', req.query.name as string);
-        res.redirect(url.toString());
-      } else {
-        res.sendFile(path.resolve(__dirname, '../../renderer/', 'mapping-editor.html'));
-      }
-    });
+    serveAsset('cuestation.html');
+    serveAsset('cuestation.js');
+    serveAsset('control.html');
+    serveAsset('control.js');
+    serveAsset('mapping-editor.html');
+    serveAsset('mapping-editor.js');
 
     // Setup SignalMaster routes for WebRTC
     setupSignalmaster(this.app);
