@@ -4,7 +4,8 @@
       "Bash(npm start)",
       "Bash(resvg:*)",
       "Bash(convert:*)",
-      "Bash(magick:*)"
+      "Bash(magick:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

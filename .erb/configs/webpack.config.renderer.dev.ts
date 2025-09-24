@@ -256,6 +256,30 @@ const configuration: webpack.Configuration = {
         context: ['/control'],
         target: 'http://localhost:8080',
       },
+      {
+        context: ['/cueball'],
+        target: 'http://localhost:8080',
+      },
+      {
+        context: ['/cueballs/**/*'],
+        target: 'http://localhost:8080',
+      },
+      {
+        context: ['/css/**/*'],
+        target: 'http://localhost:8080',
+      },
+      {
+        context: ['/js/**/*'],
+        target: 'http://localhost:8080',
+      },
+      {
+        context: ['/media/**/*'],
+        target: 'http://localhost:8080',
+      },
+      {
+        context: ['/node_modules/**/*'],
+        target: 'http://localhost:8080',
+      },
     ],
     setupMiddlewares(middlewares) {
       console.log('Starting preload.js builder...');

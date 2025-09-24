@@ -267,25 +267,12 @@ export class WebSocketManager {
       }
     });
 
-    // Cueball-specific route
+    // Cueball route - forward all /cuepernova/cueball messages to all cueballs
     this.addRoute(/^\/cuepernova\/cueball\//, (message, client) => {
       // Messages to cueballs can come from control or cuestations
       if (client.type === 'control' || client.type === 'cuestation') {
-        // Check if targeting specific cueball
-        const match = message.address.match(/^\/cuepernova\/cueball\/([^\/]+)\//); 
-        if (match && match[1]) {
-          const cueballName = match[1];
-          const targetCueball = this.findCueballByName(cueballName);
-          if (targetCueball) {
-            this.sendToClient(targetCueball, message);
-            this.log(`Sent message to cueball: ${cueballName}`);
-          } else {
-            this.log(`Cueball not found: ${cueballName}`, 'warn');
-          }
-        } else {
-          // Broadcast to all cueballs
-          this.broadcastToCueballs(message);
-        }
+        // Broadcast to all cueballs - they'll filter on the frontend
+        this.broadcastToCueballs(message);
       }
     });
 
@@ -550,6 +537,7 @@ export class WebSocketManager {
 
   public handleUpgrade(request: IncomingMessage, socket: Duplex, head: Buffer): void {
     const pathname = url.parse(request.url || '').pathname;
+    console.log('pathname', pathname);
     
     if (pathname === '/cuestation') {
       this.cuestationServer.handleUpgrade(request, socket, head, (ws) => {
