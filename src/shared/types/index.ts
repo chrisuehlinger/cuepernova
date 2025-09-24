@@ -18,9 +18,6 @@ export interface Cue {
   type: CueType;
   args: CueArgument[];
   notes?: string;
-  // OSC compatibility fields
-  address?: string;
-  group?: string;
 }
 
 export interface Cuestation {

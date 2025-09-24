@@ -2,9 +2,8 @@ import $ from 'jquery';
 
 interface Cue {
   name: string;
-  address: string;
+  type: string;
   args?: (string | number | boolean)[];
-  group?: string;
 }
 
 interface CueList {
@@ -191,7 +190,9 @@ function bindEventHandlers(): void {
     const index = $(this).data('index') as number;
     const cue = state.customCues[index];
     if (cue) {
-      sendMessage(cue.address, cue.args || []);
+      // Construct address from cue type
+      const address = `/cuepernova/cuestation/all/showScreen/${cue.type}`;
+      sendMessage(address, cue.args || []);
       highlightCue($(this));
     }
   });
@@ -207,20 +208,14 @@ function renderCueList(): void {
     return;
   }
   
-  let currentGroup = '';
   state.customCues.forEach((cue, index) => {
-    if (cue.group && cue.group !== currentGroup) {
-      currentGroup = cue.group;
-      $list.append(`<div class="cue-group">${currentGroup}</div>`);
-    }
-    
     const $item = $('<div class="cue-item">')
       .data('index', index)
       .html(`
         <span class="cue-name">${cue.name}</span>
-        <span class="cue-address">${cue.address}</span>
+        <span class="cue-type">${cue.type}</span>
       `);
-    
+
     $list.append($item);
   });
 }
