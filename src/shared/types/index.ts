@@ -18,6 +18,10 @@ export interface Cue {
   type: CueType;
   args: CueArgument[];
   notes?: string;
+  // OSC compatibility field
+  oscCommand?: string;
+  // Target cuestation (defaults to 'all' if not set)
+  cuestation?: string;
 }
 
 export interface Cuestation {

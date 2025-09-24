@@ -23,16 +23,17 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { Cue } from '@shared/types';
+import { Cue, Cuestation } from '@shared/types';
 
 interface CueListProps {
   cues: Cue[];
   onChange: (cues: Cue[]) => void;
   serverRunning: boolean;
   config?: { httpPort?: number; httpsPort?: number; oscPort?: number };
+  cuestations?: Cuestation[];
 }
 
-const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunning, config }) => {
+const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunning, config, cuestations }) => {
   const [editDialog, setEditDialog] = useState(false);
   const [editingCue, setEditingCue] = useState<Cue | null>(null);
   const [formData, setFormData] = useState<Partial<Cue>>({});
@@ -78,11 +79,33 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
       return;
     }
 
-    // Send OSC message via WebSocket to server (broadcast to all by default)
-    const message = {
-      address: `/cuepernova/cuestation/all/showScreen/${cue.type}`,
-      args: cue.args,
-    };
+    let message: { address: string; args: (string | number | boolean)[] };
+
+    if (cue.type === 'osc' && cue.oscCommand) {
+      // Parse OSC command: "/address arg1 arg2 arg3..."
+      const parts = cue.oscCommand.trim().split(/\s+/);
+      const address = parts[0];
+      const args = parts.slice(1).map(arg => {
+        // Try to parse as number
+        const num = parseFloat(arg);
+        if (!isNaN(num)) return num;
+        // Try to parse as boolean
+        if (arg === 'true') return true;
+        if (arg === 'false') return false;
+        // Otherwise keep as string
+        return arg;
+      });
+
+      message = { address, args };
+    } else {
+      // Send standard cuestation message
+      // Use the cuestation field if set, otherwise default to 'all'
+      const target = cue.cuestation || 'all';
+      message = {
+        address: `/cuepernova/cuestation/${target}/showScreen/${cue.type}`,
+        args: cue.args,
+      };
+    }
 
     try {
       // Determine WebSocket URL based on context (Electron vs web)
@@ -171,6 +194,14 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
                   </Typography>
                   <Typography variant="body1">{cue.name}</Typography>
                   <Chip label={cue.type} size="small" color="primary" />
+                  {cue.type === 'osc' && cue.oscCommand && (
+                    <Typography variant="caption" sx={{ color: 'text.secondary', ml: 1 }}>
+                      {cue.oscCommand}
+                    </Typography>
+                  )}
+                  {cue.type !== 'osc' && cue.cuestation && (
+                    <Chip label={`→ ${cue.cuestation}`} size="small" variant="outlined" sx={{ ml: 1 }} />
+                  )}
                 </Box>
               }
               secondary={cue.notes}
@@ -199,7 +230,16 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
               <InputLabel>Type</InputLabel>
               <Select
                 value={formData.type || 'clear'}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as Cue['type'] })}
+                onChange={(e) => {
+                  const newType = e.target.value as Cue['type'];
+                  if (newType === 'osc' && !formData.oscCommand && formData.args?.length) {
+                    // Converting to OSC - build oscCommand from args if we have them
+                    const oscCmd = formData.args.join(' ');
+                    setFormData({ ...formData, type: newType, oscCommand: oscCmd });
+                  } else {
+                    setFormData({ ...formData, type: newType });
+                  }
+                }}
                 label="Type"
               >
                 {cueTypes.map(type => (
@@ -207,16 +247,41 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
                 ))}
               </Select>
             </FormControl>
-            <TextField
-              label="Arguments (comma separated)"
-              value={formData.args?.join(', ') || ''}
-              onChange={(e) => setFormData({
-                ...formData,
-                args: e.target.value.split(',').map(s => s.trim()).filter(s => s)
-              })}
-              fullWidth
-              helperText="For video: path, loop | For message: text, subtitle"
-            />
+            {formData.type === 'osc' ? (
+              <TextField
+                label="OSC Command"
+                value={formData.oscCommand || ''}
+                onChange={(e) => setFormData({ ...formData, oscCommand: e.target.value })}
+                fullWidth
+                helperText="Format: /address arg1 arg2 arg3... (e.g., /note/on 60 127)"
+              />
+            ) : (
+              <>
+                <TextField
+                  label="Arguments (comma separated)"
+                  value={formData.args?.join(', ') || ''}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    args: e.target.value.split(',').map(s => s.trim()).filter(s => s)
+                  })}
+                  fullWidth
+                  helperText="For video: path, loop | For message: text, subtitle"
+                />
+                <FormControl fullWidth>
+                  <InputLabel>Target Cuestation</InputLabel>
+                  <Select
+                    value={formData.cuestation || 'all'}
+                    onChange={(e) => setFormData({ ...formData, cuestation: e.target.value === 'all' ? undefined : e.target.value })}
+                    label="Target Cuestation"
+                  >
+                    <MenuItem value="all">All Cuestations</MenuItem>
+                    {cuestations?.map(cs => (
+                      <MenuItem key={cs.id} value={cs.name}>{cs.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </>
+            )}
             <TextField
               label="Notes"
               value={formData.notes || ''}

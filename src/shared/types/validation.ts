@@ -21,7 +21,9 @@ export const CueSchema = z.object({
   name: z.string().min(1),
   type: z.enum(CUE_TYPES),
   args: z.array(CueArgumentSchema),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  oscCommand: z.string().optional(),
+  cuestation: z.string().optional()
 });
 
 export const MaptasticMappingSchema = z.object({
