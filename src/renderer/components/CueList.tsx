@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, DragEvent } from 'react';
 import {
   Box,
   List,
@@ -37,6 +37,8 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
   const [editDialog, setEditDialog] = useState(false);
   const [editingCue, setEditingCue] = useState<Cue | null>(null);
   const [formData, setFormData] = useState<Partial<Cue>>({});
+  const [draggedCue, setDraggedCue] = useState<Cue | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const handleAdd = useCallback(() => {
     const newCue: Cue = {
@@ -199,6 +201,43 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
     'clear', 'message', 'video', 'image', 'cueball', 'osc'
   ], []);
 
+  const handleDragStart = useCallback((e: DragEvent<HTMLLIElement>, cue: Cue) => {
+    setDraggedCue(cue);
+    e.dataTransfer.effectAllowed = 'move';
+  }, []);
+
+  const handleDragOver = useCallback((e: DragEvent<HTMLLIElement>, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverIndex(null);
+  }, []);
+
+  const handleDrop = useCallback((e: DragEvent<HTMLLIElement>, dropIndex: number) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+
+    if (!draggedCue) return;
+
+    const draggedIndex = cues.findIndex(c => c.id === draggedCue.id);
+    if (draggedIndex === dropIndex) return;
+
+    const newCues = [...cues];
+    newCues.splice(draggedIndex, 1);
+    newCues.splice(dropIndex, 0, draggedCue);
+
+    onChange(newCues);
+    setDraggedCue(null);
+  }, [draggedCue, cues, onChange]);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedCue(null);
+    setDragOverIndex(null);
+  }, []);
+
   return (
     <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
       <Box sx={{ mb: 2 }}>
@@ -212,13 +251,23 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
       </Box>
 
       <List sx={{ flexGrow: 1, overflow: 'auto' }}>
-        {cues.map((cue) => (
+        {cues.map((cue, index) => (
           <ListItem
             key={cue.id}
+            draggable
+            onDragStart={(e) => handleDragStart(e, cue)}
+            onDragOver={(e) => handleDragOver(e, index)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, index)}
+            onDragEnd={handleDragEnd}
             sx={{
               mb: 1,
               background: '#2d2d2d',
               borderRadius: 1,
+              cursor: 'move',
+              opacity: draggedCue?.id === cue.id ? 0.5 : 1,
+              borderTop: dragOverIndex === index ? '2px solid #90caf9' : 'none',
+              transition: 'all 0.2s ease',
               '&:hover': { background: '#3d3d3d' },
             }}
             secondaryAction={
