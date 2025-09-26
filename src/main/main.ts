@@ -112,8 +112,7 @@ async function createCuestationWindow(name: string): Promise<void> {
     title: `Cuestation: ${name}`,
     webPreferences: {
       contextIsolation: false,
-      nodeIntegration: false,
-      devTools: false
+      nodeIntegration: false
     },
   });
 
