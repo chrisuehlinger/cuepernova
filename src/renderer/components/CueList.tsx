@@ -73,6 +73,73 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
     setFormData({});
   }, [editingCue, formData, cues, onChange]);
 
+  // Parse OSC command string into address and typed arguments
+  // Handles quoted strings, numbers, booleans, and special values
+  const parseOscCommand = (command: string): { address: string; args: (string | number | boolean)[] } => {
+    const trimmed = command.trim();
+    const parts: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    let quoteChar = '';
+
+    // First, split by spaces while respecting quotes
+    for (let i = 0; i < trimmed.length; i++) {
+      const char = trimmed[i];
+
+      if ((char === '"' || char === "'") && !inQuotes) {
+        inQuotes = true;
+        quoteChar = char;
+      } else if (char === quoteChar && inQuotes && (i === 0 || trimmed[i - 1] !== '\\')) {
+        inQuotes = false;
+        quoteChar = '';
+      } else if (char === ' ' && !inQuotes) {
+        if (current.length > 0) {
+          parts.push(current);
+          current = '';
+        }
+      } else {
+        current += char;
+      }
+    }
+
+    if (current.length > 0) {
+      parts.push(current);
+    }
+
+    // First part is the address
+    const address = parts[0] || '/';
+
+    // Parse the remaining parts as arguments
+    const args = parts.slice(1).map(arg => {
+      // Handle escaped characters in strings
+      const unescaped = arg.replace(/\\(.)/g, '$1');
+
+      // Try to parse as integer
+      if (/^-?\d+$/.test(arg)) {
+        return parseInt(arg, 10);
+      }
+
+      // Try to parse as float
+      const num = parseFloat(arg);
+      if (!isNaN(num) && isFinite(num)) {
+        return num;
+      }
+
+      // Try to parse as boolean
+      if (arg === 'true' || arg === 'True' || arg === 'TRUE') return true;
+      if (arg === 'false' || arg === 'False' || arg === 'FALSE') return false;
+
+      // Handle special OSC values
+      if (arg === 'nil' || arg === 'null') return null as any;
+      if (arg === 'Infinity' || arg === 'inf') return Infinity;
+
+      // Otherwise keep as string
+      return unescaped;
+    });
+
+    return { address, args };
+  };
+
   const handleExecute = useCallback(async (cue: Cue) => {
     if (!serverRunning) {
       alert('Server must be running to execute cues');
@@ -82,21 +149,8 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
     let message: { address: string; args: (string | number | boolean)[] };
 
     if (cue.type === 'osc' && cue.oscCommand) {
-      // Parse OSC command: "/address arg1 arg2 arg3..."
-      const parts = cue.oscCommand.trim().split(/\s+/);
-      const address = parts[0];
-      const args = parts.slice(1).map(arg => {
-        // Try to parse as number
-        const num = parseFloat(arg);
-        if (!isNaN(num)) return num;
-        // Try to parse as boolean
-        if (arg === 'true') return true;
-        if (arg === 'false') return false;
-        // Otherwise keep as string
-        return arg;
-      });
-
-      message = { address, args };
+      // Parse OSC command with proper quoted string handling
+      message = parseOscCommand(cue.oscCommand);
     } else {
       // Send standard cuestation message
       // Use the cuestation field if set, otherwise default to 'all'
@@ -253,7 +307,7 @@ const CueListComponent: React.FC<CueListProps> = ({ cues, onChange, serverRunnin
                 value={formData.oscCommand || ''}
                 onChange={(e) => setFormData({ ...formData, oscCommand: e.target.value })}
                 fullWidth
-                helperText="Format: /address arg1 arg2 arg3... (e.g., /note/on 60 127)"
+                helperText='Format: /address arg1 arg2... Use quotes for strings with spaces (e.g., /message "Hello World" 1.5)'
               />
             ) : (
               <>
