@@ -8,6 +8,8 @@ import {
   Stack,
   TextField,
   Divider,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
@@ -21,6 +23,9 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ onDirectorySelect }) 
   const [selectedDir, setSelectedDir] = useState<string | null>(null);
   const [hostIP, setHostIP] = useState<string>('');
   const [cuestationName, setCuestationName] = useState<string>('');
+  const [useHttps, setUseHttps] = useState<boolean>(true);
+  const [httpPort, setHttpPort] = useState<number>(8080);
+  const [httpsPort, setHttpsPort] = useState<number>(8443);
 
   const handleSelectDirectory = async () => {
     const directory = await window.electronAPI.selectDirectory();
@@ -32,7 +37,9 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ onDirectorySelect }) 
 
   const handleLaunchCuestation = () => {
     if (hostIP && cuestationName) {
-      const url = `https://${hostIP}:8443/cuestation.html?name=${encodeURIComponent(cuestationName)}`;
+      const protocol = useHttps ? 'https' : 'http';
+      const port = useHttps ? httpsPort : httpPort;
+      const url = `${protocol}://${hostIP}:${port}/cuestation.html?name=${encodeURIComponent(cuestationName)}`;
       window.location.href = url;
     }
   };
@@ -47,6 +54,21 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ onDirectorySelect }) 
       }
     };
     checkLastDirectory();
+
+    // Load config to get default ports
+    const loadConfig = async () => {
+      try {
+        const config = await window.electronAPI.getConfig();
+        if (config) {
+          setHttpPort(config.httpPort || 8080);
+          setHttpsPort(config.httpsPort || 8443);
+        }
+      } catch (error) {
+        // If config fails, keep default values
+        console.log('Using default ports');
+      }
+    };
+    loadConfig();
   }, [onDirectorySelect]);
 
   return (
@@ -131,6 +153,17 @@ const DirectoryPicker: React.FC<DirectoryPickerProps> = ({ onDirectorySelect }) 
                 sx={{ width: 180 }}
               />
             </Stack>
+
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={useHttps}
+                  onChange={(e) => setUseHttps(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label={`Use HTTPS (port ${useHttps ? httpsPort : httpPort})`}
+            />
 
             <Button
               variant="contained"
