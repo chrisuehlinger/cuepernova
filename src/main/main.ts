@@ -113,6 +113,7 @@ async function createCuestationWindow(name: string): Promise<void> {
     webPreferences: {
       contextIsolation: false,
       nodeIntegration: false,
+      devTools: false
     },
   });
 
