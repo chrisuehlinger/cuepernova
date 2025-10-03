@@ -8,11 +8,14 @@ import {
   Paper,
   Container,
   Button,
+  TextField,
+  Stack,
 } from '@mui/material';
 import Grid from '@mui/system/Grid';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import AddIcon from '@mui/icons-material/Add';
+import SendIcon from '@mui/icons-material/Send';
 import CueList from '../components/CueList';
 import CuestationManager from '../components/CuestationManager';
 import ServerToggle from '../components/ServerToggle';
@@ -31,6 +34,7 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [cueballModalOpen, setCueballModalOpen] = useState(false);
   const [config, setConfig] = useState<Config>({} as Config);
+  const [oscCommand, setOscCommand] = useState('');
 
   useEffect(() => {
     loadData();
@@ -84,13 +88,28 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
     setConfig(newConfig);
     await window.electronAPI.saveConfig(newConfig);
     setSettingsOpen(false);
-    
+
     // Restart server if running to apply new config
     if (serverRunning) {
       await window.electronAPI.stopServer();
       await window.electronAPI.startServer();
     }
   }, [serverRunning]);
+
+  const handleSendOSC = useCallback(async () => {
+    if (!oscCommand.trim()) return;
+
+    const parts = oscCommand.trim().split(' ');
+    const address = parts[0];
+    const args = parts.slice(1);
+
+    try {
+      await window.electronAPI.sendOSCCommand(address, args);
+      setOscCommand('');
+    } catch (error) {
+      console.error('Failed to send OSC command:', error);
+    }
+  }, [oscCommand]);
 
   return (
     <Box sx={{ flexGrow: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -147,6 +166,34 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
               <Typography variant="h5" gutterBottom>
                 Cue List
               </Typography>
+              <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  placeholder="/cuepernova/cuestation/showScreen/clear"
+                  value={oscCommand}
+                  onChange={(e) => setOscCommand(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSendOSC();
+                    }
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    },
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleSendOSC}
+                  disabled={!serverRunning || !oscCommand.trim()}
+                  endIcon={<SendIcon />}
+                  sx={{ minWidth: '100px' }}
+                >
+                  Send
+                </Button>
+              </Stack>
               <CueList
                 cues={cues}
                 onChange={handleCuesChange}

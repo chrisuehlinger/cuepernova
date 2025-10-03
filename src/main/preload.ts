@@ -35,7 +35,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Cueball operations
   createCueball: (name: string) => ipcRenderer.invoke('create-cueball', name),
-  
+
+  // OSC operations
+  sendOSCCommand: (address: string, args: any[]) => ipcRenderer.invoke('send-osc-command', address, args),
+
   // Event listeners
   onDirectorySelected: (callback: (dir: string) => void) => {
     ipcRenderer.on('directory-selected', (_event, dir) => callback(dir));
@@ -66,6 +69,7 @@ declare global {
       getServerStatus: () => Promise<boolean>;
       downloadCACert: () => Promise<string>;
       createCueball: (name: string) => Promise<{ success: boolean; error?: string; files?: any; kebabName?: string }>;
+      sendOSCCommand: (address: string, args: any[]) => Promise<void>;
       onDirectorySelected: (callback: (dir: string) => void) => void;
       onServerStatusChanged: (callback: (status: boolean) => void) => void;
     };

@@ -279,6 +279,15 @@ export function setupIpcHandlers(context: IpcContext) {
     return ['basic', 'interactive', 'webrtc'];
   });
 
+  // OSC operations
+  ipcMain.handle('send-osc-command', async (event, address: string, args: any[]) => {
+    const { wsManager } = await import('../server/sockets');
+    wsManager.handleOSCMessage({
+      address,
+      args
+    });
+  });
+
   // Cache operations
   ipcMain.handle('invalidate-cache', () => {
     if (dataStore) {
