@@ -105,7 +105,6 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
 
     try {
       await window.electronAPI.sendOSCCommand(address, args);
-      setOscCommand('');
     } catch (error) {
       console.error('Failed to send OSC command:', error);
     }
