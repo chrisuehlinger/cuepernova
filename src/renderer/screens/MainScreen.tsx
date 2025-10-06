@@ -27,6 +27,79 @@ interface MainScreenProps {
   projectDir: string;
 }
 
+// Parse OSC command string into address and typed arguments
+// Handles quoted strings, numbers, booleans, and special values
+const parseOscCommand = (
+  command: string,
+): { address: string; args: (string | number | boolean)[] } => {
+  const trimmed = command.trim();
+  const parts: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let quoteChar = '';
+
+  // First, split by spaces while respecting quotes
+  for (let i = 0; i < trimmed.length; i++) {
+    const char = trimmed[i];
+
+    if ((char === '"' || char === "'") && !inQuotes) {
+      inQuotes = true;
+      quoteChar = char;
+    } else if (
+      char === quoteChar &&
+      inQuotes &&
+      (i === 0 || trimmed[i - 1] !== '\\')
+    ) {
+      inQuotes = false;
+      quoteChar = '';
+    } else if (char === ' ' && !inQuotes) {
+      if (current.length > 0) {
+        parts.push(current);
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+
+  if (current.length > 0) {
+    parts.push(current);
+  }
+
+  // First part is the address
+  const address = parts[0] || '/';
+
+  // Parse the remaining parts as arguments
+  const args = parts.slice(1).map((arg) => {
+    // Handle escaped characters in strings
+    const unescaped = arg.replace(/\\(.)/g, '$1');
+
+    // Try to parse as integer
+    if (/^-?\d+$/.test(arg)) {
+      return parseInt(arg, 10);
+    }
+
+    // Try to parse as float
+    const num = parseFloat(arg);
+    if (!isNaN(num) && isFinite(num)) {
+      return num;
+    }
+
+    // Try to parse as boolean
+    if (arg === 'true' || arg === 'True' || arg === 'TRUE') return true;
+    if (arg === 'false' || arg === 'False' || arg === 'FALSE') return false;
+
+    // Handle special OSC values
+    if (arg === 'nil' || arg === 'null') return null as any;
+    if (arg === 'Infinity' || arg === 'inf') return Infinity;
+
+    // Otherwise keep as string
+    return unescaped;
+  });
+
+  return { address, args };
+};
+
 const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
   const [cues, setCues] = useState<Cue[]>([]);
   const [cuestations, setCuestations] = useState<Cuestation[]>([]);
@@ -71,10 +144,13 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
     await window.electronAPI.saveCues(newCues);
   }, []);
 
-  const handleCuestationsChange = useCallback(async (newCuestations: Cuestation[]) => {
-    setCuestations(newCuestations);
-    await window.electronAPI.saveCuestations(newCuestations);
-  }, []);
+  const handleCuestationsChange = useCallback(
+    async (newCuestations: Cuestation[]) => {
+      setCuestations(newCuestations);
+      await window.electronAPI.saveCuestations(newCuestations);
+    },
+    [],
+  );
 
   const handleServerToggle = useCallback(async () => {
     if (serverRunning) {
@@ -84,24 +160,25 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
     }
   }, [serverRunning]);
 
-  const handleSettingsSave = useCallback(async (newConfig: Config) => {
-    setConfig(newConfig);
-    await window.electronAPI.saveConfig(newConfig);
-    setSettingsOpen(false);
+  const handleSettingsSave = useCallback(
+    async (newConfig: Config) => {
+      setConfig(newConfig);
+      await window.electronAPI.saveConfig(newConfig);
+      setSettingsOpen(false);
 
-    // Restart server if running to apply new config
-    if (serverRunning) {
-      await window.electronAPI.stopServer();
-      await window.electronAPI.startServer();
-    }
-  }, [serverRunning]);
+      // Restart server if running to apply new config
+      if (serverRunning) {
+        await window.electronAPI.stopServer();
+        await window.electronAPI.startServer();
+      }
+    },
+    [serverRunning],
+  );
 
   const handleSendOSC = useCallback(async () => {
     if (!oscCommand.trim()) return;
 
-    const parts = oscCommand.trim().split(' ');
-    const address = parts[0];
-    const args = parts.slice(1);
+    const { address, args } = parseOscCommand(oscCommand);
 
     try {
       await window.electronAPI.sendOSCCommand(address, args);
@@ -111,34 +188,44 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
   }, [oscCommand]);
 
   return (
-    <Box sx={{ flexGrow: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <AppBar position="static" sx={{ background: 'linear-gradient(90deg, #1e1e1e 0%, #2d2d2d 100%)' }}>
+    <Box
+      sx={{
+        flexGrow: 1,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <AppBar
+        position="static"
+        sx={{ background: 'linear-gradient(90deg, #1e1e1e 0%, #2d2d2d 100%)' }}
+      >
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Cuepernova - {projectDir.split('/').pop()}
           </Typography>
-          
+
           <Button
             variant="outlined"
             startIcon={<AddIcon />}
             onClick={() => setCueballModalOpen(true)}
-            sx={{ 
+            sx={{
               mr: 2,
               borderColor: 'rgba(255, 255, 255, 0.3)',
               '&:hover': {
                 borderColor: 'rgba(255, 255, 255, 0.5)',
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              }
+              },
             }}
           >
             CUEBALL
           </Button>
-          
+
           <ServerToggle
             isRunning={serverRunning}
             onToggle={handleServerToggle}
           />
-          
+
           <IconButton
             color="inherit"
             onClick={() => setSettingsOpen(true)}
@@ -202,7 +289,7 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
               />
             </Paper>
           </Grid>
-          
+
           <Grid size={{ xs: 12, md: 5 }}>
             <Paper
               elevation={2}
@@ -234,7 +321,7 @@ const MainScreenComponent: React.FC<MainScreenProps> = ({ projectDir }) => {
         onClose={() => setSettingsOpen(false)}
         onSave={handleSettingsSave}
       />
-      
+
       <CueballCreateModal
         open={cueballModalOpen}
         onClose={() => setCueballModalOpen(false)}
