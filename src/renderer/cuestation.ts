@@ -69,11 +69,47 @@ const cueHandlers: Record<string, CueHandler> = {
 
   message: (message: WebSocketMessage) => {
     const text = message.args?.[0] || 'No message';
-    const subtitle = message.args?.[1] || '';
+    const resolutionWidth = state.config?.showtimeResolution.width || 1920;
+    const resolutionHeight = state.config?.showtimeResolution.height || 1080;
+
     state.showtime.html(`<div class="message-wrapper">
       <h1>${text}</h1>
-      ${subtitle ? `<p>${subtitle}</p>` : ''}
     </div>`);
+
+    const h1 = state.showtime.find('h1');
+    let fontSize = 100; // Start with a reasonable size
+    h1.css('font-size', fontSize + 'px');
+
+    // First, shrink if too large
+    while (fontSize > 1) {
+      const width = h1.outerWidth() || 0;
+      const height = h1.outerHeight() || 0;
+
+      if (width > resolutionWidth || height > resolutionHeight) {
+        fontSize--;
+        h1.css('font-size', fontSize + 'px');
+      } else {
+        break;
+      }
+    }
+
+    // Then, grow if there's room (100px margin on both dimensions)
+    while (fontSize < 1000) {
+      const width = h1.outerWidth() || 0;
+      const height = h1.outerHeight() || 0;
+
+      if (width < resolutionWidth - 100 && height < resolutionHeight - 100) {
+        fontSize++;
+        h1.css('font-size', fontSize + 'px');
+      } else {
+        // Check if we went over, if so step back
+        if (width > resolutionWidth || height > resolutionHeight) {
+          fontSize--;
+          h1.css('font-size', fontSize + 'px');
+        }
+        break;
+      }
+    }
   },
 
   video: (message: WebSocketMessage) => {
