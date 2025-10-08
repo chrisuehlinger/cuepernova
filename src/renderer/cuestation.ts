@@ -93,12 +93,12 @@ const cueHandlers: Record<string, CueHandler> = {
       }
     }
 
-    // Then, grow if there's room (100px margin on both dimensions)
+    // Then, grow if there's room
     while (fontSize < 1000) {
       const width = h1.outerWidth() || 0;
       const height = h1.outerHeight() || 0;
 
-      if (width < resolutionWidth - 100 && height < resolutionHeight - 100) {
+      if (width < resolutionWidth && height < resolutionHeight) {
         fontSize++;
         h1.css('font-size', fontSize + 'px');
       } else {
